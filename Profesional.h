@@ -1,0 +1,40 @@
+#pragma once
+
+class Profesional{
+    private:
+        int idProfesional;
+        char nombre[50];
+        char especialidad[50];
+        float porcentajeComision;
+        char observaciones[200];
+        bool estado; // baja lógica
+
+        // Método privado auxiliar para calcular el ID autoincremental
+        int generarNuevoId();
+
+    public:
+        // Constructor
+        Profesional();
+
+        // Métodos principales
+        void cargar();
+        void mostrar();
+
+        // Setters
+        void setIdProfesional(int id);
+        void setNombre(const char* n);
+        void setEspecialidad(const char* e);
+        void setComision(float c);
+        void setEstado(bool e);
+
+        //Getters
+        int getIdProfesional();
+        const char* getNombre();
+        const char* getEspecialidad();
+        float getComision();
+        bool getEstado();
+
+        // Métodos de persistencia binaria (.dat)
+        bool leerDisco(int pos);
+        bool escribirDisco();
+};
