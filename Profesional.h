@@ -6,17 +6,16 @@ class Profesional{
         char nombre[50];
         char especialidad[50];
         float porcentajeComision;
-        char observaciones[200];
-        bool estado; // baja lógica
+        bool estado; // baja lÃ³gica
 
-        // Método privado auxiliar para calcular el ID autoincremental
+        // MÃ©todo privado auxiliar para calcular el ID autoincremental
         int generarNuevoId();
 
     public:
         // Constructor
         Profesional();
 
-        // Métodos principales
+        // MÃ©todos principales
         void cargar();
         void mostrar();
 
@@ -34,7 +33,7 @@ class Profesional{
         float getComision();
         bool getEstado();
 
-        // Métodos de persistencia binaria (.dat)
+        // MÃ©todos de persistencia binaria (.dat)
         bool leerDisco(int pos);
         bool escribirDisco();
 };
