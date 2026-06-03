@@ -6,7 +6,6 @@
 using namespace std;
 
 // CONSTRUCTOR
-
 Cliente::Cliente() {
     idCliente = 0;
     strcpy(nombre, "");
@@ -17,7 +16,6 @@ Cliente::Cliente() {
 
 // METODO AUXILIAR
 // Simula el autoincrement contando registros en el .dat
-
 int Cliente::generarNuevoId() {
     FILE* p = fopen("clientes.dat", "rb");
     if (p == NULL) {
@@ -34,7 +32,6 @@ int Cliente::generarNuevoId() {
 }
 
 // SETTERS
-
 void Cliente::setIdCliente(int id) {
     idCliente = id;
 }
@@ -62,7 +59,6 @@ void Cliente::setEstado(bool e) {
 }
 
 // GETTERS
-
 int Cliente::getIdCliente() {
     return idCliente;
 }
@@ -80,7 +76,6 @@ bool Cliente::getEstado() {
 }
 
 // METODOS PRINCIPALES DE LA CLASE
-
 void Cliente::cargar() {
     // El sistema calcula y asigna el ID automáticamente
     idCliente = generarNuevoId();
@@ -112,7 +107,6 @@ void Cliente::mostrar() {
 }
 
 // PERSISTENCIA EN DISCO
-
 bool Cliente::leerDisco(int pos) {
     FILE* p = fopen("clientes.dat", "rb");
     if (p == NULL) return false;
