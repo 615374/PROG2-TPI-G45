@@ -67,6 +67,7 @@ int main() {
 // ===============================================
 
 // Modulo Clientes - Gisela
+
 void menuClientes() {
     int op;
     Cliente aux;
@@ -82,25 +83,40 @@ void menuClientes() {
         cout << endl;
 
         if (op == 1) {
+            system("cls");
             aux.cargar();
             if (aux.escribirDisco()) {
                 cout << "\n[OK] Clienta guardada con exito.\n\n";
             } else {
                 cout << "\n[ERROR] No se pudo escribir el archivo.\n\n";
             }
-        } else if (op == 2) {
+            cin.ignore(1000, '\n');
+            cout << "Presione ENTER para continuar...";
+            cin.get();
+            system("cls");
+        }
+        else if (op == 2) {
+            system("cls");
             pos = 0;
             cout << "=== LISTADO DE CLIENTAS ===\n";
             while (aux.leerDisco(pos)) {
                 aux.mostrar();
                 pos++;
             }
-            if (pos == 0) cout << "Archivo vacio.\n\n";
+            if (pos == 0) {
+                cout << "Archivo vacio.\n\n";
+            }
+
+            cin.ignore(1000, '\n');
+            cout << "\nPresione ENTER para continuar...";
+            cin.get();
+            system("cls");
         }
     } while (op != 0);
 }
 
 // Modulo Profesionales - Sol
+
 void menuProfesionales() {
     int op;
     Profesional aux;
@@ -114,16 +130,22 @@ void menuProfesionales() {
         cout << "Seleccione una opcion: ";
         cin >> op;
         cout << endl;
-        system("cls");
 
         if (op == 1) {
+            system("cls");
             aux.cargar();
             if (aux.escribirDisco()) {
                 cout << "\n[OK] Profesional guardado con exito.\n\n";
             } else {
                 cout << "\n[ERROR] No se pudo escribir el archivo.\n\n";
             }
-        } else if (op == 2) {
+            cin.ignore(1000, '\n');
+            cout << "Presione ENTER para continuar...";
+            cin.get();
+            system("cls");
+        }
+        else if (op == 2) {
+            system("cls");
             pos = 0;
             cout << "=== LISTADO DE PROFESIONALES ===\n";
             while (aux.leerDisco(pos)) {
