@@ -15,7 +15,6 @@ Cliente::Cliente() {
     estado = false;
 }
 
-
 // METODO AUXILIAR
 // Simula el autoincrement contando registros en el .dat
 
@@ -62,7 +61,6 @@ void Cliente::setEstado(bool e) {
     estado = e;
 }
 
-
 // GETTERS
 
 int Cliente::getIdCliente() {
@@ -80,7 +78,6 @@ const char* Cliente::getApellido() {
 bool Cliente::getEstado() {
     return estado;
 }
-
 
 // METODOS PRINCIPALES DE LA CLASE
 
