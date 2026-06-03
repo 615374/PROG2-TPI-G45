@@ -5,7 +5,8 @@
 
 using namespace std;
 
-// Constructor: Inicializa el objeto vacío y en false hasta que se cargue
+// CONSTRUCTOR
+
 Cliente::Cliente() {
     idCliente = 0;
     strcpy(nombre, "");
@@ -21,23 +22,23 @@ Cliente::Cliente() {
 int Cliente::generarNuevoId() {
     FILE* p = fopen("clientes.dat", "rb");
     if (p == NULL) {
-        return 1; // Si el archivo no existe, es la primera clienta
+        return 1;
     }
 
-    // Se posiciona al final para medir el tamaño
     fseek(p, 0, SEEK_END);
     long bytesTotales = ftell(p);
     fclose(p);
 
-    // Divide los bytes por lo que pesa un objeto Cliente
     int cantidadRegistros = bytesTotales / sizeof(Cliente);
 
     return cantidadRegistros + 1;
 }
 
-// SETTERS Y GETTERS
+// SETTERS
 
-void Cliente::setIdCliente(int id) { idCliente = id; }
+void Cliente::setIdCliente(int id) {
+    idCliente = id;
+}
 
 void Cliente::setNombre(const char* n) {
     int longitud_maxima = 49;
@@ -57,12 +58,28 @@ void Cliente::setTelefono(const char* tel) {
     telefono[longitud_maxima] = '\0';
 }
 
-void Cliente::setEstado(bool e) { estado = e; }
+void Cliente::setEstado(bool e) {
+    estado = e;
+}
 
-int Cliente::getIdCliente() { return idCliente; }
-const char* Cliente::getNombre() { return nombre; }
-const char* Cliente::getApellido() { return apellido; }
-bool Cliente::getEstado() { return estado; }
+
+// GETTERS
+
+int Cliente::getIdCliente() {
+    return idCliente;
+}
+
+const char* Cliente::getNombre() {
+    return nombre;
+}
+
+const char* Cliente::getApellido() {
+    return apellido;
+}
+
+bool Cliente::getEstado() {
+    return estado;
+}
 
 
 // METODOS PRINCIPALES DE LA CLASE
@@ -86,7 +103,7 @@ void Cliente::cargar() {
     estado = true; // Nace activa en el sistema
 }
 
-// Muestra la ficha de la clienta si no tiene baja lógica
+
 void Cliente::mostrar() {
     if (estado) {
         cout << "------------------------------------------" << endl;
@@ -99,8 +116,6 @@ void Cliente::mostrar() {
 
 // PERSISTENCIA EN DISCO
 
-// Lee un registro específico por su número de posición física
-
 bool Cliente::leerDisco(int pos) {
     FILE* p = fopen("clientes.dat", "rb");
     if (p == NULL) return false;
@@ -112,7 +127,6 @@ bool Cliente::leerDisco(int pos) {
     return leyo;
 }
 
-// Guarda la clienta actual al final del archivo binario
 bool Cliente::escribirDisco() {
     FILE* p = fopen("clientes.dat", "ab");
     if (p == NULL) return false;

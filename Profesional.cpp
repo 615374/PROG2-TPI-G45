@@ -108,6 +108,7 @@ void Profesional::mostrar() {
 }
 
 // PERSISTENCIA
+
 bool Profesional::leerDisco(int pos) {
     FILE* p = fopen("profesionales.dat", "rb");
     if (p == NULL) return false;
