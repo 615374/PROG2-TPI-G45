@@ -110,7 +110,21 @@ void Profesional::mostrar() {
 bool Profesional::buscarPorId(int id){
     int pos = 0;
     while(leerDisco(pos)){
-        if(idProfesional == id){
+        if(idProfesional == id && estado == true){
+            return true;
+        }
+        pos++;
+    }
+    return false;
+}
+
+//MOSTRAR NOMBRE POR ID
+bool Profesional::mostrarNombrePorId(int id) {
+    int pos = 0;
+
+    while (leerDisco(pos)) {
+        if (idProfesional == id && estado == true) {
+            cout << nombre << " (ID: " << idProfesional << ")";
             return true;
         }
         pos++;
