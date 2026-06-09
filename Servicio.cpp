@@ -81,21 +81,27 @@ bool Servicio::getEstado() {
 void Servicio::cargar() {
     idServicio = generarNuevoId();
     cout << "ID SERVICIO ASIGNADO AUTOMATICAMENTE: " << idServicio << endl;
-    cin.ignore();
+    cin.ignore(); // Tu marca registrada: limpia el buffer antes de las cadenas
 
-    // Validación de Nombre de Servicio
+    // Validacin de Nombre de Servicio
     do {
-        cout << "Ingrese Nombre del Servicio: ";
+        cout << "Ingrese Nombre del Servicio (Ej: Perfilado, Esculpidas): ";
         cin.getline(nombre, 50);
         if (strlen(nombre) == 0) {
             cout << "[ERROR] El nombre del servicio no puede quedar vacio.\n";
         }
     } while (strlen(nombre) == 0);
 
-    cout << "Ingrese Tipo de Servicio (Ej: Facial, Corporal, Uñas): ";
-    cin.getline(tipo, 30);
+    // Validacion de Tipo
+    do {
+        cout << "Ingrese Tipo de Servicio (Ej: Facial, Corporal, Unias): ";
+        cin.getline(tipo, 30);
+        if (strlen(tipo) == 0) {
+            cout << "[ERROR] El tipo de servicio no puede quedar vacio.\n";
+        }
+    } while (strlen(tipo) == 0);
 
-    // Validación de Precio (Debe ser mayor a 0)
+    // Validacion de Precio (Mayor a cero)
     do {
         cout << "Ingrese Precio Actual: $";
         cin >> precioActual;
