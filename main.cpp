@@ -128,7 +128,10 @@ void menuProfesionales() {
             else {
                 cout << "\n[ERROR] No se pudo escribir el archivo.\n\n";
             }
-            system("pause");
+            // CAMBIADO: Sacamos el system("pause") y ponemos TU estructura de Clientes
+            cin.ignore(1000, '\n');
+            cout << "Presione ENTER para continuar...";
+            cin.get();
             system("cls");
         }
         else if (op == 2) {

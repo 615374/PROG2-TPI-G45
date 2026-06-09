@@ -77,24 +77,53 @@ bool Cliente::getEstado() {
 
 // METODOS PRINCIPALES DE LA CLASE
 void Cliente::cargar() {
-    // El sistema calcula y asigna el ID automáticamente
     idCliente = generarNuevoId();
-
     cout << "ID ASIGNADO AUTOMATICAMENTE: " << idCliente << endl;
-    cin.ignore(); // Limpia el buffer del teclado
+    cin.ignore(); // Limpia buffer
 
-    cout << "Ingrese Nombre: ";
-    cin.getline(nombre, 50);
+    // Validacion de Nombre
+    do {
+        cout << "Ingrese Nombre: ";
+        cin.getline(nombre, 50);
+        if (strlen(nombre) == 0) {
+            cout << "[ERROR] El nombre no puede quedar vacio.\n";
+        }
+    } while (strlen(nombre) == 0);
 
-    cout << "Ingrese Apellido: ";
-    cin.getline(apellido, 50);
+    // Validacion de Apellido
+    do {
+        cout << "Ingrese Apellido: ";
+        cin.getline(apellido, 50);
+        if (strlen(apellido) == 0) {
+            cout << "[ERROR] El apellido no puede quedar vacio.\n";
+        }
+    } while (strlen(apellido) == 0);
 
-    cout << "Ingrese Telefono: ";
-    cin.getline(telefono, 15);
+    // Validacion de Telefono
+    do {
+        cout << "Ingrese Telefono: ";
+        cin.getline(telefono, 15);
+        if (strlen(telefono) == 0) {
+            cout << "[ERROR] El telefono no puede quedar vacio.\n";
+        } else if (strlen(telefono) < 6) {
+            cout << "[ERROR] Ingrese un numero de telefono valido (minimo 6 digitos).\n";
+        }
+    } while (strlen(telefono) == 0 || strlen(telefono) < 6);
 
-    estado = true; // Nace activa en el sistema
+    estado = true;
 }
 
+// NUEVO MÉTODO DE BÚSQUEDA
+bool Cliente::buscarPorId(int id) {
+    int pos = 0;
+    while (leerDisco(pos)) {
+        if (idCliente == id && estado == true) {
+            return true;
+        }
+        pos++;
+    }
+    return false;
+}
 
 void Cliente::mostrar() {
     if (estado) {

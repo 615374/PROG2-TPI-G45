@@ -9,6 +9,7 @@ using namespace std;
 Profesional::Profesional() {
     idProfesional = 0;
     strcpy(nombre, "");
+    strcpy(apellido, "");
     strcpy(especialidad, "");
     porcentajeComision = 0;
     estado = false;
@@ -20,7 +21,6 @@ int Profesional::generarNuevoId() {
     if (p == NULL) {
         return 1;
     }
-
     fseek(p, 0, SEEK_END);
     long bytesTotales = ftell(p);
     fclose(p);
@@ -39,6 +39,12 @@ void Profesional::setNombre(const char* n) {
     int longitudMaxima = 49;
     strncpy(nombre, n, longitudMaxima);
     nombre[longitudMaxima] = '\0';
+}
+
+void Profesional::setApellido(const char* a) {
+    int longitudMaxima = 49;
+    strncpy(apellido, a, longitudMaxima);
+    apellido[longitudMaxima] = '\0';
 }
 
 void Profesional::setEspecialidad(const char* e) {
@@ -64,6 +70,10 @@ const char* Profesional::getNombre() {
     return nombre;
 }
 
+const char* Profesional::getApellido() {
+    return apellido;
+}
+
 const char* Profesional::getEspecialidad() {
     return especialidad;
 }
@@ -79,15 +89,44 @@ bool Profesional::getEstado() {
 // METODOS PRINCIPALES
 void Profesional::cargar() {
     idProfesional = generarNuevoId();
-    cout << "ID ASIGNADO AUTOMATICAMENTE: "
-         << idProfesional << endl;
-    cin.ignore(1000, '\n');
-    cout << "Ingrese Nombre: ";
-    cin.getline(nombre, 50);
-    cout << "Ingrese Especialidad: ";
-    cin.getline(especialidad, 50);
-    cout << "Ingrese porcentaje de comision: ";
-    cin >> porcentajeComision;
+    cout << "ID PROFESIONAL ASIGNADO AUTOMATICAMENTE: " << idProfesional << endl;
+    cin.ignore(); // Limpia buffer
+
+    // Validacion de Nombre
+    do {
+        cout << "Ingrese Nombre del Profesional: ";
+        cin.getline(nombre, 50);
+        if (strlen(nombre) == 0) {
+            cout << "[ERROR] El nombre no puede quedar vacio.\n";
+        }
+    } while (strlen(nombre) == 0);
+
+    // Validacion de Apellido
+    do {
+        cout << "Ingrese Apellido del Profesional: ";
+        cin.getline(apellido, 50);
+        if (strlen(apellido) == 0) {
+            cout << "[ERROR] El apellido no puede quedar vacio.\n";
+        }
+    } while (strlen(apellido) == 0);
+
+    // Validacion de Especialidad
+    do {
+        cout << "Ingrese Especialidad: ";
+        cin.getline(especialidad, 50);
+        if (strlen(especialidad) == 0) {
+            cout << "[ERROR] La especialidad no puede quedar vacia.\n";
+        }
+    } while (strlen(especialidad) == 0);
+
+    // Validacion del porcentaje de comision
+    do {
+        cout << "Ingrese Porcentaje de Comision (0-100): ";
+        cin >> porcentajeComision;
+        if (porcentajeComision < 0 || porcentajeComision > 100) {
+            cout << "[ERROR] El porcentaje debe estar entre 0 y 100.\n";
+        }
+    } while (porcentajeComision < 0 || porcentajeComision > 100);
 
     estado = true;
 }
@@ -99,6 +138,8 @@ void Profesional::mostrar() {
              << idProfesional << endl;
         cout << "NOMBRE: "
              << nombre << endl;
+        cout << "APELLIDO: "
+             << apellido << endl;
         cout << "ESPECIALIDAD: "
              << especialidad << endl;
         cout << "COMISION: "
@@ -107,8 +148,34 @@ void Profesional::mostrar() {
     }
 }
 
-// PERSISTENCIA
+//BUSQUEDA (EXISTE EL ID? TRUE O FALSE)
+bool Profesional::buscarPorId(int id){
+    int pos = 0;
+    while(leerDisco(pos)){
+        if(idProfesional == id && estado == true){
+            return true;
+        }
+        pos++;
+    }
+    return false;
+}
 
+// MOSTRAR NOMBRE Y APELLIDO POR ID (Para la relación ServicioXProfesional)
+bool Profesional::mostrarNombrePorId(int id) {
+    int pos = 0;
+
+    while (leerDisco(pos)) {
+        if (idProfesional == id && estado == true) {
+            // Mostramos "Apellido, Nombre" de forma prolija
+            cout << apellido << ", " << nombre << " (ID: " << idProfesional << ")";
+            return true;
+        }
+        pos++;
+    }
+    return false;
+}
+
+// PERSISTENCIA
 bool Profesional::leerDisco(int pos) {
     FILE* p = fopen("profesionales.dat", "rb");
     if (p == NULL) return false;

@@ -4,6 +4,7 @@ class Profesional{
     private:
         int idProfesional;
         char nombre[50];
+        char apellido[50];
         char especialidad[50];
         float porcentajeComision;
         bool estado; // baja lógica
@@ -28,6 +29,7 @@ class Profesional{
         // Setters
         void setIdProfesional(int id);
         void setNombre(const char* n);
+        void setApellido(const char* n);
         void setEspecialidad(const char* e);
         void setComision(float c);
         void setEstado(bool e);
@@ -35,6 +37,7 @@ class Profesional{
         //Getters
         int getIdProfesional();
         const char* getNombre();
+        const char* getApellido();
         const char* getEspecialidad();
         float getComision();
         bool getEstado();
