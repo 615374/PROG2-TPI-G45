@@ -153,7 +153,7 @@ void menuProfesionales() {
     } while (op != 0);
 }
 
-// Modulo Servicios
+// Modulo Servicios Sol
 void menuServicios() {
     int op;
     Servicio aux;
@@ -199,7 +199,7 @@ void menuServicios() {
     } while (op != 0);
 }
 
-// Modulo Tabla Intermedia Servicio X Profesional
+// Modulo Tabla Intermedia Servicio X Profesional Sol y Gise
 void menuServicioXProfesional() {
     int op;
     ServicioXProfesional aux;
@@ -275,7 +275,7 @@ void menuServicioXProfesional() {
             cin.get();
             system("cls");
         }
-    } while (op != 0); // Corrección de la variable y cierre del bucle del submenú
+    } while (op != 0);
 }
 
 // Modulo Agenda de Turnos Cascada
