@@ -41,25 +41,59 @@ bool ServicioXProfesional::getEstado() {
 
 // METODOS PRINCIPALES
 void ServicioXProfesional::cargar() {
-    //Agregamos para validar profesional y servicio
     Profesional prof;
     Servicio serv;
+    int pos;
 
-    do{ //WHILE DE PROFESIONAL
-    cout << "Ingrese ID del Profesional: ";
-    cin >> idProfesional;
-    if(!prof.buscarPorId(idProfesional)){
-       cout << "Ese profesional no existe.\n";
+    // === DESPLIEGUE DE PROFESIONALES ===
+    cout << "=================================================" << endl;
+    cout << "       SELECCIONE UNA PROFESIONAL DEL STAFF       " << endl;
+    cout << "=================================================" << endl;
+    pos = 0;
+    while (prof.leerDisco(pos)) {
+        if (prof.getEstado()) {
+            prof.mostrarNombrePorId(prof.getIdProfesional());
+            cout << "\n";
+        }
+        pos++;
     }
-    }while(!prof.buscarPorId(idProfesional));
+    cout << "-------------------------------------------------" << endl;
 
-    do{ //WHILE DE SERVICIO
-    cout << "Ingrese ID del Servicio: ";
-    cin >> idServicio;
-    if(!serv.buscarPorId(idServicio)){
-       cout << "Ese servicio no existe.\n";
-       }
-    }while(!serv.buscarPorId(idServicio));
+    // Validacion interactiva del ID de la Profesional
+    do {
+        cout << "Ingrese el ID de la Profesional elegida: ";
+        cin >> idProfesional;
+        if (!prof.buscarPorId(idProfesional)) {
+            cout << "[ERROR] El ID ingresado no corresponde a ninguna profesional activa.\n";
+        }
+    } while (!prof.buscarPorId(idProfesional));
+
+    cout << endl;
+
+    // === DESPLIEGUE DE SERVICIOS ===
+    cout << "=================================================" << endl;
+    cout << "          CATALOGO DE SERVICIOS ACTIVOS          " << endl;
+    cout << "=================================================" << endl;
+    pos = 0;
+    while (serv.leerDisco(pos)) {
+        if (serv.getEstado()) {
+            // Muestra "[ID] Nombre del Servicio"
+            serv.mostrarNombrePorId(serv.getIdServicio());
+            cout << " - Tipo: " << serv.getTipo() << " ($" << serv.getPrecio() << ")\n";
+        }
+        pos++;
+    }
+    cout << "-------------------------------------------------" << endl;
+
+    // Validación interactiva del ID del Servicio
+    do {
+        cout << "Ingrese el ID del Servicio a asignar: ";
+        cin >> idServicio;
+        if (!serv.buscarPorId(idServicio)) {
+            cout << "[ERROR] El ID ingresado no corresponde a un servicio activo.\n";
+        }
+    } while (!serv.buscarPorId(idServicio));
+
     estado = true;
 }
 
