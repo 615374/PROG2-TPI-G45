@@ -1,22 +1,14 @@
 #include <iostream>
 #include <cstdlib>
+#include "main.h"
 #include "Cliente.h"
 #include "Profesional.h"
-//#include "Servicio.h" // Desmarca Gise cuando cree su archivo
-//#include "ServicioXProfesional.h" // Desmarca Gise cuando cree su archivo
-//#include "Turno.h"         // Desmarca Sol cuando cree su archivo
-//#include "DetalleTurno.h"  // Desmarca Sol cuando cree su archivo
+#include "Servicio.h"
+#include "ServicioXProfesional.h"
 
 using namespace std;
 
-// Declaración de menús intermedios
-void menuClientes();
-void menuProfesionales();
-void menuServicios();
-void menuTurnos();
-void menuServicioXProfesional();
-
-int main() {
+int main(){
     int opcion;
     do {
         cout << "=================================================" << endl;
@@ -58,16 +50,13 @@ int main() {
                 cout << "Opcion incorrecta. Reintente." << endl;
         }
     } while (opcion != 0);
-
-    return 0;
 }
 
 // ===============================================
-// SUB-MENÚS DEL BACKOFFICE
+//          SUB-MENÚS DEL BACKOFFICE
 // ===============================================
 
 // Modulo Clientes - Gisela
-
 void menuClientes() {
     int op;
     Cliente aux;
@@ -116,7 +105,6 @@ void menuClientes() {
 }
 
 // Modulo Profesionales - Sol
-
 void menuProfesionales() {
     int op;
     Profesional aux;
@@ -136,12 +124,11 @@ void menuProfesionales() {
             aux.cargar();
             if (aux.escribirDisco()) {
                 cout << "\n[OK] Profesional guardado con exito.\n\n";
-            } else {
+            }
+            else {
                 cout << "\n[ERROR] No se pudo escribir el archivo.\n\n";
             }
-            cin.ignore(1000, '\n');
-            cout << "Presione ENTER para continuar...";
-            cin.get();
+            system("pause");
             system("cls");
         }
         else if (op == 2) {
@@ -163,21 +150,137 @@ void menuProfesionales() {
     } while (op != 0);
 }
 
-// Modulo Catalogo de Servicios
+// Modulo Servicios
 void menuServicios() {
+    int op;
+    Servicio aux;
+    int pos;
 
-    cout << "Modulo en desarrollo por Gisela Lanzillotta. Disponible proximamente.\n\n";
+    do {
+        cout << ">>> MODULO: GESTION DE SERVICIOS <<<" << endl;
+        cout << "1. Registrar Servicio" << endl;
+        cout << "2. Listar Servicios Activos" << endl;
+        cout << "0. Volver al Menu Principal" << endl;
+        cout << "Seleccione una opcion: ";
+        cin >> op;
+        cout << endl;
+
+        if (op == 1) {
+            system("cls");
+            aux.cargar();
+            if (aux.escribirDisco()) {
+                cout << "\n[OK] Servicio guardado con exito.\n\n";
+            }
+            else {
+                cout << "\n[ERROR] No se pudo escribir el archivo.\n\n";
+            }
+            system("pause");
+            system("cls");
+        }
+        else if (op == 2) {
+            system("cls");
+            pos = 0;
+            cout << "=== LISTADO DE SERVICIOS ===\n";
+            while (aux.leerDisco(pos)) {
+                aux.mostrar();
+                pos++;
+            }
+            if (pos == 0) {
+                cout << "Archivo vacio.\n\n";
+            }
+            cin.ignore(1000, '\n');
+            cout << "\nPresione ENTER para continuar...";
+            cin.get();
+            system("cls");
+        }
+    } while (op != 0);
 }
 
 // Modulo Tabla Intermedia Servicio X Profesional
 void menuServicioXProfesional() {
-    cout << "Modulo en desarrollo por Gisela Lanzillotta. Disponible proximamente.\n\n";
+    int op;
+    ServicioXProfesional aux;
+
+    do {
+        cout << ">>> MODULO: SERVICIO POR PROFESIONAL <<<" << endl;
+        cout << "1. Registrar relacion Profesional-Servicio" << endl;
+        cout << "2. Listar servicios por profesional" << endl;
+        cout << "0. Volver al Menu Principal" << endl;
+        cout << "Seleccione una opcion: ";
+        cin >> op;
+        cout << endl;
+
+        if (op == 1) {
+            system("cls");
+            aux.cargar();
+            if (aux.escribirDisco()) {
+                cout << "\nRelacion guardada correctamente.\n\n";
+            }
+            else {
+                cout << "\n[ERROR] No se pudo guardar la relacion.\n\n";
+            }
+            system("pause");
+            system("cls");
+        }
+        else if (op == 2) {
+            system("cls");
+            Profesional prof;
+            Servicio serv;
+            ServicioXProfesional rel;
+
+            int posProf = 0;
+            int posRel;
+            bool tieneServicios;
+            bool hayRelaciones = false;
+
+            cout << "=================================================" << endl;
+            cout << "        SERVICIOS ASIGNADOS POR PROFESIONAL      " << endl;
+            cout << "=================================================" << endl << endl;
+
+            while (prof.leerDisco(posProf)) {
+                if (prof.getEstado()) {
+                    tieneServicios = false;
+                    posRel = 0;
+
+                    while (rel.leerDisco(posRel)) {
+                        if (rel.getEstado() && rel.getIdProfesional() == prof.getIdProfesional()) {
+                            if (!tieneServicios) {
+                                cout << "PROFESIONAL: ";
+                                prof.mostrarNombrePorId(prof.getIdProfesional());
+                                cout << endl;
+                                cout << "SERVICIOS:" << endl;
+                                tieneServicios = true;
+                                hayRelaciones = true;
+                            }
+                            cout << "   - ";
+                            serv.mostrarNombrePorId(rel.getIdServicio());
+                            cout << endl;
+                        }
+                        posRel++;
+                    }
+                    if (tieneServicios) {
+                        cout << "-------------------------------------------------" << endl;
+                    }
+                }
+                posProf++;
+            }
+            if (!hayRelaciones) {
+                cout << "No hay relaciones cargadas.\n\n";
+            }
+            cin.ignore(1000, '\n');
+            cout << "\nPresione ENTER para continuar...";
+            cin.get();
+            system("cls");
+        }
+    } while (op != 0); // Corrección de la variable y cierre del bucle del submenú
 }
 
-// Modulo Agenda de Turnos Cascacda
+// Modulo Agenda de Turnos Cascada
 void menuTurnos() {
-    cout << "Modulo en desarrollo por Sol Lezcano. Disponible proximamente.\n\n";
-}
+    cout << "Modulo en desarrollo. Disponible proximamente.\n\n";
+    system("pause");
+    system("cls");
 
+}
 
 

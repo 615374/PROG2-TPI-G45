@@ -19,6 +19,12 @@ class Profesional{
         void cargar();
         void mostrar();
 
+        //Método para validar Id
+        bool buscarPorId(int id);
+
+        //Metodo que nos sirve para ServicioXProfesional
+        bool mostrarNombrePorId(int id);
+
         // Setters
         void setIdProfesional(int id);
         void setNombre(const char* n);
