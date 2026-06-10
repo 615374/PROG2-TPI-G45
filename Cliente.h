@@ -20,6 +20,9 @@ class Cliente {
         void cargar();
         void mostrar();
 
+        //Método para validar Id
+        bool buscarPorId(int id);
+
         // Setters y Getters (Encapsulamiento)
         void setIdCliente(int id);
         void setNombre(const char* n);
@@ -36,5 +39,7 @@ class Cliente {
         bool leerDisco(int pos);
         bool escribirDisco();
 };
+
+void darDeBajaCliente();
 
 #endif // CLIENTE_H

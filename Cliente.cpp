@@ -5,7 +5,7 @@
 
 using namespace std;
 
-// Constructor: Inicializa el objeto vacío y en false hasta que se cargue
+// CONSTRUCTOR
 Cliente::Cliente() {
     idCliente = 0;
     strcpy(nombre, "");
@@ -14,30 +14,27 @@ Cliente::Cliente() {
     estado = false;
 }
 
-
 // METODO AUXILIAR
 // Simula el autoincrement contando registros en el .dat
-
 int Cliente::generarNuevoId() {
     FILE* p = fopen("clientes.dat", "rb");
     if (p == NULL) {
-        return 1; // Si el archivo no existe, es la primera clienta
+        return 1;
     }
 
-    // Se posiciona al final para medir el tamaño
     fseek(p, 0, SEEK_END);
     long bytesTotales = ftell(p);
     fclose(p);
 
-    // Divide los bytes por lo que pesa un objeto Cliente
     int cantidadRegistros = bytesTotales / sizeof(Cliente);
 
     return cantidadRegistros + 1;
 }
 
-// SETTERS Y GETTERS
-
-void Cliente::setIdCliente(int id) { idCliente = id; }
+// SETTERS
+void Cliente::setIdCliente(int id) {
+    idCliente = id;
+}
 
 void Cliente::setNombre(const char* n) {
     int longitud_maxima = 49;
@@ -57,36 +54,77 @@ void Cliente::setTelefono(const char* tel) {
     telefono[longitud_maxima] = '\0';
 }
 
-void Cliente::setEstado(bool e) { estado = e; }
-
-int Cliente::getIdCliente() { return idCliente; }
-const char* Cliente::getNombre() { return nombre; }
-const char* Cliente::getApellido() { return apellido; }
-bool Cliente::getEstado() { return estado; }
-
-
-// METODOS PRINCIPALES DE LA CLASE
-
-void Cliente::cargar() {
-    // El sistema calcula y asigna el ID automáticamente
-    idCliente = generarNuevoId();
-
-    cout << "ID ASIGNADO AUTOMATICAMENTE: " << idCliente << endl;
-    cin.ignore(); // Limpia el buffer del teclado
-
-    cout << "Ingrese Nombre: ";
-    cin.getline(nombre, 50);
-
-    cout << "Ingrese Apellido: ";
-    cin.getline(apellido, 50);
-
-    cout << "Ingrese Telefono: ";
-    cin.getline(telefono, 15);
-
-    estado = true; // Nace activa en el sistema
+void Cliente::setEstado(bool e) {
+    estado = e;
 }
 
-// Muestra la ficha de la clienta si no tiene baja lógica
+// GETTERS
+int Cliente::getIdCliente() {
+    return idCliente;
+}
+
+const char* Cliente::getNombre() {
+    return nombre;
+}
+
+const char* Cliente::getApellido() {
+    return apellido;
+}
+
+bool Cliente::getEstado() {
+    return estado;
+}
+
+// METODOS PRINCIPALES DE LA CLASE
+void Cliente::cargar() {
+    idCliente = generarNuevoId();
+    cout << "ID ASIGNADO AUTOMATICAMENTE: " << idCliente << endl;
+    cin.ignore(); // Limpia buffer
+
+    // Validacion de Nombre
+    do {
+        cout << "Ingrese Nombre: ";
+        cin.getline(nombre, 50);
+        if (strlen(nombre) == 0) {
+            cout << "[ERROR] El nombre no puede quedar vacio.\n";
+        }
+    } while (strlen(nombre) == 0);
+
+    // Validacion de Apellido
+    do {
+        cout << "Ingrese Apellido: ";
+        cin.getline(apellido, 50);
+        if (strlen(apellido) == 0) {
+            cout << "[ERROR] El apellido no puede quedar vacio.\n";
+        }
+    } while (strlen(apellido) == 0);
+
+    // Validacion de Telefono
+    do {
+        cout << "Ingrese Telefono: ";
+        cin.getline(telefono, 15);
+        if (strlen(telefono) == 0) {
+            cout << "[ERROR] El telefono no puede quedar vacio.\n";
+        } else if (strlen(telefono) < 6) {
+            cout << "[ERROR] Ingrese un numero de telefono valido (minimo 6 digitos).\n";
+        }
+    } while (strlen(telefono) == 0 || strlen(telefono) < 6);
+
+    estado = true;
+}
+
+// NUEVO MÉTODO DE BÚSQUEDA
+bool Cliente::buscarPorId(int id) {
+    int pos = 0;
+    while (leerDisco(pos)) {
+        if (idCliente == id && estado == true) {
+            return true;
+        }
+        pos++;
+    }
+    return false;
+}
+
 void Cliente::mostrar() {
     if (estado) {
         cout << "------------------------------------------" << endl;
@@ -98,9 +136,6 @@ void Cliente::mostrar() {
 }
 
 // PERSISTENCIA EN DISCO
-
-// Lee un registro específico por su número de posición física
-
 bool Cliente::leerDisco(int pos) {
     FILE* p = fopen("clientes.dat", "rb");
     if (p == NULL) return false;
@@ -112,7 +147,6 @@ bool Cliente::leerDisco(int pos) {
     return leyo;
 }
 
-// Guarda la clienta actual al final del archivo binario
 bool Cliente::escribirDisco() {
     FILE* p = fopen("clientes.dat", "ab");
     if (p == NULL) return false;
@@ -121,4 +155,56 @@ bool Cliente::escribirDisco() {
 
     fclose(p);
     return escribio;
+}
+
+void darDeBajaCliente() {
+    int idBuscado;
+    Cliente reg;
+    int pos = 0;
+    bool encontrado = false;
+
+    // === DESPLIEGUE PREVIO DE CLIENTAS ACTIVAS ===
+    cout << "=================================================" << endl;
+    cout << "       SELECCIONE UNA CLIENTA PARA DAR DE BAJA   " << endl;
+    cout << "=================================================" << endl;
+
+    // Recorremos el archivo completo y mostramos las activas
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado() == true) {
+            cout << " ID: [" << reg.getIdCliente() << "] - "
+                 << reg.getApellido() << ", " << reg.getNombre() << endl;
+        }
+        pos++;
+    }
+    cout << "=================================================" << endl;
+    cout << "Ingrese el ID de la clienta a eliminar: ";
+    cin >> idBuscado;
+
+    // Reiniciamos la posición para buscar y sobreescribir
+    pos = 0;
+    FILE* p = fopen("clientes.dat", "rb+");
+    if (p == NULL) {
+        cout << "\n[ERROR] No se pudo acceder al archivo de clientes.\n";
+        return;
+    }
+
+    while (fread(&reg, sizeof(Cliente), 1, p) == 1) {
+        if (reg.getIdCliente() == idBuscado && reg.getEstado() == true) {
+            encontrado = true;
+            reg.setEstado(false);
+
+            fseek(p, pos * sizeof(Cliente), SEEK_SET);
+            fwrite(&reg, sizeof(Cliente), 1, p);
+
+            cout << "\n[OK] Clienta dada de baja correctamente del sistema.\n";
+            break;
+        }
+        pos++;
+    }
+
+    fclose(p);
+
+    if (!encontrado) {
+        cout << "\n[ERROR] No se encontro ninguna clienta activa con el ID: " << idBuscado << endl;
+    }
 }
