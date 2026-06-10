@@ -156,3 +156,55 @@ bool Cliente::escribirDisco() {
     fclose(p);
     return escribio;
 }
+
+void darDeBajaCliente() {
+    int idBuscado;
+    Cliente reg;
+    int pos = 0;
+    bool encontrado = false;
+
+    // === DESPLIEGUE PREVIO DE CLIENTAS ACTIVAS ===
+    cout << "=================================================" << endl;
+    cout << "       SELECCIONE UNA CLIENTA PARA DAR DE BAJA   " << endl;
+    cout << "=================================================" << endl;
+
+    // Recorremos el archivo completo y mostramos las activas
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado() == true) {
+            cout << " ID: [" << reg.getIdCliente() << "] - "
+                 << reg.getApellido() << ", " << reg.getNombre() << endl;
+        }
+        pos++;
+    }
+    cout << "=================================================" << endl;
+    cout << "Ingrese el ID de la clienta a eliminar: ";
+    cin >> idBuscado;
+
+    // Reiniciamos la posición para buscar y sobreescribir
+    pos = 0;
+    FILE* p = fopen("clientes.dat", "rb+");
+    if (p == NULL) {
+        cout << "\n[ERROR] No se pudo acceder al archivo de clientes.\n";
+        return;
+    }
+
+    while (fread(&reg, sizeof(Cliente), 1, p) == 1) {
+        if (reg.getIdCliente() == idBuscado && reg.getEstado() == true) {
+            encontrado = true;
+            reg.setEstado(false);
+
+            fseek(p, pos * sizeof(Cliente), SEEK_SET);
+            fwrite(&reg, sizeof(Cliente), 1, p);
+
+            cout << "\n[OK] Clienta dada de baja correctamente del sistema.\n";
+            break;
+        }
+        pos++;
+    }
+
+    fclose(p);
+
+    if (!encontrado) {
+        cout << "\n[ERROR] No se encontro ninguna clienta activa con el ID: " << idBuscado << endl;
+    }
+}

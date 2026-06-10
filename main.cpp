@@ -66,6 +66,7 @@ void menuClientes() {
         cout << ">>> MODULO: GESTION DE CLIENTAS <<<" << endl;
         cout << "1. Registrar Nueva Clienta" << endl;
         cout << "2. Listar Todas las Clientas Activas" << endl;
+        cout << "3. Dar de baja Clienta" << endl;
         cout << "0. Volver al Menu Principal" << endl;
         cout << "Seleccione una opcion: ";
         cin >> op;
@@ -95,6 +96,16 @@ void menuClientes() {
             if (pos == 0) {
                 cout << "Archivo vacio.\n\n";
             }
+
+            cin.ignore(1000, '\n');
+            cout << "\nPresione ENTER para continuar...";
+            cin.get();
+            system("cls");
+        }
+        else if (op == 3) {
+            system("cls");
+
+            darDeBajaCliente();
 
             cin.ignore(1000, '\n');
             cout << "\nPresione ENTER para continuar...";

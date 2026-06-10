@@ -40,4 +40,6 @@ class Cliente {
         bool escribirDisco();
 };
 
+void darDeBajaCliente();
+
 #endif // CLIENTE_H
