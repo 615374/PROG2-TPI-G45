@@ -163,3 +163,50 @@ bool Servicio::escribirDisco() {
     fclose(p);
     return escribio;
 }
+
+void darDeBajaServicio() {
+    int idBuscado;
+    Servicio reg;
+    int pos = 0;
+    bool encontrado = false;
+
+    cout << "=================================================" << endl;
+    cout << "       SELECCIONE UN SERVICIO PARA DAR DE BAJA   " << endl;
+    cout << "=================================================" << endl;
+
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado() == true) {
+            cout << "ID: [" << reg.getIdServicio() << "] - "
+                 << reg.getNombre()
+                 << " ($" << reg.getPrecio() << ")"
+                 << endl;
+        }
+        pos++;
+    }
+    cout << "=================================================" << endl;
+    cout << "Ingrese el ID del servicio a dar de baja: ";
+    cin >> idBuscado;
+
+    pos = 0;
+    FILE* p = fopen("servicios.dat", "rb+");
+    if (p == NULL) {
+        cout << "\n[ERROR] No se pudo acceder al archivo.\n";
+        return;
+    }
+    while (fread(&reg, sizeof(Servicio), 1, p) == 1) {
+        if (reg.getIdServicio() == idBuscado &&
+            reg.getEstado() == true) {
+            encontrado = true;
+            reg.setEstado(false);
+            fseek(p, pos * sizeof(Servicio), SEEK_SET);
+            fwrite(&reg, sizeof(Servicio), 1, p);
+            cout << "\n[OK] Servicio dado de baja correctamente.\n";
+            break;
+        }
+        pos++;
+    }
+    fclose(p);
+    if (!encontrado) {
+        cout << "\n[ERROR] No se encontro ningun servicio activo con ese ID.\n";
+    }
+}
