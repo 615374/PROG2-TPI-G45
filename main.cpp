@@ -185,6 +185,7 @@ void menuServicios() {
         cout << ">>> MODULO: GESTION DE SERVICIOS <<<" << endl;
         cout << "1. Registrar Servicio" << endl;
         cout << "2. Listar Servicios Activos" << endl;
+        cout << "3. Dar de baja Servicio"  << endl;
         cout << "0. Volver al Menu Principal" << endl;
         cout << "Seleccione una opcion: ";
         cin >> op;
@@ -199,7 +200,9 @@ void menuServicios() {
             else {
                 cout << "\n[ERROR] No se pudo escribir el archivo.\n\n";
             }
-            system("pause");
+            cin.ignore(1000, '\n');
+            cout << "Presione ENTER para continuar...";
+            cin.get();
             system("cls");
         }
         else if (op == 2) {
@@ -218,7 +221,17 @@ void menuServicios() {
             cin.get();
             system("cls");
         }
+        else if(op == 3){
+            system("cls");
+
+            darDeBajaServicio();
+            cin.ignore(1000, '\n');
+            cout << "\nPresione ENTER para continuar...";
+            cin.get();
+            system("cls");
+        }
     } while (op != 0);
+    system("cls");
 }
 
 // Modulo Tabla Intermedia Servicio X Profesional Sol y Gise

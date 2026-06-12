@@ -41,4 +41,4 @@ class Servicio {
         bool escribirDisco();
 };
 
-
+void darDeBajaServicio();
