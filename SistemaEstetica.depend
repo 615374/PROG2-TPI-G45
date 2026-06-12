@@ -1,0 +1,45 @@
+# depslib dependency file v1.0
+1781279280 source:c:\users\gisel\onedrive\escritorio\utn\c++\sistemaestetica\cliente.cpp
+	<iostream>
+	<cstring>
+	<cstdio>
+	"Cliente.h"
+
+1781280690 c:\users\gisel\onedrive\escritorio\utn\c++\sistemaestetica\cliente.h
+
+1781129527 source:c:\users\gisel\onedrive\escritorio\utn\c++\sistemaestetica\main.cpp
+	<iostream>
+	<cstdlib>
+	"main.h"
+	"Cliente.h"
+	"Profesional.h"
+	"Servicio.h"
+	"ServicioXProfesional.h"
+
+1781129527 c:\users\gisel\onedrive\escritorio\utn\c++\sistemaestetica\main.h
+
+1781280601 c:\users\gisel\onedrive\escritorio\utn\c++\sistemaestetica\profesional.h
+
+1781129527 c:\users\gisel\onedrive\escritorio\utn\c++\sistemaestetica\servicio.h
+
+1781129527 c:\users\gisel\onedrive\escritorio\utn\c++\sistemaestetica\servicioxprofesional.h
+
+1781280180 source:c:\users\gisel\onedrive\escritorio\utn\c++\sistemaestetica\profesional.cpp
+	<iostream>
+	<cstring>
+	<cstdio>
+	"Profesional.h"
+
+1781129527 source:c:\users\gisel\onedrive\escritorio\utn\c++\sistemaestetica\servicio.cpp
+	<iostream>
+	<cstring>
+	<cstdio>
+	"Servicio.h"
+
+1781129527 source:c:\users\gisel\onedrive\escritorio\utn\c++\sistemaestetica\servicioxprofesional.cpp
+	<iostream>
+	<cstdio>
+	"ServicioXProfesional.h"
+	"Profesional.h"
+	"Servicio.h"
+

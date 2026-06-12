@@ -32,13 +32,18 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="Cliente.cpp">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="Cliente.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
+		<Unit filename="Cliente.cpp" />
+		<Unit filename="Cliente.h" />
+		<Unit filename="Profesional.cpp" />
+		<Unit filename="Profesional.h" />
+		<Unit filename="README.md" />
+		<Unit filename="Servicio.cpp" />
+		<Unit filename="Servicio.h" />
+		<Unit filename="ServicioXProfesional.cpp" />
+		<Unit filename="ServicioXProfesional.h" />
+		<Unit filename="SistemaEstetica.cbp" />
 		<Unit filename="main.cpp" />
+		<Unit filename="main.h" />
 		<Extensions />
 	</Project>
 </CodeBlocks_project_file>

@@ -1,16 +1,36 @@
 #include <iostream>
 #include <cstdlib>
-#include "Menu.h"
+#include "Cliente.h"
+#include "Profesional.h"
 
 using namespace std;
 
+// DECLARACIÓN DE FUNCIONES DE MENÚS (Para que main sepa que existen abajo)
+void menuClientes();
+void menuProfesionales();
+void menuServicios();
+void menuTurnos();
+void menuServicioXProfesional();
+
 int main() {
+    int opcion;
 
-    Menu();
+    // Incluimos las directivas de cabeceras necesarias para los prototipos de las funciones
+    do {
+        cout << "===============================================" << endl;
+        cout << "       SISTEMA DE GESTION: CENTRO DE ESTETICA  " << endl;
+        cout << "===============================================" << endl;
+        cout << "1. Modulo Clientes" << endl;
+        cout << "2. Modulo Profesionales" << endl;
+        cout << "3. Modulo Servicios" << endl;
+        cout << "4. Modulo Turnos" << endl;
+        cout << "5. Modulo Configurar Staff (Servicio x Profesional)" << endl;
+        cout << "0. Salir de la Aplicacion" << endl;
+        cout << "-----------------------------------------------" << endl;
+        cout << "Seleccione una opcion: ";
+        cin >> opcion;
+        cout << endl;
 
-<<<<<<< Updated upstream
-    return 0;
-=======
         switch (opcion) {
             case 1:
                 menuClientes();
@@ -34,10 +54,12 @@ int main() {
                 cout << "Opcion incorrecta. Reintente." << endl;
         }
     } while (opcion != 0);
+
+    return 0;
 }
 
 // ===============================================
-//          SUB-MENÚS DEL BACKOFFICE
+//         SUB-MENÚS DEL BACKOFFICE
 // ===============================================
 
 // Modulo Clientes - Gisela
@@ -240,7 +262,7 @@ void menuServicioXProfesional() {
                 cout << "\nRelacion guardada correctamente.\n\n";
             }
             else {
-                cout << "\n[ERROR] No se pudo guardar la relacion.\n\n";
+                cout << "\n[ERROR] No se pudo guardar la relación.\n\n";
             }
             system("pause");
             system("cls");
@@ -304,6 +326,4 @@ void menuTurnos() {
     cout << "Modulo en desarrollo. Disponible proximamente.\n\n";
     system("pause");
     system("cls");
->>>>>>> Stashed changes
-
 }
