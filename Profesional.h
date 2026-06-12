@@ -46,3 +46,6 @@ class Profesional{
         bool leerDisco(int pos);
         bool escribirDisco();
 };
+
+void darDeBajaProfesional();
+

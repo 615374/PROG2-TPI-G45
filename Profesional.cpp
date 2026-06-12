@@ -196,3 +196,50 @@ bool Profesional::escribirDisco() {
 
     return escribio;
 }
+
+//BAJA LOGICA PROFESIONAL
+void darDeBajaProfesional() {
+    int idBuscado;
+    Profesional reg;
+    int pos = 0;
+    bool encontrado = false;
+
+    cout << "=================================================" << endl;
+    cout << "     SELECCIONE UN PROFESIONAL PARA DAR DE BAJA  " << endl;
+    cout << "=================================================" << endl;
+
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado() == true) {
+            cout << "ID: [" << reg.getIdProfesional() << "] - "
+                 << reg.getApellido() << ", "
+                 << reg.getNombre() << endl;
+        }
+        pos++;
+    }
+    cout << "=================================================" << endl;
+    cout << "Ingrese el ID del profesional a dar de baja: ";
+    cin >> idBuscado;
+
+    pos = 0;
+    FILE* p = fopen("profesionales.dat", "rb+");
+    if (p == NULL) {
+        cout << "\n[ERROR] No se pudo acceder al archivo.\n";
+        return;
+    }
+    while (fread(&reg, sizeof(Profesional), 1, p) == 1) {
+        if (reg.getIdProfesional() == idBuscado &&
+            reg.getEstado() == true) {
+            encontrado = true;
+            reg.setEstado(false);
+            fseek(p, pos * sizeof(Profesional), SEEK_SET);
+            fwrite(&reg, sizeof(Profesional), 1, p);
+            cout << "\n[OK] Profesional dado de baja correctamente.\n";
+            break;
+        }
+        pos++;
+    }
+    fclose(p);
+    if (!encontrado) {
+        cout << "\n[ERROR] No se encontro ningun profesional activo con ese ID.\n";
+    }
+}

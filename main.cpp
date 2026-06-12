@@ -125,6 +125,7 @@ void menuProfesionales() {
         cout << ">>> MODULO: GESTION DE PROFESIONALES <<<" << endl;
         cout << "1. Registrar Profesional" << endl;
         cout << "2. Listar Profesionales Activos" << endl;
+        cout << "3. Dar de baja Profesional" << endl;
         cout << "0. Volver al Menu Principal" << endl;
         cout << "Seleccione una opcion: ";
         cin >> op;
@@ -139,7 +140,6 @@ void menuProfesionales() {
             else {
                 cout << "\n[ERROR] No se pudo escribir el archivo.\n\n";
             }
-            // CAMBIADO: Sacamos el system("pause") y ponemos TU estructura de Clientes
             cin.ignore(1000, '\n');
             cout << "Presione ENTER para continuar...";
             cin.get();
@@ -161,7 +161,18 @@ void menuProfesionales() {
             cin.get();
             system("cls");
         }
+        else if (op == 3) {
+            system("cls");
+
+            darDeBajaProfesional();
+
+            cin.ignore(1000, '\n');
+            cout << "\nPresione ENTER para continuar...";
+            cin.get();
+            system("cls");
+        }
     } while (op != 0);
+    system("cls");
 }
 
 // Modulo Servicios Sol
