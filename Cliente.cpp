@@ -157,6 +157,8 @@ bool Cliente::escribirDisco() {
     return escribio;
 }
 
+
+//BAJA LOGICA CLIENTE
 void darDeBajaCliente() {
     int idBuscado;
     Cliente reg;
