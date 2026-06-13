@@ -17,7 +17,7 @@ class Profesional{
         Profesional();
 
         // Métodos principales
-        void cargar();
+        bool cargar();
         void mostrar();
 
         //Método para validar Id
@@ -47,5 +47,5 @@ class Profesional{
         bool escribirDisco();
 };
 
-void darDeBajaProfesional();
+bool darDeBajaProfesional();
 

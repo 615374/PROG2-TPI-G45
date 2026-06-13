@@ -53,36 +53,40 @@ int main(){
 }
 
 // ===============================================
-//          SUB-MENÚS DEL BACKOFFICE
+//         SUB-MENÚS DEL BACKOFFICE
 // ===============================================
 
-// Modulo Clientes - Gisela
+// Modulo Clientes
 void menuClientes() {
     int op;
     Cliente aux;
     int pos;
 
     do {
-        cout << ">>> MODULO: GESTION DE CLIENTAS <<<" << endl;
+        cout << "=================================================" << endl;
+        cout << "     MODULO: GESTION CLIENTAS                    " << endl;
+        cout << "=================================================" << endl;
         cout << "1. Registrar Nueva Clienta" << endl;
         cout << "2. Listar Todas las Clientas Activas" << endl;
         cout << "3. Dar de baja Clienta" << endl;
         cout << "0. Volver al Menu Principal" << endl;
+        cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion: ";
         cin >> op;
         cout << endl;
 
         if (op == 1) {
             system("cls");
-            aux.cargar();
-            if (aux.escribirDisco()) {
-                cout << "\n[OK] Clienta guardada con exito.\n\n";
-            } else {
-                cout << "\n[ERROR] No se pudo escribir el archivo.\n\n";
+            if (aux.cargar() == true) {
+                if (aux.escribirDisco()) {
+                    cout << "\n[OK] Clienta guardada con exito.\n\n";
+                } else {
+                    cout << "\n[ERROR] No se pudo escribir el archivo.\n\n";
+                }
+                cin.ignore(1000, '\n');
+                cout << "Presione ENTER para continuar...";
+                cin.get();
             }
-            cin.ignore(1000, '\n');
-            cout << "Presione ENTER para continuar...";
-            cin.get();
             system("cls");
         }
         else if (op == 2) {
@@ -107,42 +111,44 @@ void menuClientes() {
 
             darDeBajaCliente();
 
-            cin.ignore(1000, '\n');
-            cout << "\nPresione ENTER para continuar...";
-            cin.get();
             system("cls");
         }
     } while (op != 0);
+
+    system("cls");
 }
 
-// Modulo Profesionales - Sol
+// Modulo Profesionales
 void menuProfesionales() {
     int op;
     Profesional aux;
     int pos;
 
     do {
-        cout << ">>> MODULO: GESTION DE PROFESIONALES <<<" << endl;
+        cout << "=================================================" << endl;
+        cout << "     MODULO: GESTION PROFESIONALES               " << endl;
+        cout << "=================================================" << endl;
         cout << "1. Registrar Profesional" << endl;
         cout << "2. Listar Profesionales Activos" << endl;
         cout << "3. Dar de baja Profesional" << endl;
         cout << "0. Volver al Menu Principal" << endl;
+        cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion: ";
         cin >> op;
         cout << endl;
 
         if (op == 1) {
             system("cls");
-            aux.cargar();
-            if (aux.escribirDisco()) {
-                cout << "\n[OK] Profesional guardado con exito.\n\n";
+            if (aux.cargar() == true) {
+                if (aux.escribirDisco()) {
+                    cout << "\n[OK] Profesional guardado con exito.\n\n";
+                } else {
+                    cout << "\n[ERROR] No se pudo escribir el archivo.\n\n";
+                }
+                cin.ignore(1000, '\n');
+                cout << "Presione ENTER para continuar...";
+                cin.get();
             }
-            else {
-                cout << "\n[ERROR] No se pudo escribir el archivo.\n\n";
-            }
-            cin.ignore(1000, '\n');
-            cout << "Presione ENTER para continuar...";
-            cin.get();
             system("cls");
         }
         else if (op == 2) {
@@ -166,43 +172,43 @@ void menuProfesionales() {
 
             darDeBajaProfesional();
 
-            cin.ignore(1000, '\n');
-            cout << "\nPresione ENTER para continuar...";
-            cin.get();
             system("cls");
         }
     } while (op != 0);
     system("cls");
 }
 
-// Modulo Servicios Sol
+// Modulo Servicios
 void menuServicios() {
     int op;
     Servicio aux;
     int pos;
 
     do {
-        cout << ">>> MODULO: GESTION DE SERVICIOS <<<" << endl;
+        cout << "=================================================" << endl;
+        cout << "     MODULO: GESTION SERVICIOS                   " << endl;
+        cout << "=================================================" << endl;
         cout << "1. Registrar Servicio" << endl;
         cout << "2. Listar Servicios Activos" << endl;
         cout << "3. Dar de baja Servicio"  << endl;
         cout << "0. Volver al Menu Principal" << endl;
+        cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion: ";
         cin >> op;
         cout << endl;
 
         if (op == 1) {
             system("cls");
-            aux.cargar();
-            if (aux.escribirDisco()) {
-                cout << "\n[OK] Servicio guardado con exito.\n\n";
+            if (aux.cargar() == true) {
+                if (aux.escribirDisco()) {
+                    cout << "\n[OK] Servicio guardado con exito.\n\n";
+                } else {
+                    cout << "\n[ERROR] No se pudo escribir el archivo.\n\n";
+                }
+                cin.ignore(1000, '\n');
+                cout << "Presione ENTER para continuar...";
+                cin.get();
             }
-            else {
-                cout << "\n[ERROR] No se pudo escribir el archivo.\n\n";
-            }
-            cin.ignore(1000, '\n');
-            cout << "Presione ENTER para continuar...";
-            cin.get();
             system("cls");
         }
         else if (op == 2) {
@@ -225,39 +231,42 @@ void menuServicios() {
             system("cls");
 
             darDeBajaServicio();
-            cin.ignore(1000, '\n');
-            cout << "\nPresione ENTER para continuar...";
-            cin.get();
+
             system("cls");
         }
     } while (op != 0);
     system("cls");
 }
 
-// Modulo Tabla Intermedia Servicio X Profesional Sol y Gise
+// Modulo Tabla Intermedia Servicio X Profesional
 void menuServicioXProfesional() {
     int op;
     ServicioXProfesional aux;
 
     do {
-        cout << ">>> MODULO: SERVICIO POR PROFESIONAL <<<" << endl;
+        cout << "=================================================" << endl;
+        cout << "     MODULO: SERVICIOS POR PROFESIONAL           " << endl;
+        cout << "=================================================" << endl;
         cout << "1. Registrar relacion Profesional-Servicio" << endl;
         cout << "2. Listar servicios por profesional" << endl;
         cout << "0. Volver al Menu Principal" << endl;
+        cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion: ";
         cin >> op;
         cout << endl;
 
         if (op == 1) {
             system("cls");
-            aux.cargar();
-            if (aux.escribirDisco()) {
-                cout << "\nRelacion guardada correctamente.\n\n";
+            if (aux.cargar() == true) {
+                if (aux.escribirDisco()) {
+                    cout << "\nRelacion guardada correctamente.\n\n";
+                } else {
+                    cout << "\n[ERROR] No se pudo guardar la relacion.\n\n";
+                }
+                cin.ignore(1000, '\n');
+                cout << "Presione ENTER para continuar...";
+                cin.get();
             }
-            else {
-                cout << "\n[ERROR] No se pudo guardar la relacion.\n\n";
-            }
-            system("pause");
             system("cls");
         }
         else if (op == 2) {
@@ -311,6 +320,7 @@ void menuServicioXProfesional() {
             system("cls");
         }
     } while (op != 0);
+    system("cls");
 }
 
 // Modulo Agenda de Turnos Cascada
@@ -318,7 +328,6 @@ void menuTurnos() {
     cout << "Modulo en desarrollo. Disponible proximamente.\n\n";
     system("pause");
     system("cls");
-
 }
 
 

@@ -87,23 +87,32 @@ bool Profesional::getEstado() {
 }
 
 // METODOS PRINCIPALES
-void Profesional::cargar() {
-    idProfesional = generarNuevoId();
-    cout << "ID PROFESIONAL ASIGNADO AUTOMATICAMENTE: " << idProfesional << endl;
+bool Profesional::cargar() {
     cin.ignore(); // Limpia buffer
+
+    cout << "=================================================" << endl;
+    cout << "          REGISTRAR NUEVA PROFESIONAL               " << endl;
+    cout << "=================================================" << endl;
+    cout << "0. Volver al Menu Principal / Cancelar alta      " << endl;
+    cout << "-------------------------------------------------" << endl;
 
     // Validacion de Nombre
     do {
-        cout << "Ingrese Nombre del Profesional: ";
+        cout << "Ingrese Nombre: ";
         cin.getline(nombre, 50);
         if (strlen(nombre) == 0) {
             cout << "[ERROR] El nombre no puede quedar vacio.\n";
         }
     } while (strlen(nombre) == 0);
 
+    // Si puso '0', marcamos estado en false
+    if (strcmp(nombre, "0") == 0) {
+        estado = false;
+        return false;
+    }
     // Validacion de Apellido
     do {
-        cout << "Ingrese Apellido del Profesional: ";
+        cout << "Ingrese Apellido: ";
         cin.getline(apellido, 50);
         if (strlen(apellido) == 0) {
             cout << "[ERROR] El apellido no puede quedar vacio.\n";
@@ -128,7 +137,11 @@ void Profesional::cargar() {
         }
     } while (porcentajeComision < 0 || porcentajeComision > 100);
 
+    idProfesional = generarNuevoId();
+    cout << "ID PROFESIONAL ASIGNADO AUTOMATICAMENTE: " << idProfesional << endl;
+
     estado = true;
+    return true;
 }
 
 void Profesional::mostrar() {
@@ -198,7 +211,7 @@ bool Profesional::escribirDisco() {
 }
 
 //BAJA LOGICA PROFESIONAL
-void darDeBajaProfesional() {
+bool darDeBajaProfesional() {
     int idBuscado;
     Profesional reg;
     int pos = 0;
@@ -207,6 +220,8 @@ void darDeBajaProfesional() {
     cout << "=================================================" << endl;
     cout << "     SELECCIONE UN PROFESIONAL PARA DAR DE BAJA  " << endl;
     cout << "=================================================" << endl;
+    cout << " 0. Volver al Menu Principal / Cancelar Baja     " << endl;
+    cout << "-------------------------------------------------" << endl;
 
     while (reg.leerDisco(pos)) {
         if (reg.getEstado() == true) {
@@ -220,11 +235,15 @@ void darDeBajaProfesional() {
     cout << "Ingrese el ID del profesional a dar de baja: ";
     cin >> idBuscado;
 
+    if (idBuscado == 0) {
+        return false;
+    }
+
     pos = 0;
     FILE* p = fopen("profesionales.dat", "rb+");
     if (p == NULL) {
         cout << "\n[ERROR] No se pudo acceder al archivo.\n";
-        return;
+        return true;
     }
     while (fread(&reg, sizeof(Profesional), 1, p) == 1) {
         if (reg.getIdProfesional() == idBuscado &&
@@ -242,4 +261,10 @@ void darDeBajaProfesional() {
     if (!encontrado) {
         cout << "\n[ERROR] No se encontro ningun profesional activo con ese ID.\n";
     }
+
+    cin.ignore(1000, '\n');
+    cout << "\nPresione ENTER para continuar...";
+    cin.get();
+
+    return true;
 }

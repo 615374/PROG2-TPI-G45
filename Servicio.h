@@ -13,7 +13,7 @@ class Servicio {
     public:
         Servicio();
 
-        void cargar();
+        bool cargar();
         void mostrar();
 
         //Método para validar Id
@@ -41,4 +41,4 @@ class Servicio {
         bool escribirDisco();
 };
 
-void darDeBajaServicio();
+bool darDeBajaServicio();

@@ -75,11 +75,16 @@ bool Cliente::getEstado() {
     return estado;
 }
 
-// METODOS PRINCIPALES DE LA CLASE
-void Cliente::cargar() {
-    idCliente = generarNuevoId();
-    cout << "ID ASIGNADO AUTOMATICAMENTE: " << idCliente << endl;
+// METODOS PRINCIPALES
+
+bool Cliente::cargar() {
     cin.ignore(); // Limpia buffer
+
+    cout << "=================================================" << endl;
+    cout << "          REGISTRAR NUEVA CLIENTA                " << endl;
+    cout << "=================================================" << endl;
+    cout << "0. Volver al Menu Principal / Cancelar alta      " << endl;
+    cout << "-------------------------------------------------" << endl;
 
     // Validacion de Nombre
     do {
@@ -89,6 +94,12 @@ void Cliente::cargar() {
             cout << "[ERROR] El nombre no puede quedar vacio.\n";
         }
     } while (strlen(nombre) == 0);
+
+    // Si puso '0', marcamos estado en false
+    if (strcmp(nombre, "0") == 0) {
+        estado = false;
+        return false;
+    }
 
     // Validacion de Apellido
     do {
@@ -110,7 +121,11 @@ void Cliente::cargar() {
         }
     } while (strlen(telefono) == 0 || strlen(telefono) < 6);
 
+    idCliente = generarNuevoId();
+    cout << "ID ASIGNADO AUTOMATICAMENTE: " << idCliente << endl;
+
     estado = true;
+    return true; // Retorna true si se completó toda la carga correctamente
 }
 
 // NUEVO MÉTODO DE BÚSQUEDA
@@ -157,18 +172,17 @@ bool Cliente::escribirDisco() {
     return escribio;
 }
 
-
-//BAJA LOGICA CLIENTE
-void darDeBajaCliente() {
+bool darDeBajaCliente() {
     int idBuscado;
     Cliente reg;
     int pos = 0;
     bool encontrado = false;
 
-    // === DESPLIEGUE PREVIO DE CLIENTAS ACTIVAS ===
     cout << "=================================================" << endl;
-    cout << "       SELECCIONE UNA CLIENTA PARA DAR DE BAJA   " << endl;
+    cout << "        SELECCIONE UNA CLIENTA PARA DAR DE BAJA   " << endl;
     cout << "=================================================" << endl;
+    cout << " 0. Volver al Menu Principal / Cancelar baja" << endl;
+    cout << "-------------------------------------------------" << endl;
 
     // Recorremos el archivo completo y mostramos las activas
     while (reg.leerDisco(pos)) {
@@ -182,12 +196,17 @@ void darDeBajaCliente() {
     cout << "Ingrese el ID de la clienta a eliminar: ";
     cin >> idBuscado;
 
-    // Reiniciamos la posición para buscar y sobreescribir
+    // Si presiona 0, vuelve al menu
+    if (idBuscado == 0) {
+        return false;
+    }
+
+    // Reiniciamos la posicion para buscar y sobreescribir
     pos = 0;
     FILE* p = fopen("clientes.dat", "rb+");
     if (p == NULL) {
         cout << "\n[ERROR] No se pudo acceder al archivo de clientes.\n";
-        return;
+        return true;
     }
 
     while (fread(&reg, sizeof(Cliente), 1, p) == 1) {
@@ -209,4 +228,10 @@ void darDeBajaCliente() {
     if (!encontrado) {
         cout << "\n[ERROR] No se encontro ninguna clienta activa con el ID: " << idBuscado << endl;
     }
+
+    cin.ignore(1000, '\n');
+    cout << "\nPresione ENTER para continuar...";
+    cin.get();
+
+    return true;
 }

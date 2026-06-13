@@ -40,15 +40,17 @@ bool ServicioXProfesional::getEstado() {
 }
 
 // METODOS PRINCIPALES
-void ServicioXProfesional::cargar() {
+bool ServicioXProfesional::cargar() {
     Profesional prof;
     Servicio serv;
     int pos;
 
-    // === DESPLIEGUE DE PROFESIONALES ===
+    // DESPLIEGUE DE PROFESIONALES
     cout << "=================================================" << endl;
     cout << "       SELECCIONE UNA PROFESIONAL DEL STAFF       " << endl;
     cout << "=================================================" << endl;
+    cout << "0. Volver al Menu Principal / Cancelar alta      " << endl;
+    cout << "-------------------------------------------------" << endl;
     pos = 0;
     while (prof.leerDisco(pos)) {
         if (prof.getEstado()) {
@@ -63,21 +65,34 @@ void ServicioXProfesional::cargar() {
     do {
         cout << "Ingrese el ID de la Profesional elegida: ";
         cin >> idProfesional;
+
+        //Si es 0, sale del bucle de validacion
+        if (idProfesional == 0) {
+            break;
+        }
+
         if (!prof.buscarPorId(idProfesional)) {
             cout << "[ERROR] El ID ingresado no corresponde a ninguna profesional activa.\n";
         }
     } while (!prof.buscarPorId(idProfesional));
 
+    // Si el usuario tipeo 0, frenamos la funcion
+    if (idProfesional == 0) {
+        estado = false;
+        return false; // Regresa directo al main sin mostrar servicios
+    }
+
     cout << endl;
 
-    // === DESPLIEGUE DE SERVICIOS ===
+    // DESPLIEGUE DE SERVICIOS
     cout << "=================================================" << endl;
     cout << "          CATALOGO DE SERVICIOS ACTIVOS          " << endl;
     cout << "=================================================" << endl;
+    cout << "0. Volver al Menu Principal / Cancelar alta      " << endl; // Sumamos el aviso visual
+    cout << "-------------------------------------------------" << endl;
     pos = 0;
     while (serv.leerDisco(pos)) {
         if (serv.getEstado()) {
-            // Muestra "[ID] Nombre del Servicio"
             serv.mostrarNombrePorId(serv.getIdServicio());
             cout << " - Tipo: " << serv.getTipo() << " ($" << serv.getPrecio() << ")\n";
         }
@@ -85,18 +100,31 @@ void ServicioXProfesional::cargar() {
     }
     cout << "-------------------------------------------------" << endl;
 
-    // Validación interactiva del ID del Servicio
+    // Validacion interactiva del ID del Servicio
     do {
         cout << "Ingrese el ID del Servicio a asignar: ";
         cin >> idServicio;
+
+        //Si es 0, sale del bucle de validacion
+        if (idServicio == 0) {
+            break;
+        }
+
         if (!serv.buscarPorId(idServicio)) {
             cout << "[ERROR] El ID ingresado no corresponde a un servicio activo.\n";
         }
     } while (!serv.buscarPorId(idServicio));
 
-    estado = true;
-}
+    // Si se arrepintio en el segundo paso, tambien abortamos
+    if (idServicio == 0) {
+        estado = false;
+        return false;
+    }
 
+    // Si paso ambos filtros con IDs reales, la relacion es valida
+    estado = true;
+    return true; // Exito total
+}
 void ServicioXProfesional::mostrar() {
     if (estado) {
         cout << "-----------------------------------" << endl;

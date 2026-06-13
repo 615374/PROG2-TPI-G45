@@ -11,7 +11,7 @@ class ServicioXProfesional {
         ServicioXProfesional();
 
         // Métodos principales
-        void cargar();
+        bool cargar();
         void mostrar();
 
         // Setters

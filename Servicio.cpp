@@ -78,12 +78,16 @@ bool Servicio::getEstado() {
 }
 
 // METODOS PRINCIPALES
-void Servicio::cargar() {
-    idServicio = generarNuevoId();
-    cout << "ID SERVICIO ASIGNADO AUTOMATICAMENTE: " << idServicio << endl;
-    cin.ignore(); // Tu marca registrada: limpia el buffer antes de las cadenas
+bool Servicio::cargar() {
+    cin.ignore(); //Limpia el buffer antes de las cadenas
 
-    // Validacin de Nombre de Servicio
+    cout << "=================================================" << endl;
+    cout << "          REGISTRAR NUEVO SERVICIO               " << endl;
+    cout << "=================================================" << endl;
+    cout << "0. Volver al Menu Principal / Cancelar alta      " << endl;
+    cout << "-------------------------------------------------" << endl;
+
+    // Validacin de Nombre
     do {
         cout << "Ingrese Nombre del Servicio (Ej: Perfilado, Esculpidas): ";
         cin.getline(nombre, 50);
@@ -91,6 +95,12 @@ void Servicio::cargar() {
             cout << "[ERROR] El nombre del servicio no puede quedar vacio.\n";
         }
     } while (strlen(nombre) == 0);
+
+    // Si puso '0', marcamos estado en false
+    if (strcmp(nombre, "0") == 0) {
+        estado = false;
+        return false;
+    }
 
     // Validacion de Tipo
     do {
@@ -110,7 +120,11 @@ void Servicio::cargar() {
         }
     } while (precioActual <= 0);
 
+    idServicio = generarNuevoId();
+    cout << "ID SERVICIO ASIGNADO AUTOMATICAMENTE: " << idServicio << endl;
+
     estado = true;
+    return true;
 }
 
 void Servicio::mostrar() {
@@ -179,7 +193,7 @@ bool Servicio::escribirDisco() {
 }
 
 //BAJA LOGICA SERVICIO
-void darDeBajaServicio() {
+bool darDeBajaServicio() {
     int idBuscado;
     Servicio reg;
     int pos = 0;
@@ -188,6 +202,8 @@ void darDeBajaServicio() {
     cout << "=================================================" << endl;
     cout << "       SELECCIONE UN SERVICIO PARA DAR DE BAJA   " << endl;
     cout << "=================================================" << endl;
+    cout << " 0. Volver al Menu Principal / Cancelar Baja     " << endl;
+    cout << "-------------------------------------------------" << endl;
 
     while (reg.leerDisco(pos)) {
         if (reg.getEstado() == true) {
@@ -202,11 +218,17 @@ void darDeBajaServicio() {
     cout << "Ingrese el ID del servicio a dar de baja: ";
     cin >> idBuscado;
 
+    //Si el usuario presiona 0, corta la funcion
+    if (idBuscado == 0) {
+        cout << "\nOperacion cancelada. Volviendo al menu...\n";
+        return false;
+    }
+
     pos = 0;
     FILE* p = fopen("servicios.dat", "rb+");
     if (p == NULL) {
         cout << "\n[ERROR] No se pudo acceder al archivo.\n";
-        return;
+        return true;
     }
     while (fread(&reg, sizeof(Servicio), 1, p) == 1) {
         if (reg.getIdServicio() == idBuscado &&
@@ -224,4 +246,10 @@ void darDeBajaServicio() {
     if (!encontrado) {
         cout << "\n[ERROR] No se encontro ningun servicio activo con ese ID.\n";
     }
+
+    cin.ignore(1000, '\n');
+    cout << "\nPresione ENTER para continuar...";
+    cin.get();
+
+    return true;
 }
