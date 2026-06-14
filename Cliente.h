@@ -17,7 +17,7 @@ class Cliente {
         Cliente();
 
         // Métodos de Carga y Muestra por consola
-        void cargar();
+        bool cargar();
         void mostrar();
 
         //Método para validar Id
@@ -40,6 +40,6 @@ class Cliente {
         bool escribirDisco();
 };
 
-void darDeBajaCliente();
+bool darDeBajaCliente();
 
 #endif // CLIENTE_H
