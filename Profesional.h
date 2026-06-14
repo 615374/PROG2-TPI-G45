@@ -9,18 +9,18 @@ class Profesional{
         float porcentajeComision;
         bool estado; // baja lógica
 
-        // Metodo privado auxiliar para calcular el ID autoincremental
+        // Método privado auxiliar para calcular el ID autoincremental
         int generarNuevoId();
 
     public:
         // Constructor
         Profesional();
 
-        // Metodos principales
-        void cargar();
+        // Métodos principales
+        bool cargar();
         void mostrar();
 
-        //Metodo para validar Id
+        //Método para validar Id
         bool buscarPorId(int id);
 
         //Metodo que nos sirve para ServicioXProfesional
@@ -42,10 +42,9 @@ class Profesional{
         float getComision();
         bool getEstado();
 
-        // Metodos de persistencia binaria (.dat)
+        // Métodos de persistencia binaria (.dat)
         bool leerDisco(int pos);
         bool escribirDisco();
 };
 
-void darDeBajaProfesional();
-
+bool darDeBajaProfesional();

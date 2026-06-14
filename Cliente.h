@@ -17,8 +17,11 @@ class Cliente {
         Cliente();
 
         // Métodos de Carga y Muestra por consola
-        void cargar();
+        bool cargar();
         void mostrar();
+
+        //Método para validar Id
+        bool buscarPorId(int id);
 
         // Setters y Getters (Encapsulamiento)
         void setIdCliente(int id);
@@ -37,6 +40,6 @@ class Cliente {
         bool escribirDisco();
 };
 
-void darDeBajaCliente();
+bool darDeBajaCliente();
 
 #endif // CLIENTE_H
