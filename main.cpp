@@ -128,42 +128,68 @@ void menuProfesionales() {
     int pos;
 
     do {
-        cout << "=================================================" << endl;
-        cout << "     MODULO: GESTION PROFESIONALES               " << endl;
-        cout << "=================================================" << endl;
+        cout << ">>> MODULO: GESTION DE PROFESIONALES <<<" << endl;
+
+        cout << "\n--- ALTAS ---" << endl;
         cout << "1. Registrar Profesional" << endl;
+
+        cout << "\n--- CONSULTAS ---" << endl;
         cout << "2. Listar Profesionales Activos" << endl;
-        cout << "3. Dar de baja Profesional" << endl;
-        cout << "0. Volver al Menu Principal" << endl;
-        cout << "-------------------------------------------------" << endl;
+        cout << "3. Listar Profesionales por Especialidad" << endl;
+        cout << "4. Listar Profesionales Inactivos" << endl;
+
+        cout << "\n--- MANTENIMIENTO ---" << endl;
+        cout << "5. Modificar Profesional" << endl;
+        cout << "6. Dar de Baja Profesional" << endl;
+
+/*
+        cout << "\n--- REPORTES ---" << endl;
+        cout << "7. Volumen de Servicios por Profesional" << endl;
+        cout << "8. Liquidacion de Comisiones" << endl;
+*/
+
+        cout << "\n0. Volver al Menu Principal" << endl;
         cout << "Seleccione una opcion: ";
         cin >> op;
-        cout << endl;
 
         if (op == 1) {
             system("cls");
-            if (aux.cargar() == true) {
-                if (aux.escribirDisco()) {
-                    cout << "\n[OK] Profesional guardado con exito.\n\n";
-                } else {
-                    cout << "\n[ERROR] No se pudo escribir el archivo.\n\n";
-                }
-                cin.ignore(1000, '\n');
-                cout << "Presione ENTER para continuar...";
-                cin.get();
+
+        if (aux.cargar() == true) {
+            if (aux.escribirDisco()) {
+                cout << "\n[OK] Profesional guardado con exito.\n\n";
             }
+            else {
+                cout << "\n[ERROR] No se pudo escribir el archivo.\n\n";
+            }
+            cin.ignore(1000, '\n'); //pq venimos de cargar
+        }
+        else {
+            cout << "\nCarga cancelada. No se guardo el profesional.\n\n";
+        }
+            //si ya cancele no queda nada en el buffer
+            cout << "Presione ENTER para continuar...";
+            cin.get();
             system("cls");
         }
         else if (op == 2) {
             system("cls");
+
             pos = 0;
-            cout << "=== LISTADO DE PROFESIONALES ===\n";
+            bool hayActivos = false;
+            cout << "=== LISTADO DE PROFESIONALES ACTIVOS ===\n";
             while (aux.leerDisco(pos)) {
-                aux.mostrar();
+                if (aux.getEstado()) {
+                    aux.mostrar();
+                    hayActivos = true;
+                }
                 pos++;
             }
             if (pos == 0) {
                 cout << "Archivo vacio.\n\n";
+            }
+            else if (!hayActivos) {
+                cout << "No hay profesionales activos para mostrar.\n\n";
             }
             cin.ignore(1000, '\n');
             cout << "\nPresione ENTER para continuar...";
@@ -173,8 +199,40 @@ void menuProfesionales() {
         else if (op == 3) {
             system("cls");
 
+            listarProfesionalesPorEspecialidad();
+
+            cout << "\nPresione ENTER para continuar...";
+            cin.get();
+            system("cls");
+        }
+        else if (op == 4){
+            system("cls");
+
+            listarProfesionalesInactivos();
+
+            cin.ignore(1000, '\n');
+            cout << "\nPresione ENTER para continuar...";
+            cin.get();
+
+            system("cls");
+        }
+        else if (op == 5){
+            system("cls");
+            modificarProfesional();
+
+            cout << "\nPresione ENTER para continuar...";
+            cin.get();
+
+        system("cls");
+        }
+        else if (op == 6) {
+            system("cls");
+
             darDeBajaProfesional();
 
+            cin.ignore(1000, '\n');
+            cout << "\nPresione ENTER para continuar...";
+            cin.get();
             system("cls");
         }
     } while (op != 0);

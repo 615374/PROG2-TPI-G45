@@ -19,6 +19,7 @@ class Profesional{
         // Métodos principales
         bool cargar();
         void mostrar();
+        bool modificar();
 
         //Método para validar Id
         bool buscarPorId(int id);
@@ -47,4 +48,12 @@ class Profesional{
         bool escribirDisco();
 };
 
+      //FUNCIONES GLOBALES
+//MANTENIMIENTO
 bool darDeBajaProfesional();
+void modificarProfesional();
+
+//LISTADOS, recorremos todo el archivo
+void listarProfesionalesPorEspecialidad();
+void listarProfesionalesInactivos();
+

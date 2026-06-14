@@ -86,7 +86,8 @@ bool Profesional::getEstado() {
     return estado;
 }
 
-// METODOS PRINCIPALES
+        // METODOS PRINCIPALES
+//METODO CARGAR
 bool Profesional::cargar() {
     cin.ignore(); // Limpia buffer
 
@@ -96,73 +97,88 @@ bool Profesional::cargar() {
     cout << "0. Volver al Menu Principal / Cancelar alta      " << endl;
     cout << "-------------------------------------------------" << endl;
 
-// VALIDACION DE NOMBRE
+    // VALIDACION DE NOMBRE
     bool valido;
-
-do {
-    valido = true;
-
-    cout << "Ingrese Nombre: ";
-    cin.getline(nombre, 50);
-
-    //Cancelacion de Carga
-    if (strcmp(nombre, "0") == 0) {
-        estado = false;
-        return false;
-    }
-    if (strlen(nombre) == 0) {
-        cout << "[ERROR] El nombre no puede quedar vacio.\n";
-        valido = false;
-    }
-    //Validacion de unicamente char
-    for (int i = 0; nombre[i] != '\0'; i++) {
-        if (nombre[i] >= '0' && nombre[i] <= '9') {
-            valido = false;
-        }
-    }
-    if (!valido && strlen(nombre) > 0) {
-        cout << "[ERROR] El nombre no puede contener numeros.\n";
-    }
-} while (!valido);
-
-
-// VALIDACION DE APELLIDO
-do {
-    valido = true;
-
-    cout << "Ingrese Apellido: ";
-    cin.getline(apellido, 50);
-
-    //Cancelacion de carga
-    if (strcmp(apellido, "0") == 0) {
-        estado = false;
-        return false;
-    }
-    if (strlen(apellido) == 0) {
-        cout << "[ERROR] El apellido no puede quedar vacio.\n";
-        valido = false;
-    }
-    for (int i = 0; apellido[i] != '\0'; i++) {
-        if (apellido[i] >= '0' && apellido[i] <= '9') {
-            valido = false;
-        }
-    }//Validacion de unicamente char
-    if (!valido && strlen(apellido) > 0) {
-        cout << "[ERROR] El apellido no puede contener numeros.\n";
-    }
-} while (!valido);
-
-
-    // Validacion de Especialidad
     do {
+        valido = true;
+
+        cout << "Ingrese Nombre: ";
+        cin.getline(nombre, 50);
+
+        //Cancelacion de Carga
+        if (strcmp(nombre, "0") == 0) {
+            estado = false;
+            return false;
+        }
+        if (strlen(nombre) == 0) {
+            cout << "[ERROR] El nombre no puede quedar vacio.\n";
+            valido = false;
+        }
+        //Validacion de unicamente char
+        for (int i = 0; nombre[i] != '\0'; i++) {
+            if (nombre[i] >= '0' && nombre[i] <= '9') {
+                valido = false;
+            }
+        }
+        if (!valido && strlen(nombre) > 0) {
+            cout << "[ERROR] El nombre no puede contener numeros.\n";
+        }
+    } while (!valido);
+
+
+    // VALIDACION DE APELLIDO
+    do {
+        valido = true;
+
+        cout << "Ingrese Apellido: ";
+        cin.getline(apellido, 50);
+
+        //Cancelacion de carga
+        if (strcmp(apellido, "0") == 0) {
+            estado = false;
+            return false;
+        }
+        if (strlen(apellido) == 0) {
+            cout << "[ERROR] El apellido no puede quedar vacio.\n";
+            valido = false;
+        }
+        for (int i = 0; apellido[i] != '\0'; i++) {
+            if (apellido[i] >= '0' && apellido[i] <= '9') {
+                valido = false;
+            }
+        }//Validacion de unicamente char
+        if (!valido && strlen(apellido) > 0) {
+            cout << "[ERROR] El apellido no puede contener numeros.\n";
+        }
+    } while (!valido);
+
+    // VALIDACIÓN POR ESPECIALIDAD
+    do {
+        valido = true;
+
         cout << "Ingrese Especialidad: ";
         cin.getline(especialidad, 50);
+
+        //Cancelacion de carga
+        if (strcmp(especialidad, "0") == 0) {
+            estado = false;
+            return false;
+        }
         if (strlen(especialidad) == 0) {
             cout << "[ERROR] La especialidad no puede quedar vacia.\n";
+            valido = false;
         }
-    } while (strlen(especialidad) == 0);
+        for (int i = 0; especialidad[i] != '\0'; i++) {
+            if (especialidad[i] >= '0' && especialidad[i] <= '9') {
+                valido = false;
+            }
+        }//Validacion de unicamente char
+        if (!valido && strlen(especialidad) > 0) {
+            cout << "[ERROR] La especialidad no puede contener numeros.\n";
+        }
+    } while (!valido);
 
-    // Validacion del porcentaje de comision
+    // VALIDACION POR PORCENTAJE DE COMISION
     do {
         cout << "Ingrese Porcentaje de Comision (0-100): ";
         cin >> porcentajeComision;
@@ -178,6 +194,7 @@ do {
     return true;
 }
 
+//METODO MOSTRAR
 void Profesional::mostrar() {
     if (estado) {
         cout << "-----------------------------------" << endl;
@@ -195,7 +212,101 @@ void Profesional::mostrar() {
     }
 }
 
-//BUSQUEDA (EXISTE EL ID? TRUE O FALSE)
+//METODO MODIFICAR (id sin incluir)
+bool Profesional::modificar(){
+    cin.ignore();
+    bool valido;
+
+    // VALIDACION DE NOMBRE EN MODIFICAR
+    do {
+        valido = true;
+
+        cout << "Ingrese Nombre: ";
+        cin.getline(nombre, 50);
+
+        //Cancelacion de Carga
+        if (strcmp(nombre, "0") == 0) {
+            return false;
+        }
+        if (strlen(nombre) == 0) {
+            cout << "[ERROR] El nombre no puede quedar vacio.\n";
+            valido = false;
+        }
+        //Validacion de unicamente char
+        for (int i = 0; nombre[i] != '\0'; i++) {
+            if (nombre[i] >= '0' && nombre[i] <= '9') {
+                valido = false;
+            }
+        }
+        if (!valido && strlen(nombre) > 0) {
+            cout << "[ERROR] El nombre no puede contener numeros.\n";
+        }
+    } while (!valido);
+
+    // VALIDACION DE APELLIDO EN MODIFICAR
+    do {
+        valido = true;
+
+        cout << "Ingrese Apellido: ";
+        cin.getline(apellido, 50);
+
+        //Cancelacion de carga
+        if (strcmp(apellido, "0") == 0) {
+            return false;
+        }
+        if (strlen(apellido) == 0) {
+            cout << "[ERROR] El apellido no puede quedar vacio.\n";
+            valido = false;
+        }
+        for (int i = 0; apellido[i] != '\0'; i++) {
+            if (apellido[i] >= '0' && apellido[i] <= '9') {
+                valido = false;
+            }
+        }//Validacion de unicamente char
+        if (!valido && strlen(apellido) > 0) {
+            cout << "[ERROR] El apellido no puede contener numeros.\n";
+        }
+    } while (!valido);
+
+    // VALIDACIÓN POR ESPECIALIDAD EN MODIFICAR
+    do {
+        valido = true;
+
+        cout << "Ingrese Especialidad: ";
+        cin.getline(especialidad, 50);
+
+        //Cancelacion de carga
+        if (strcmp(especialidad, "0") == 0) {
+            return false;
+        }
+        if (strlen(especialidad) == 0) {
+            cout << "[ERROR] La especialidad no puede quedar vacia.\n";
+            valido = false;
+        }
+        for (int i = 0; especialidad[i] != '\0'; i++) {
+            if (especialidad[i] >= '0' && especialidad[i] <= '9') {
+                valido = false;
+            }
+        }//Validacion de unicamente char
+        if (!valido && strlen(especialidad) > 0) {
+            cout << "[ERROR] La especialidad no puede contener numeros.\n";
+        }
+    } while (!valido);
+
+    // VALIDACION POR PORCENTAJE DE COMISION EN MODIFICAR
+    do {
+        cout << "Ingrese Porcentaje de Comision (0-100): ";
+        cin >> porcentajeComision;
+        if (porcentajeComision < 0 || porcentajeComision > 100) {
+            cout << "[ERROR] El porcentaje debe estar entre 0 y 100.\n";
+        }
+    } while (porcentajeComision < 0 || porcentajeComision > 100);
+
+    return true;
+}
+
+                 //BUSQUEDAS
+//(EXISTE EL ID? TRUE O FALSE)
 bool Profesional::buscarPorId(int id){
     int pos = 0;
     while(leerDisco(pos)){
@@ -244,8 +355,183 @@ bool Profesional::escribirDisco() {
     return escribio;
 }
 
+      //FUNCIONES GLOBALES DE LISTADO
+//LISTAR PROFESIONALES POR ESPECIALIDAD
+void listarProfesionalesPorEspecialidad() {
+    char especialidades[100][50];
+    int cantidadEspecialidades = 0;
+    int opcionEspecialidad;
+
+    Profesional reg;
+    int pos = 0;
+    bool repetida;
+    bool encontrado = false;
+
+    cout << "=================================================" << endl;
+    cout << "        LISTADO DE PROFESIONALES POR ESPECIALIDAD" << endl;
+    cout << "=================================================" << endl;
+
+    // Armamos el listado de especialidades sin repetir
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado()) {
+            repetida = false;
+
+            for (int i = 0; i < cantidadEspecialidades; i++) {
+                if (strcmp(especialidades[i], reg.getEspecialidad()) == 0) {
+                    repetida = true;
+                }
+            }
+            if (!repetida) {
+                strcpy(especialidades[cantidadEspecialidades], reg.getEspecialidad());
+                cantidadEspecialidades++;
+            }
+        }
+        pos++;
+    }
+    if (cantidadEspecialidades == 0) {
+        cout << "No hay especialidades disponibles porque no hay profesionales activos.\n";
+        return;
+    }
+    cout << "\nESPECIALIDADES DISPONIBLES:" << endl;
+    for (int i = 0; i < cantidadEspecialidades; i++) {
+        cout << i + 1 << ". " << especialidades[i] << endl;
+    }
+    cout << "0. Volver al menu" << endl;
+    cout << "-------------------------------------------------" << endl;
+    do {
+        cout << "Seleccione una especialidad: ";
+        cin >> opcionEspecialidad;
+        if (opcionEspecialidad < 0 || opcionEspecialidad > cantidadEspecialidades) {
+            cout << "[ERROR] Opcion invalida.\n";
+        }
+    } while (opcionEspecialidad < 0 || opcionEspecialidad > cantidadEspecialidades);
+
+    cin.ignore(1000, '\n');
+
+    if (opcionEspecialidad == 0) {
+        cout << "\nOperacion cancelada. Volviendo al menu...\n";
+        return;
+    }
+    pos = 0;
+    cout << endl;
+    cout << "=== PROFESIONALES CON ESPECIALIDAD: "
+         << especialidades[opcionEspecialidad - 1]
+         << " ===" << endl;
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado() == true &&
+            strcmp(reg.getEspecialidad(), especialidades[opcionEspecialidad - 1]) == 0) {
+
+            reg.mostrar();
+            encontrado = true;
+        }
+        pos++;
+    }
+    if (!encontrado) {
+        cout << "No se encontraron profesionales activos con esa especialidad.\n";
+    }
+}
+
+//LISTAR PROFESIONALES INACTIVOS
+void listarProfesionalesInactivos() {
+    Profesional reg;
+    int pos = 0;
+    bool hayInactivos = false;
+
+    cout << "=================================================" << endl;
+    cout << "         LISTADO DE PROFESIONALES INACTIVOS      " << endl;
+    cout << "=================================================" << endl;
+
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado() == false) {
+            cout << "-----------------------------------" << endl;
+            cout << "ID PROFESIONAL: " << reg.getIdProfesional() << endl;
+            cout << "NOMBRE: " << reg.getNombre() << endl;
+            cout << "APELLIDO: " << reg.getApellido() << endl;
+            cout << "ESPECIALIDAD: " << reg.getEspecialidad() << endl;
+            cout << "COMISION: " << reg.getComision() << "%" << endl;
+            cout << "-----------------------------------" << endl;
+
+            hayInactivos = true;
+        }
+        pos++;
+    }
+    if (!hayInactivos) {
+        cout << "No hay profesionales inactivos para mostrar." << endl;
+    }
+}
+      //FUNCIONES GLOBALES DE MANTENIMIENTO
+//MODIFICAR PROFESIONAL
+void modificarProfesional() {
+    int idBuscado;
+    Profesional reg;
+    int pos = 0;
+    bool encontrado = false;
+
+    cout << "=================================================" << endl;
+    cout << "          SELECCIONE PROFESIONAL A MODIFICAR     " << endl;
+    cout << "=================================================" << endl;
+    cout << "0. Volver al Menu Principal / Cancelar Modificacion" << endl;
+    cout << "-------------------------------------------------" << endl;
+
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado() == true) {
+            cout << "ID: [" << reg.getIdProfesional() << "] - "
+                 << reg.getApellido() << ", "
+                 << reg.getNombre()
+                 << " - Especialidad: " << reg.getEspecialidad()
+                 << " - Comision: " << reg.getComision() << "%"
+                 << endl;
+        }
+        pos++;
+    }
+    cout << "=================================================" << endl;
+    cout << "Ingrese el ID del profesional a modificar: ";
+    cin >> idBuscado;
+
+    if (idBuscado == 0) {
+        cout << "\nOperacion cancelada. Volviendo al menu...\n";
+        return;
+    }
+    pos = 0;
+    FILE* p = fopen("profesionales.dat", "rb+");
+
+    if (p == NULL) {
+        cout << "\n[ERROR] No se pudo acceder al archivo.\n";
+        return;
+    }
+    while (fread(&reg, sizeof(Profesional), 1, p) == 1) {
+        if (reg.getIdProfesional() == idBuscado && reg.getEstado() == true) {
+            encontrado = true;
+
+            cout << "\nProfesional encontrado. Reingrese los datos:\n\n";
+            cout << "ID PROFESIONAL: " << idBuscado << endl;
+
+            if (!reg.modificar()) {
+                cout << "\nModificacion cancelada.\n";
+                fclose(p);
+                return;
+            }
+
+            reg.setIdProfesional(idBuscado);
+            reg.setEstado(true);
+
+            fseek(p, pos * sizeof(Profesional), SEEK_SET);
+            fwrite(&reg, sizeof(Profesional), 1, p);
+
+            cout << "\n[OK] Profesional modificado correctamente.\n";
+            cin.ignore(1000, '\n');
+            break;
+        }
+        pos++;
+    }
+    fclose(p);
+    if (!encontrado) {
+        cout << "\n[ERROR] No se encontro ningun profesional activo con ese ID.\n";
+    }
+}
+
 //BAJA LOGICA PROFESIONAL
-bool darDeBajaProfesional() {
+bool darDeBajaProfesional(){
     int idBuscado;
     Profesional reg;
     int pos = 0;
