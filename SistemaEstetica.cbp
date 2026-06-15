@@ -40,6 +40,8 @@
 		</Unit>
 		<Unit filename="Servicio.cpp" />
 		<Unit filename="Servicio.h" />
+		<Unit filename="Turno.cpp" />
+		<Unit filename="Turno.h" />
 		<Unit filename="main.cpp" />
 		<Extensions />
 	</Project>
