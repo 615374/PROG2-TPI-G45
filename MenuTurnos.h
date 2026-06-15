@@ -1,0 +1,7 @@
+#ifndef MENUTURNOS_H_INCLUDED
+#define MENUTURNOS_H_INCLUDED
+
+
+void menuTurnos();
+
+#endif // MENUTURNOS_H_INCLUDED

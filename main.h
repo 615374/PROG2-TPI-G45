@@ -1,9 +1,6 @@
-#pragma once
+#ifndef MAIN_H
+#define MAIN_H
 
+// Configuraciones globales del Sistema de Gestión (Centro de Estética)
 
-// Declaración de prototipos de menús intermedios
-void menuClientes();
-void menuProfesionales();
-void menuServicios();
-void menuTurnos();
-void menuServicioXProfesional();
+#endif // MAIN_H
