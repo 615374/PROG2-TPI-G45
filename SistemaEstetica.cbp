@@ -33,11 +33,13 @@
 			<Add option="-fexceptions" />
 		</Compiler>
 		<Unit filename="Cliente.cpp">
-			<Option target="&lt;{~None~}&gt;" />
+			<Option target="Debug" />
 		</Unit>
 		<Unit filename="Cliente.h">
-			<Option target="&lt;{~None~}&gt;" />
+			<Option target="Debug" />
 		</Unit>
+		<Unit filename="Servicio.cpp" />
+		<Unit filename="Servicio.h" />
 		<Unit filename="main.cpp" />
 		<Extensions />
 	</Project>

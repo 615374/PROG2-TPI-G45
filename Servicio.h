@@ -13,13 +13,13 @@ class Servicio {
     public:
         Servicio();
 
-        void cargar();
+        // Métodos principales
+        bool cargar();
         void mostrar();
+        bool modificar();
 
-        //Método para validar Id
+        // Métodos para validar / mostrar por ID
         bool buscarPorId(int id);
-
-        //Método que despues nos sirve ServicioXProfesional
         bool mostrarNombrePorId(int id);
 
         // Setters
@@ -41,4 +41,12 @@ class Servicio {
         bool escribirDisco();
 };
 
-void darDeBajaServicio();
+// FUNCIONES GLOBALES
+
+// Mantenimiento
+bool darDeBajaServicio();
+void modificarServicio();
+
+// Listados
+void listarServiciosPorTipo();
+void listarServiciosInactivos();
