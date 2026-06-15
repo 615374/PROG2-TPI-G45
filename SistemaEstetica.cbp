@@ -38,6 +38,10 @@
 		<Unit filename="Cliente.h">
 			<Option target="Debug" />
 		</Unit>
+		<Unit filename="DetalleTurno.cpp" />
+		<Unit filename="DetalleTurno.h" />
+		<Unit filename="Profesional.cpp" />
+		<Unit filename="Profesional.h" />
 		<Unit filename="Servicio.cpp" />
 		<Unit filename="Servicio.h" />
 		<Unit filename="main.cpp" />
