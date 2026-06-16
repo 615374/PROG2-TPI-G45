@@ -139,7 +139,7 @@ void menuConsultasProfesionales() {
         cout << "=================================================" << endl;
         cout << "1. Ver Staff de Profesionales Activas" << endl;
         cout << "2. Listar por Especialidad" << endl;
-        cout << "3. Listar Ordenadas por Volumen de Servicios" << endl;
+        cout << "3. Listar por Volumen de Servicios" << endl;
         cout << "4. Ver Staff Profesionales Inactivas" << endl;
         cout << "5. Liquidacion de Comisiones" << endl;
         cout << "0. Volver al Menu de Gestion" << endl;
@@ -155,7 +155,7 @@ void menuConsultasProfesionales() {
         cout << "=================================================" << endl;
         cout << "1. Ver Staff de Profesionales Activas" << endl;
         cout << "2. Listar por Especialidad" << endl;
-        cout << "3. Listar Ordenadas por Volumen de Servicios" << endl;
+        cout << "3. Listar por Volumen de Servicios" << endl;
         cout << "4. Ver Staff Profesionales Inactivas" << endl;
         cout << "5. Liquidacion de Comisiones" << endl;
         cout << "0. Volver al Menu de Gestion" << endl;

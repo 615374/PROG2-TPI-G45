@@ -24,14 +24,14 @@ void listarClientasPorApellido() {
     }
 
     if (cantidadActivas == 0) {
-        cout << "   [AVISO] No hay clientas activas registradas para mostrar.\n\n";
+        cout << " [AVISO] No hay clientas activas registradas para mostrar.\n\n";
         return;
     }
 
     // Creamos un array dinamico en memoria para guardar las activas
     Cliente* vectorClientes = new Cliente[cantidadActivas];
     if (vectorClientes == NULL) {
-        cout << "   [ERROR] Memoria insuficiente para ordenar.\n\n";
+        cout << " [ERROR] Memoria insuficiente para ordenar.\n\n";
         return;
     }
 
@@ -69,12 +69,12 @@ void listarClientasPorApellido() {
 
 // Algoritmo: Filtrara el listado cruzando datos con la clase Turno
 void listarClientasPorFrecuencia() {
-    cout << "   [Proximamente: Se resolvera al avanzar con el modulo Turnos]\n\n";
+    cout << " [Proximamente: Se resolvera al avanzar con el modulo Turnos]\n\n";
 }
 
 // Algoritmo: Filtrara las clientas que posean deudas registradas
 void listarClientasConSaldos() {
-    cout << "   [Proximamente: Reporte de Cuentas Corrientes]\n\n";
+    cout << " [Proximamente: Reporte de Cuentas Corrientes]\n\n";
 }
 
 

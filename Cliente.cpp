@@ -86,29 +86,58 @@ bool Cliente::cargar() {
     cout << "0. Volver al Menu Principal / Cancelar alta      " << endl;
     cout << "-------------------------------------------------" << endl;
 
-    // Validacion de Nombre
+    // Validacion de nombre
+    bool valido;
     do {
+        valido = true;
         cout << "Ingrese Nombre: ";
         cin.getline(nombre, 50);
+
+        // Cancelacion de carga inmediata si pone 0
+        if (strcmp(nombre, "0") == 0) {
+            estado = false;
+            return false;
+        }
         if (strlen(nombre) == 0) {
             cout << "[ERROR] El nombre no puede quedar vacio.\n";
+            valido = false;
         }
-    } while (strlen(nombre) == 0);
+        // Validacion de unicamente char
+        for (int i = 0; nombre[i] != '\0'; i++) {
+            if (nombre[i] >= '0' && nombre[i] <= '9') {
+                valido = false;
+            }
+        }
+        if (!valido && strlen(nombre) > 0) {
+            cout << "[ERROR] El nombre no puede contener numeros.\n";
+        }
+    } while (!valido);
 
-    // Si puso '0', marcamos estado en false
-    if (strcmp(nombre, "0") == 0) {
-        estado = false;
-        return false;
-    }
-
-    // Validacion de Apellido
+    // Validacion de apellido
     do {
+        valido = true;
         cout << "Ingrese Apellido: ";
         cin.getline(apellido, 50);
+
+        // Cancelacion de carga inmediata si pone 0
+        if (strcmp(apellido, "0") == 0) {
+            estado = false;
+            return false;
+        }
         if (strlen(apellido) == 0) {
             cout << "[ERROR] El apellido no puede quedar vacio.\n";
+            valido = false;
         }
-    } while (strlen(apellido) == 0);
+        // Validacion de unicamente char
+        for (int i = 0; apellido[i] != '\0'; i++) {
+            if (apellido[i] >= '0' && apellido[i] <= '9') {
+                valido = false;
+            }
+        }
+        if (!valido && strlen(apellido) > 0) {
+            cout << "[ERROR] El apellido no puede contener numeros.\n";
+        }
+    } while (!valido);
 
     // Validacion de Telefono
     do {
@@ -125,7 +154,7 @@ bool Cliente::cargar() {
     cout << "ID ASIGNADO AUTOMATICAMENTE: " << idCliente << endl;
 
     estado = true;
-    return true; // Retorna true si se completó toda la carga correctamente
+    return true; // Retorna true si se completo toda la carga correctamente
 }
 
 // BUSQUEDA POR ID
