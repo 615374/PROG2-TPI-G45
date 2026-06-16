@@ -1,5 +1,4 @@
-#ifndef CLIENTE_H
-#define CLIENTE_H
+#pragma once
 
 class Cliente {
     private:
@@ -42,4 +41,9 @@ class Cliente {
 
 bool darDeBajaCliente();
 
-#endif // CLIENTE_H
+// Listados Masivos / Reportes
+void listarClientasPorApellido();
+void listarClientasPorFrecuencia();
+void listarClientasConSaldos();
+
+

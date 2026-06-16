@@ -6,7 +6,8 @@
 
 using namespace std;
 
-// DECLARACIONES DE FUNCIONES DE LÓGICA / REPORTES (Locales de este archivo)
+
+// FUNCIONES GLOBALES
 
 // Algoritmo: Ordena en memoria las clientas activas por Apellido (A-Z) y las muestra
 void listarClientasPorApellido() {
@@ -77,7 +78,7 @@ void listarClientasConSaldos() {
 }
 
 
-// SUB-MENÚ INTERNO: PANEL DE CONSULTAS
+// SUB-MENU INTERNO: PANEL DE CONSULTAS Y FILTROS CLIENTAS
 void menuConsultasClientes() {
     int op = 1; // Arranca por defecto listado A-Z
 
@@ -85,7 +86,7 @@ void menuConsultasClientes() {
         cout << "=================================================" << endl;
         cout << "          PANEL DE CONSULTAS Y FILTROS           " << endl;
         cout << "=================================================" << endl;
-        cout << "1. Ver Catalogo Completo Activo (A-Z)" << endl;
+        cout << "1. Ver Listado de Clientas Activas (A-Z)" << endl;
         cout << "2. Filtrar por Frecuencia de Visitas" << endl;
         cout << "3. Filtrar por Saldos Pendientes" << endl;
         cout << "0. Volver al Menu de Gestion" << endl;
@@ -99,7 +100,7 @@ void menuConsultasClientes() {
         cout << "=================================================" << endl;
         cout << "          PANEL DE CONSULTAS Y FILTROS           " << endl;
         cout << "=================================================" << endl;
-        cout << "1. Ver Catalogo Completo Activo (A-Z)" << endl;
+        cout << "1. Ver Listado de Clientas Activas (A-Z)" << endl;
         cout << "2. Filtrar por Frecuencia de Visitas" << endl;
         cout << "3. Filtrar por Saldos Pendientes" << endl;
         cout << "0. Volver al Menu de Gestion" << endl;
@@ -108,7 +109,7 @@ void menuConsultasClientes() {
 
         if (op == 1) {
             cout << "=================================================" << endl;
-            cout << "        CATALOGO DE CLIENTAS ACTIVAS (A-Z)       " << endl;
+            cout << "        LISTADO DE CLIENTAS ACTIVAS (A-Z)       " << endl;
             cout << "=================================================" << endl;
             listarClientasPorApellido();
             cout << "=================================================" << endl << endl;
@@ -151,7 +152,7 @@ void menuClientes() {
         cout << "            MODULO: GESTION CLIENTAS             " << endl;
         cout << "=================================================" << endl;
         cout << "1. Registrar Nueva Clienta" << endl;
-        cout << "2. Listado de Clientas" << endl;
+        cout << "2. Listado de Clientas y Consultas" << endl;
         cout << "3. Dar de baja Clienta" << endl;
         cout << "0. Volver al Menu Principal" << endl;
         cout << "-------------------------------------------------" << endl;

@@ -128,7 +128,7 @@ bool Cliente::cargar() {
     return true; // Retorna true si se completó toda la carga correctamente
 }
 
-// NUEVO MÉTODO DE BÚSQUEDA
+// BUSQUEDA POR ID
 bool Cliente::buscarPorId(int id) {
     int pos = 0;
     while (leerDisco(pos)) {
@@ -172,6 +172,7 @@ bool Cliente::escribirDisco() {
     return escribio;
 }
 
+//BAJA LOGICA
 bool darDeBajaCliente() {
     int idBuscado;
     Cliente reg;
