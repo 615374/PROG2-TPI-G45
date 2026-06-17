@@ -100,15 +100,25 @@ void listarProfesionalesInactivos() {
     int pos = 0;
     bool hayInactivos = false;
     while (reg.leerDisco(pos)) {
-        if (!reg.getEstado()) {
-            reg.mostrar();
+        if (reg.getEstado() == false) { // Si el estado es false (inactiva)
+            // Tiramos los cout directos para que no se silencie por el if de mostrar()
+            cout << "-----------------------------------" << endl;
+            cout << "ID PROFESIONAL: " << reg.getIdProfesional() << endl;
+            cout << "NOMBRE: " << reg.getNombre() << endl;
+            cout << "APELLIDO: " << reg.getApellido() << endl;
+            cout << "ESPECIALIDAD: " << reg.getEspecialidad() << endl;
+            cout << "COMISION: " << reg.getComision() << "%" << endl;
+            cout << "-----------------------------------" << endl;
+
             hayInactivos = true;
         }
         pos++;
     }
+
     if (!hayInactivos) {
         cout << "No hay profesionales inactivos para mostrar.\n";
     }
+    cout << "=================================================" << endl << endl;
 }
 
 // Algoritmo: Filtrara el listado ordenando por volumen de servicios brindados
