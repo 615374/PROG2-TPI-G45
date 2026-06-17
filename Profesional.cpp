@@ -86,7 +86,7 @@ bool Profesional::getEstado() {
     return estado;
 }
 
-// MÉTODOS PRINCIPALES DE LA CLASE
+// METODOS PRINCIPALES DE LA CLASE
 
 // METODO CARGAR
 bool Profesional::cargar() {
@@ -210,7 +210,7 @@ void Profesional::mostrar() {
     }
 }
 
-//METODO MODIFICAR
+// METODO MODIFICAR
 bool Profesional::modificar() {
     cin.ignore(1000, '\n');
     bool valido;
@@ -343,6 +343,7 @@ bool Profesional::escribirDisco() {
     return escribio;
 }
 
+// FUNCIONES GLOBALES DE MANTENIMIENTO
 void modificarProfesional() {
     int idBuscado;
     Profesional reg;

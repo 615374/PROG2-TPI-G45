@@ -99,11 +99,6 @@ void listarProfesionalesInactivos() {
     Profesional reg;
     int pos = 0;
     bool hayInactivos = false;
-
-    cout << "=================================================" << endl;
-    cout << "         LISTADO DE PROFESIONALES INACTIVOS      " << endl;
-    cout << "=================================================" << endl;
-
     while (reg.leerDisco(pos)) {
         if (!reg.getEstado()) {
             reg.mostrar();
@@ -114,7 +109,6 @@ void listarProfesionalesInactivos() {
     if (!hayInactivos) {
         cout << "No hay profesionales inactivos para mostrar.\n";
     }
-    cout << "=================================================" << endl << endl;
 }
 
 // Algoritmo: Filtrara el listado ordenando por volumen de servicios brindados
@@ -193,7 +187,11 @@ void menuConsultasProfesionales() {
             cout << "=================================================" << endl << endl;
         }
         else if (op == 4) {
+            cout << "=================================================" << endl;
+            cout << "         LISTADO DE PROFESIONALES INACTIVOS      " << endl;
+            cout << "=================================================" << endl;
             listarProfesionalesInactivos();
+            cout << "=================================================" << endl << endl;
         }
         else if (op == 5) {
             cout << "=================================================" << endl;

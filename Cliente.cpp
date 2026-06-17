@@ -71,12 +71,17 @@ const char* Cliente::getApellido() {
     return apellido;
 }
 
+const char* Cliente::getTelefono() {
+    return telefono;
+}
+
 bool Cliente::getEstado() {
     return estado;
 }
 
-// METODOS PRINCIPALES
+//METODOS PRINCIPALES DE LA CLASE
 
+//METODO CARGAR
 bool Cliente::cargar() {
     cin.ignore(); // Limpia buffer
 
@@ -157,6 +162,89 @@ bool Cliente::cargar() {
     return true; // Retorna true si se completo toda la carga correctamente
 }
 
+// METODO MOSTRAR
+void Cliente::mostrar() {
+    if (estado) {
+        cout << "------------------------------------------" << endl;
+        cout << "ID CLIENTA: " << idCliente << endl;
+        cout << "APELLIDO Y NOMBRE: " << apellido << ", " << nombre << endl;
+        cout << "TELEFONO: " << telefono << endl;
+        cout << "------------------------------------------" << endl;
+    }
+}
+
+// METODO MODIFICAR
+bool Cliente::modificar() {
+    cin.ignore(1000, '\n'); // Limpiamos buffer
+    bool valido;
+
+    // Validacion de nombre
+    do {
+        valido = true;
+        cout << "Ingrese Nombre: ";
+        cin.getline(nombre, 50);
+
+        // Cancelacion inmediata si se presiona 0
+        if (strcmp(nombre, "0") == 0) {
+            return false;
+        }
+        if (strlen(nombre) == 0) {
+            cout << "[ERROR] El nombre no puede quedar vacio.\n";
+            valido = false;
+        }
+        for (int i = 0; nombre[i] != '\0'; i++) {
+            if (nombre[i] >= '0' && nombre[i] <= '9') {
+                valido = false;
+            }
+        }
+        if (!valido && strlen(nombre) > 0) {
+            cout << "[ERROR] El nombre no puede contener numeros.\n";
+        }
+    } while (!valido);
+
+    //Validacion de apellido
+    do {
+        valido = true;
+        cout << "Ingrese Apellido: ";
+        cin.getline(apellido, 50);
+
+        if (strcmp(apellido, "0") == 0) {
+            return false;
+        }
+        if (strlen(apellido) == 0) {
+            cout << "[ERROR] El apellido no puede quedar vacio.\n";
+            valido = false;
+        }
+        for (int i = 0; apellido[i] != '\0'; i++) {
+            if (apellido[i] >= '0' && apellido[i] <= '9') {
+                valido = false;
+            }
+        }
+        if (!valido && strlen(apellido) > 0) {
+            cout << "[ERROR] El apellido no puede contener numeros.\n";
+        }
+    } while (!valido);
+
+    // Validacion de telefono
+    do {
+        cout << "Ingrese Telefono: ";
+        cin.getline(telefono, 15);
+
+        if (strcmp(telefono, "0") == 0) {
+            return false;
+        }
+        if (strlen(telefono) == 0) {
+            cout << "[ERROR] El telefono no puede quedar vacio.\n";
+        } else if (strlen(telefono) < 6) {
+            cout << "[ERROR] Ingrese un numero de telefono valido (minimo 6 digitos).\n";
+        }
+    } while (strlen(telefono) == 0 || strlen(telefono) < 6);
+
+    return true;
+}
+
+// METODOS DE BUSQUEDA Y RELACION
+
 // BUSQUEDA POR ID
 bool Cliente::buscarPorId(int id) {
     int pos = 0;
@@ -169,14 +257,17 @@ bool Cliente::buscarPorId(int id) {
     return false;
 }
 
-void Cliente::mostrar() {
-    if (estado) {
-        cout << "------------------------------------------" << endl;
-        cout << "ID CLIENTA: " << idCliente << endl;
-        cout << "APELLIDO Y NOMBRE: " << apellido << ", " << nombre << endl;
-        cout << "TELEFONO: " << telefono << endl;
-        cout << "------------------------------------------" << endl;
+// MOSTRAR NOMBRE Y APELLIDO POR ID
+bool Cliente::mostrarNombrePorId(int id) {
+    int pos = 0;
+    while (leerDisco(pos)) {
+        if (idCliente == id && estado == true) {
+            cout << apellido << ", " << nombre << " (ID: " << idCliente << ")";
+            return true;
+        }
+        pos++;
     }
+    return false;
 }
 
 // PERSISTENCIA EN DISCO
@@ -199,6 +290,83 @@ bool Cliente::escribirDisco() {
 
     fclose(p);
     return escribio;
+}
+
+// FUNCIONES GLOBALES DE MANTENIMIENTO
+void modificarCliente() {
+    int idBuscado;
+    Cliente reg;
+    int pos = 0;
+    bool encontrado = false;
+
+    cout << "=================================================" << endl;
+    cout << "           SELECCIONE CLIENTA A MODIFICAR        " << endl;
+    cout << "=================================================" << endl;
+    cout << "0. Volver al Menu Principal / Cancelar Modificacion" << endl;
+    cout << "-------------------------------------------------" << endl;
+
+    // Listamos todas las clientas activas para que la recepcionista elija el ID
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado() == true) {
+            cout << "ID: [" << reg.getIdCliente() << "] - "
+                 << reg.getApellido() << ", " << reg.getNombre()
+                 << " - Tel: " << reg.getTelefono() << endl;
+        }
+        pos++;
+    }
+    cout << "=================================================" << endl;
+    cout << "Ingrese el ID de la clienta a modificar: ";
+    cin >> idBuscado;
+
+    if (idBuscado == 0) {
+        cout << "\nOperacion cancelada. Volviendo al menu...\n";
+        return;
+    }
+
+    pos = 0;
+    FILE* p = fopen("clientes.dat", "rb+");
+    if (p == NULL) {
+        cout << "\n[ERROR] No se pudo acceder al archivo.\n";
+        return;
+    }
+
+    // Buscamos el registro en el archivo de forma binaria
+    while (fread(&reg, sizeof(Cliente), 1, p) == 1) {
+        if (reg.getIdCliente() == idBuscado && reg.getEstado() == true) {
+            encontrado = true;
+
+            cout << "\nClienta encontrada. Reingrese los datos:\n\n";
+            cout << "ID CLIENTA: " << idBuscado << endl;
+
+            // Invocamos el metodo para cargar las variables
+            if (!reg.modificar()) {
+                cout << "\nModificacion cancelada.\n";
+                fclose(p);
+                return;
+            }
+
+            // Aseguramos que conserve su ID original y siga activa
+            reg.setIdCliente(idBuscado);
+            reg.setEstado(true);
+
+            // Volvemos para atras el puntero del archivo y reescribimos el registro
+            fseek(p, pos * sizeof(Cliente), SEEK_SET);
+            fwrite(&reg, sizeof(Cliente), 1, p);
+
+            cout << "\n[OK] Clienta modificada correctamente.\n";
+            cin.ignore(1000, '\n');
+            break;
+        }
+        pos++;
+    }
+    fclose(p);
+
+    if (!encontrado) {
+        cout << "\n[ERROR] No se encontro ninguna clienta activa con ese ID.\n";
+    }
+
+    cout << "\nPresione ENTER para continuar...";
+    cin.get();
 }
 
 //BAJA LOGICA
@@ -252,7 +420,6 @@ bool darDeBajaCliente() {
         }
         pos++;
     }
-
     fclose(p);
 
     if (!encontrado) {

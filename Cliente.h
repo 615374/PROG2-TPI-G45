@@ -15,12 +15,16 @@ class Cliente {
         // Constructor
         Cliente();
 
-        // Métodos de Carga y Muestra por consola
+        // Metodos principales del objeto
         bool cargar();
         void mostrar();
+        bool modificar();
 
         //Método para validar Id
         bool buscarPorId(int id);
+
+        // Metodo auxiliar para la relacion Turno
+        bool mostrarNombrePorId(int id);
 
         // Setters y Getters (Encapsulamiento)
         void setIdCliente(int id);
@@ -32,6 +36,7 @@ class Cliente {
         int getIdCliente();
         const char* getNombre();
         const char* getApellido();
+        const char* getTelefono();
         bool getEstado();
 
         // Métodos de persistencia binaria (.dat)
@@ -39,6 +44,10 @@ class Cliente {
         bool escribirDisco();
 };
 
+//DECLARACIONES DE FUNCIONES GLOBALES
+
+// Mantenimiento
+void modificarCliente();
 bool darDeBajaCliente();
 
 // Listados Masivos / Reportes
