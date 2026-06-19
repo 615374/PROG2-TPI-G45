@@ -1,0 +1,177 @@
+#pragma once
+
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#include "DetalleTurno.h"
+#include "Servicio.h"
+#include "Profesional.h"
+
+using namespace std;
+
+// CONSTRUCTOR
+DetalleTurno::DetalleTurno() {
+    idTurno = 0;
+    idServicio = 0;
+    idProfesional = 0;
+    hora = 0;
+    minuto = 0;
+    precioAlMomento = 0;
+    strcpy(observaciones, "");
+    estado = false;
+}
+
+// SETTERS
+void DetalleTurno::setIdTurno(int id) {
+    idTurno = id;
+}
+
+void DetalleTurno::setIdServicio(int id) {
+    idServicio = id;
+}
+
+void DetalleTurno::setIdProfesional(int id) {
+    idProfesional = id;
+}
+
+void DetalleTurno::setHora(int h) {
+    hora = h;
+}
+
+void DetalleTurno::setMinuto(int m) {
+    minuto = m;
+}
+
+void DetalleTurno::setPrecioAlMomento(float p) {
+    precioAlMomento = p;
+}
+
+void DetalleTurno::setObservaciones(const char* obs) {
+    strncpy(observaciones, obs, 199);
+    observaciones[199] = '\0';
+}
+
+void DetalleTurno::setEstado(bool e) {
+    estado = e;
+}
+
+//GETTERS
+int DetalleTurno::getIdTurno() {
+    return idTurno;
+}
+
+int DetalleTurno::getIdServicio() {
+    return idServicio;
+}
+
+int DetalleTurno::getIdProfesional() {
+    return idProfesional;
+}
+
+int DetalleTurno::getHora() {
+    return hora;
+}
+
+int DetalleTurno::getMinuto() {
+    return minuto;
+}
+
+float DetalleTurno::getPrecioAlMomento() {
+    return precioAlMomento;
+}
+
+const char* DetalleTurno::getObservaciones() {
+    return observaciones;
+}
+
+bool DetalleTurno::getEstado() {
+    return estado;
+}
+
+// METODOS PRINCIPALES
+
+// METODO CARGAR
+bool DetalleTurno::cargar(int idT, int idS, float precioBase) {
+    idTurno = idT;
+    idServicio = idS;
+    precioAlMomento = precioBase; // Se congela el precio actual de la clienta
+
+    cout << "\n--- ASIGNAR HORARIO Y PROFESIONAL ---" << endl;
+
+    // Validacion de hora
+    do {
+        cout << "Ingrese Hora del tratamiento (0-23): ";
+        cin >> hora;
+        if (hora < 0 || hora > 23) cout << "[ERROR] Hora invalida.\n";
+    } while (hora < 0 || hora > 23);
+
+    // Validacion de minutos
+    do {
+        cout << "Ingrese Minutos (0-59): ";
+        cin >> minuto;
+        if (minuto < 0 || minuto > 59) cout << "[ERROR] Minutos invalidos.\n";
+    } while (minuto < 0 || minuto > 59);
+
+    // Seleccion de Profesional
+    Profesional prof;
+    bool profValido = false;
+    do {
+        cout << "Ingrese ID del Profesional que lo realiza: ";
+        cin >> idProfesional;
+
+        if (prof.buscarPorId(idProfesional)) {
+            profValido = true;
+        } else {
+            cout << "[ERROR] No existe un profesional activo con ese ID.\n";
+        }
+    } while (!profValido);
+
+    cin.ignore(1000, '\n');
+    cout << "Ingrese Observaciones/Notas (opcional): ";
+    cin.getline(observaciones, 200);
+
+    estado = true;
+    return true;
+}
+
+// METODO MOSTRAR
+void DetalleTurno::mostrar() {
+    if (estado) {
+        Servicio serv;
+        Profesional prof;
+
+        cout << "  -> Horario: " << (hora < 10 ? "0" : "") << hora << ":"
+             << (minuto < 10 ? "0" : "") << minuto << " hs" << endl;
+
+        cout << "     Servicio: ";
+        if (!serv.mostrarNombrePorId(idServicio)) cout << "ID: " << idServicio;
+        cout << " | Precio Cobrado: $" << precioAlMomento << endl;
+
+        cout << "     Especialista: ";
+        if (!prof.mostrarNombrePorId(idProfesional)) cout << "ID: " << idProfesional;
+        cout << endl;
+
+        if (strlen(observaciones) > 0) {
+            cout << "     Notas: " << observaciones << endl;
+        }
+        cout << "  -------------------------------------------" << endl;
+    }
+}
+
+// PERSISTENCIA
+bool DetalleTurno::leerDisco(int pos) {
+    FILE* p = fopen("detalles_turnos.dat", "rb");
+    if (p == NULL) return false;
+    fseek(p, pos * sizeof(DetalleTurno), SEEK_SET);
+    bool leyo = fread(this, sizeof(DetalleTurno), 1, p);
+    fclose(p);
+    return leyo;
+}
+
+bool DetalleTurno::escribirDisco() {
+    FILE* p = fopen("detalles_turnos.dat", "ab");
+    if (p == NULL) return false;
+    bool escribio = fwrite(this, sizeof(DetalleTurno), 1, p);
+    fclose(p);
+    return escribio;
+}

@@ -10,18 +10,28 @@ using namespace std;
 
 // FUNCIONES GLOBALES
 
-// Algoritmo: Busca clientas por apellido exacto y retorna el ID seleccionado
+// Algoritmo: Busca clientas por coincidencia parcial en el apellido y retorna el ID seleccionado
 int buscarClienteParaTurno(const char* apellidoBuscado) {
     Cliente reg;
     int pos = 0;
     bool encontrado = false;
 
+    // Calculamos cuantas letras escribio la recepcionista (ej: si puso "A", tam es 1; si puso "Per", tam es 3)
+    int tam = strlen(apellidoBuscado);
+
+    // Si la recepcionista no escribio nada, salimos para evitar que se congele el programa
+    if (tam == 0) {
+        cout << "\n[ERROR] No se ingreso ningun criterio de busqueda.\n";
+        return -1;
+    }
+
     cout << "=================================================" << endl;
-    cout << "          CLIENTAS ACTIVAS CON APELLIDO: " << apellidoBuscado << endl;
+    cout << "  CLIENTAS ACTIVAS QUE EMPIEZAN CON: "             << apellidoBuscado << endl;
     cout << "=================================================" << endl;
 
     while (reg.leerDisco(pos)) {
-        if (reg.getEstado() == true && strcmp(reg.getApellido(), apellidoBuscado) == 0) {
+        // Usamos strncmp para comparar solo los primeros 'tam' caracteres
+        if (reg.getEstado() == true && strncmp(reg.getApellido(), apellidoBuscado, tam) == 0) {
             cout << " ID: [" << reg.getIdCliente() << "] - "
                  << reg.getApellido() << ", " << reg.getNombre()
                  << " - Tel: " << reg.getTelefono() << endl;
@@ -31,7 +41,7 @@ int buscarClienteParaTurno(const char* apellidoBuscado) {
     }
 
     if (!encontrado) {
-        cout << "\n[AVISO] No se encontraron clientas activas con ese apellido.\n";
+        cout << "\n[AVISO] No se encontraron clientas activas con ese criterio.\n";
         return -1;
     }
 
@@ -40,7 +50,7 @@ int buscarClienteParaTurno(const char* apellidoBuscado) {
     cout << "Ingrese el ID de la clienta elegida: ";
     cin >> idSeleccionado;
 
-    // VALIDACIÓN CORREGIDA Y SEGURA DIRECTO CONTRA EL DISCO
+    // Validacion directa contra el disco
     pos = 0;
     Cliente verificador;
     while (verificador.leerDisco(pos)) {
