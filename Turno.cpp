@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdio>
+#include <cstring>
 #include "Turno.h"
 #include "Cliente.h"
 
@@ -83,9 +84,7 @@ bool Turno::getEstado() {
 
 
 // METODOS PRINCIPALES DE LA CLASE
-
 bool Turno::cargar() {
-    cin.ignore(1000, '\n'); // Limpieza del buffer
 
     cout << "=================================================" << endl;
     cout << "              REGISTRAR NUEVO TURNO              " << endl;
@@ -94,21 +93,32 @@ bool Turno::cargar() {
     cout << "-------------------------------------------------" << endl;
 
     Cliente cli;
-    do {
-        cout << "Ingrese ID de la clienta: ";
-        cin >> idCliente;
+    bool idValido = false;
 
-        if (idCliente == 0) {
-            estado = false;
-            return false;
-        }
+    // Si el idCliente ya se asigno en el menu (es mayor a 0), saltamos el pedido por teclado
+    if (idCliente > 0) {
+        cout << "ID CLIENTA ASOCIADA AL TURNO: " << idCliente << " (";
+        cli.mostrarNombrePorId(idCliente);
+        cout << ")" << endl << endl;
+    }
+    else {
+        // Si por alguna razon arranca en 0, lo pide como antes
+        do {
+            cout << "Ingrese ID de la clienta: ";
+            cin >> idCliente;
 
-        // Valida contra el archivo real de clientas usando metodo seguro
-        if (!cli.buscarPorId(idCliente)) {
-            cout << "[ERROR] No existe ninguna clienta activa con el ID ingresado.\n\n";
-        }
+            if (idCliente == 0) {
+                estado = false;
+                return false;
+            }
 
-    } while (!cli.buscarPorId(idCliente));
+            if (!cli.buscarPorId(idCliente)) {
+                cout << "[ERROR] No existe ninguna clienta activa con el ID ingresado.\n\n";
+            } else {
+                idValido = true;
+            }
+        } while (!idValido);
+    }
 
     idTurno = generarNuevoId();
     cout << "ID TURNO ASIGNADO AUTOMATICAMENTE: " << idTurno << endl;
@@ -125,7 +135,7 @@ bool Turno::cargar() {
         cin >> sena;
 
         if (sena < 0) {
-            cout << "[ERROR] La senia no puede ser un valor negativo.\n";
+            cout << "[ERROR] La senia no puede ser un valor negative.\n";
         }
     } while (sena < 0);
 
@@ -141,7 +151,7 @@ void Turno::mostrar() {
         cout << "-----------------------------------" << endl;
         cout << "ID TURNO: " << idTurno << endl;
 
-        //Muestra Apellido y Nombre directo en la ficha del turno
+        // Muestra apellido y nombre directo en la ficha del turno
         cout << "CLIENTA: ";
         if (!cli.mostrarNombrePorId(idCliente)) {
             cout << "No disponible (ID: " << idCliente << ")";
@@ -189,66 +199,3 @@ bool Turno::escribirDisco() {
     return escribio;
 }
 
-
-// BAJA LOGICA
-bool darDeBajaTurno() {
-    int idBuscado;
-    Turno reg;
-    int pos = 0;
-    bool encontrado = false;
-
-    cout << "=================================================" << endl;
-    cout << "          SELECCIONE TURNO PARA DAR DE BAJA      " << endl;
-    cout << "=================================================" << endl;
-    cout << "0. Volver al Menu Principal / Cancelar Baja      " << endl;
-    cout << "-------------------------------------------------" << endl;
-
-    // Lista los turnos activos
-    while (reg.leerDisco(pos)) {
-        if (reg.getEstado() == true) {
-            reg.mostrar();
-        }
-        pos++;
-    }
-
-    cout << "Ingrese el ID del turno a dar de baja: ";
-    cin >> idBuscado;
-
-    if (idBuscado == 0) {
-        cout << "\nOperacion cancelada. Volviendo al menu...\n";
-        return false;
-    }
-
-    pos = 0;
-    FILE* p = fopen("turnos.dat", "rb+");
-    if (p == NULL) {
-        cout << "\n[ERROR] No se pudo acceder al archivo.\n";
-        return true;
-    }
-
-    while (fread(&reg, sizeof(Turno), 1, p) == 1) {
-        if (reg.getIdTurno() == idBuscado && reg.getEstado() == true) {
-            encontrado = true;
-            reg.setEstado(false);
-
-            fseek(p, pos * sizeof(Turno), SEEK_SET);
-            fwrite(&reg, sizeof(Turno), 1, p);
-
-            cout << "\n[OK] Turno dado de baja correctamente del sistema.\n";
-            break;
-        }
-        pos++;
-    }
-    fclose(p);
-
-    if (!encontrado) {
-        cout << "\n[ERROR] No se encontro ningun turno activo con ese ID.\n";
-    }
-
-    //Pausa obligatoria para que la recepcionista pueda leer el cartel de baja
-    cin.ignore(1000, '\n');
-    cout << "\nPresione ENTER para continuar...";
-    cin.get();
-
-    return true;
-}

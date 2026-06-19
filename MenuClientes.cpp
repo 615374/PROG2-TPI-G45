@@ -7,7 +7,7 @@
 using namespace std;
 
 
-// FUNCIONES GLOBALES
+// FUNCIONES GLOBALES DE LISTADOS Y REPORTES
 
 // Algoritmo: Ordena en memoria las clientas activas por Apellido (A-Z) y las muestra
 void listarClientasPorApellido() {
@@ -77,6 +77,148 @@ void listarClientasConSaldos() {
     cout << " [Proximamente: Reporte de Cuentas Corrientes]\n\n";
 }
 
+// FUNCIONES GLOBALES DE MANTENIMIENTO
+void modificarCliente() {
+    int idBuscado;
+    Cliente reg;
+    int pos = 0;
+    bool encontrado = false;
+
+    cout << "=================================================" << endl;
+    cout << "           SELECCIONE CLIENTA A MODIFICAR        " << endl;
+    cout << "=================================================" << endl;
+    cout << "0. Volver al Menu Principal / Cancelar Modificacion" << endl;
+    cout << "-------------------------------------------------" << endl;
+
+    // Listamos todas las clientas activas para que la recepcionista elija el ID
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado() == true) {
+            cout << "ID: [" << reg.getIdCliente() << "] - "
+                 << reg.getApellido() << ", " << reg.getNombre()
+                 << " - Tel: " << reg.getTelefono() << endl;
+        }
+        pos++;
+    }
+    cout << "=================================================" << endl;
+    cout << "Ingrese el ID de la clienta a modificar: ";
+    cin >> idBuscado;
+
+    if (idBuscado == 0) {
+        cout << "\nOperacion cancelada. Volviendo al menu...\n";
+        return;
+    }
+
+    pos = 0;
+    FILE* p = fopen("clientes.dat", "rb+");
+    if (p == NULL) {
+        cout << "\n[ERROR] No se pudo acceder al archivo.\n";
+        return;
+    }
+
+    // Buscamos el registro en el archivo de forma binaria
+    while (fread(&reg, sizeof(Cliente), 1, p) == 1) {
+        if (reg.getIdCliente() == idBuscado && reg.getEstado() == true) {
+            encontrado = true;
+
+            cout << "\nClienta encontrada. Reingrese los datos:\n\n";
+            cout << "ID CLIENTA: " << idBuscado << endl;
+
+            // Invocamos el metodo para cargar las variables
+            if (!reg.modificar()) {
+                cout << "\nModificacion cancelada.\n";
+                fclose(p);
+                return;
+            }
+
+            // Aseguramos que conserve su ID original y siga activa
+            reg.setIdCliente(idBuscado);
+            reg.setEstado(true);
+
+            // Volvemos para atras el puntero del archivo y reescribimos el registro
+            fseek(p, pos * sizeof(Cliente), SEEK_SET);
+            fwrite(&reg, sizeof(Cliente), 1, p);
+
+            cout << "\n[OK] Clienta modificada correctamente.\n";
+            cin.ignore(1000, '\n');
+            break;
+        }
+        pos++;
+    }
+    fclose(p);
+
+    if (!encontrado) {
+        cout << "\n[ERROR] No se encontro ninguna clienta activa con ese ID.\n";
+    }
+
+    cout << "\nPresione ENTER para continuar...";
+    cin.get();
+}
+
+//BAJA LOGICA
+bool darDeBajaCliente() {
+    int idBuscado;
+    Cliente reg;
+    int pos = 0;
+    bool encontrado = false;
+
+    cout << "=================================================" << endl;
+    cout << "        SELECCIONE UNA CLIENTA PARA DAR DE BAJA  " << endl;
+    cout << "=================================================" << endl;
+    cout << " 0. Volver al Menu Principal / Cancelar baja" << endl;
+    cout << "-------------------------------------------------" << endl;
+
+    // Recorremos el archivo completo y mostramos las activas
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado() == true) {
+            cout << " ID: [" << reg.getIdCliente() << "] - "
+                 << reg.getApellido() << ", " << reg.getNombre() << endl;
+        }
+        pos++;
+    }
+    cout << "=================================================" << endl;
+    cout << "Ingrese el ID de la clienta a eliminar: ";
+    cin >> idBuscado;
+
+    // Si presiona 0, vuelve al menu
+    if (idBuscado == 0) {
+        return false;
+    }
+
+    // Reiniciamos la posicion para buscar y sobreescribir
+    pos = 0;
+    FILE* p = fopen("clientes.dat", "rb+");
+    if (p == NULL) {
+        cout << "\n[ERROR] No se pudo acceder al archivo de clientes.\n";
+        return true;
+    }
+
+    while (fread(&reg, sizeof(Cliente), 1, p) == 1) {
+        if (reg.getIdCliente() == idBuscado && reg.getEstado() == true) {
+            encontrado = true;
+            reg.setEstado(false);
+
+            fseek(p, pos * sizeof(Cliente), SEEK_SET);
+            fwrite(&reg, sizeof(Cliente), 1, p);
+
+            cout << "\n[OK] Clienta dada de baja correctamente del sistema.\n";
+            break;
+        }
+        pos++;
+    }
+    fclose(p);
+
+    if (!encontrado) {
+        cout << "\n[ERROR] No se encontro ninguna clienta activa con el ID: " << idBuscado << endl;
+    }
+
+    cin.ignore(1000, '\n');
+    cout << "\nPresione ENTER para continuar...";
+    cin.get();
+
+    return true;
+}
+
+
 
 // SUB-MENU INTERNO: PANEL DE CONSULTAS Y FILTROS CLIENTAS
 void menuConsultasClientes() {
@@ -109,7 +251,7 @@ void menuConsultasClientes() {
 
         if (op == 1) {
             cout << "=================================================" << endl;
-            cout << "        LISTADO DE CLIENTAS ACTIVAS (A-Z)       " << endl;
+            cout << "        LISTADO DE CLIENTAS ACTIVAS (A-Z)        " << endl;
             cout << "=================================================" << endl;
             listarClientasPorApellido();
             cout << "=================================================" << endl << endl;
@@ -143,6 +285,7 @@ void menuConsultasClientes() {
 }
 
 // MENU PRINCIPAL: MODULO DE CLIENTAS
+
 void menuClientes() {
     int op;
     Cliente aux;
@@ -151,9 +294,10 @@ void menuClientes() {
         cout << "=================================================" << endl;
         cout << "            MODULO: GESTION CLIENTAS             " << endl;
         cout << "=================================================" << endl;
-        cout << "1. Registrar Nueva Clienta" << endl;
+        cout << "1. Registrar Nueva Clienta (Alta)" << endl;
         cout << "2. Listado de Clientas y Consultas" << endl;
-        cout << "3. Dar de baja Clienta" << endl;
+        cout << "3. Modificar Datos de Clienta" << endl;
+        cout << "4. Dar de baja Clienta (Baja Logica)" << endl;
         cout << "0. Volver al Menu Principal" << endl;
         cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion: ";
@@ -181,7 +325,19 @@ void menuClientes() {
         }
         else if (op == 3) {
             system("cls");
+            modificarCliente();
+            system("cls");
+        }
+        else if (op == 4) {
+            system("cls");
             darDeBajaCliente();
+            system("cls");
+        }
+        else if (op != 0) {
+            cout << "[ERROR] Opcion incorrecta. Reintente.\n\n";
+            cin.ignore(1000, '\n');
+            cout << "Presione ENTER para continuar...";
+            cin.get();
             system("cls");
         }
     } while (op != 0);

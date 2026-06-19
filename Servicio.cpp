@@ -78,8 +78,10 @@ bool Servicio::getEstado() {
 }
 
 // METODOS PRINCIPALES
+
+// METODO CARGAR
 bool Servicio::cargar() {
-    cin.ignore(); //Limpia el buffer antes de las cadenas
+    cin.ignore(1000, '\n'); // Limpia buffer
 
     cout << "=================================================" << endl;
     cout << "          REGISTRAR NUEVO SERVICIO               " << endl;
@@ -87,36 +89,64 @@ bool Servicio::cargar() {
     cout << "0. Volver al Menu Principal / Cancelar alta      " << endl;
     cout << "-------------------------------------------------" << endl;
 
-    // Validacin de Nombre
+    bool valido;
+
+    // Validacion de nombre
     do {
-        cout << "Ingrese Nombre del Servicio (Ej: Perfilado, Esculpidas): ";
+        valido = true;
+        cout << "Ingrese Nombre del Servicio: ";
         cin.getline(nombre, 50);
+
+        if (strcmp(nombre, "0") == 0) {
+            estado = false;
+            return false;
+        }
         if (strlen(nombre) == 0) {
             cout << "[ERROR] El nombre del servicio no puede quedar vacio.\n";
+            valido = false;
         }
-    } while (strlen(nombre) == 0);
+        // Control para que no contenga numeros
+        for (int i = 0; nombre[i] != '\0'; i++) {
+            if (nombre[i] >= '0' && nombre[i] <= '9') {
+                valido = false;
+            }
+        }
+        if (!valido && strlen(nombre) > 0) {
+            cout << "[ERROR] El nombre del servicio no puede contener numeros.\n";
+        }
+    } while (!valido);
 
-    // Si puso '0', marcamos estado en false
-    if (strcmp(nombre, "0") == 0) {
-        estado = false;
-        return false;
-    }
-
-    // Validacion de Tipo
+    // Validacion de tipo
     do {
-        cout << "Ingrese Tipo de Servicio (Ej: Facial, Corporal, Unias): ";
+        valido = true;
+        cout << "Ingrese Tipo de Servicio: ";
         cin.getline(tipo, 30);
+
+        if (strcmp(tipo, "0") == 0) {
+            estado = false;
+            return false;
+        }
         if (strlen(tipo) == 0) {
             cout << "[ERROR] El tipo de servicio no puede quedar vacio.\n";
+            valido = false;
         }
-    } while (strlen(tipo) == 0);
+        // Control de caracteres numericos
+        for (int i = 0; tipo[i] != '\0'; i++) {
+            if (tipo[i] >= '0' && tipo[i] <= '9') {
+                valido = false;
+            }
+        }
+        if (!valido && strlen(tipo) > 0) {
+            cout << "[ERROR] El tipo de servicio no puede contener numeros.\n";
+        }
+    } while (!valido);
 
-    // Validacion de Precio (Mayor a cero)
+    // Validacion de precio
     do {
-        cout << "Ingrese Precio Actual: $";
+        cout << "Ingrese Precio Actual: ";
         cin >> precioActual;
         if (precioActual <= 0) {
-            cout << "[ERROR] El precio debe ser un valor mayor a cero.\n";
+            cout << "[ERROR] El precio debe ser mayor a cero.\n";
         }
     } while (precioActual <= 0);
 
@@ -142,12 +172,78 @@ void Servicio::mostrar() {
     }
 }
 
+//METODO MODIFICAR
+bool Servicio::modificar() {
+    cin.ignore(1000, '\n'); // Limpia buffer
+    bool valido;
+
+    // Validacion de nombre
+    do {
+        valido = true;
+        cout << "Ingrese Nombre del Servicio: ";
+        cin.getline(nombre, 50);
+
+        if (strcmp(nombre, "0") == 0) {
+            return false;
+        }
+        if (strlen(nombre) == 0) {
+            cout << "[ERROR] El nombre del servicio no puede quedar vacio.\n";
+            valido = false;
+        }
+        // Control para que no contenga numeros en el nombre
+        for (int i = 0; nombre[i] != '\0'; i++) {
+            if (nombre[i] >= '0' && nombre[i] <= '9') {
+                valido = false;
+            }
+        }
+        if (!valido && strlen(nombre) > 0) {
+            cout << "[ERROR] El nombre del servicio no puede contener numeros.\n";
+        }
+    } while (!valido);
+
+    // Validacion de tipo
+    do {
+        valido = true;
+        cout << "Ingrese Tipo de Servicio: ";
+        cin.getline(tipo, 30);
+
+        if (strcmp(tipo, "0") == 0) {
+            return false;
+        }
+        if (strlen(tipo) == 0) {
+            cout << "[ERROR] El tipo de servicio no puede quedar vacio.\n";
+            valido = false;
+        }
+        // Control para que no contenga numeros en el tipo
+        for (int i = 0; tipo[i] != '\0'; i++) {
+            if (tipo[i] >= '0' && tipo[i] <= '9') {
+                valido = false;
+            }
+        }
+        if (!valido && strlen(tipo) > 0) {
+            cout << "[ERROR] El tipo de servicio no puede contener numeros.\n";
+        }
+    } while (!valido);
+
+    // Validacion de precio
+    do {
+        cout << "Ingrese Precio Actual: ";
+        cin >> precioActual;
+
+        if (precioActual <= 0) {
+            cout << "[ERROR] El precio debe ser mayor a cero.\n";
+        }
+    } while (precioActual <= 0);
+
+    return true;
+}
+
 //BUSQUEDA (EXISTE EL ID? TRUE O FALSE)
 bool Servicio::buscarPorId(int id){
     int pos = 0;
     while(leerDisco(pos)){
         if(idServicio == id && estado == true){
-        //Porque no alcanza con que el registro exista físicamente
+        //Porque no alcanza con que el registro exista fisicamente
         //en el archivo, También debe estar activo para
         //poder utilizarse dentro del sistema
             return true;
@@ -192,64 +288,3 @@ bool Servicio::escribirDisco() {
     return escribio;
 }
 
-//BAJA LOGICA SERVICIO
-bool darDeBajaServicio() {
-    int idBuscado;
-    Servicio reg;
-    int pos = 0;
-    bool encontrado = false;
-
-    cout << "=================================================" << endl;
-    cout << "       SELECCIONE UN SERVICIO PARA DAR DE BAJA   " << endl;
-    cout << "=================================================" << endl;
-    cout << " 0. Volver al Menu Principal / Cancelar Baja     " << endl;
-    cout << "-------------------------------------------------" << endl;
-
-    while (reg.leerDisco(pos)) {
-        if (reg.getEstado() == true) {
-            cout << "ID: [" << reg.getIdServicio() << "] - "
-                 << reg.getNombre()
-                 << " ($" << reg.getPrecio() << ")"
-                 << endl;
-        }
-        pos++;
-    }
-    cout << "=================================================" << endl;
-    cout << "Ingrese el ID del servicio a dar de baja: ";
-    cin >> idBuscado;
-
-    //Si el usuario presiona 0, corta la funcion
-    if (idBuscado == 0) {
-        cout << "\nOperacion cancelada. Volviendo al menu...\n";
-        return false;
-    }
-
-    pos = 0;
-    FILE* p = fopen("servicios.dat", "rb+");
-    if (p == NULL) {
-        cout << "\n[ERROR] No se pudo acceder al archivo.\n";
-        return true;
-    }
-    while (fread(&reg, sizeof(Servicio), 1, p) == 1) {
-        if (reg.getIdServicio() == idBuscado &&
-            reg.getEstado() == true) {
-            encontrado = true;
-            reg.setEstado(false);
-            fseek(p, pos * sizeof(Servicio), SEEK_SET);
-            fwrite(&reg, sizeof(Servicio), 1, p);
-            cout << "\n[OK] Servicio dado de baja correctamente.\n";
-            break;
-        }
-        pos++;
-    }
-    fclose(p);
-    if (!encontrado) {
-        cout << "\n[ERROR] No se encontro ningun servicio activo con ese ID.\n";
-    }
-
-    cin.ignore(1000, '\n');
-    cout << "\nPresione ENTER para continuar...";
-    cin.get();
-
-    return true;
-}

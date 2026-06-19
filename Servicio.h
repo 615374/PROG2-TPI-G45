@@ -15,6 +15,7 @@ class Servicio {
 
         bool cargar();
         void mostrar();
+        bool modificar();
 
         //Método para validar Id
         bool buscarPorId(int id);
@@ -41,4 +42,12 @@ class Servicio {
         bool escribirDisco();
 };
 
+//DECLARACIONES DE FUNCIONES GLOBALES
+
+// Mantenimiento
+void modificarServicio();
 bool darDeBajaServicio();
+
+// Listados
+void listarServiciosPorTipo();
+void listarServiciosInactivos();
