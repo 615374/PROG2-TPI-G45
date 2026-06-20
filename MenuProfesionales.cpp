@@ -4,7 +4,6 @@
 #include "MenuProfesionales.h"
 #include "Profesional.h"
 #include "DetalleTurno.h"
-#include "Turno.h"
 
 using namespace std;
 
@@ -21,7 +20,7 @@ void listarProfesionalesPorEspecialidad() {
     bool repetida;
     bool encontrado = false;
 
-    // Armamos la lista de especialidades unicas en memoria
+    // Armamos la lista de especialidades únicas en memoria
     while (reg.leerDisco(pos)) {
         if (reg.getEstado()) {
             repetida = false;
@@ -123,13 +122,15 @@ void listarProfesionalesInactivos() {
     cout << "=================================================" << endl << endl;
 }
 
-// Algoritmo: Lista profesionales ordenados por volumen de servicios brindados
+// Algoritmo: Filtrara el listado ordenando por volumen de servicios brindados
+// Algoritmo: lista profesionales ordenados por volumen de servicios brindados
 void listarProfesionalesPorVolumenServicios() {
     Profesional profesional;
     DetalleTurno detalle;
     int posProfesional = 0;
     int cantidadProfesionales = 0;
 
+    // Cuenta cuantos profesionales activos existen
     while (profesional.leerDisco(posProfesional)) {
         if (profesional.getEstado()) {
             cantidadProfesionales++;
@@ -152,6 +153,7 @@ void listarProfesionalesPorVolumenServicios() {
         return;
     }
 
+    // Carga profesionales activos y calcula su cantidad de servicios realizados
     posProfesional = 0;
     int indice = 0;
 
@@ -173,9 +175,11 @@ void listarProfesionalesPorVolumenServicios() {
             vectorCantidadServicios[indice] = cantidadServicios;
             indice++;
         }
+
         posProfesional++;
     }
 
+    // Ordena de mayor a menor segun la cantidad de servicios
     for (int i = 0; i < cantidadProfesionales - 1; i++) {
         for (int j = 0; j < cantidadProfesionales - i - 1; j++) {
             if (vectorCantidadServicios[j] < vectorCantidadServicios[j + 1]) {
@@ -211,7 +215,7 @@ void listarProfesionalesPorVolumenServicios() {
     delete[] vectorCantidadServicios;
 }
 
-// Algoritmo: Filtra la liquidacion cruzando comisiones del mes con asistencias reales
+// Algoritmo: Filtra la liquidacion cruzando comisiones del mes
 void liquidacionComisiones() {
     int mesBuscado;
     int anioBuscado;
@@ -247,7 +251,7 @@ void liquidacionComisiones() {
 
                     while (turno.leerDisco(posTurno)) {
                         if (turno.getEstado() &&
-                            turno.getAsistio() == true && // Valida que la clienta fue al centro
+                            turno.getAsistio() == true &&
                             turno.getIdTurno() == detalle.getIdTurno()) {
 
                             Fecha fechaTurno = turno.getFecha();
@@ -518,10 +522,10 @@ void menuProfesionales() {
         cout << "=================================================" << endl;
         cout << "          MODULO: GESTION DE PROFESIONALES       " << endl;
         cout << "=================================================" << endl;
-        cout << "1. Registrar Profesional" << endl;
+        cout << "1. Registrar Profesional (Altas)" << endl;
         cout << "2. Listado de Profesionales y Consultas" << endl;
         cout << "3. Modificar Datos de Profesional" << endl;
-        cout << "4. Dar de Baja Profesional" << endl;
+        cout << "4. Dar de Baja Profesional (Baja Logica)" << endl;
         cout << "0. Volver al Menu Principal" << endl;
         cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion: ";

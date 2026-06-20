@@ -51,3 +51,5 @@ bool darDeBajaServicio();
 // Listados
 void listarServiciosPorTipo();
 void listarServiciosInactivos();
+// Lista servicios ordenados por cantidad de veces solicitados
+void rankingServiciosMasPedidos();

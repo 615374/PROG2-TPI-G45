@@ -32,8 +32,23 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename=".gitignore" />
 		<Unit filename="Cliente.cpp" />
 		<Unit filename="Cliente.h" />
+		<Unit filename="DetalleTurno.cpp" />
+		<Unit filename="DetalleTurno.h" />
+		<Unit filename="Fecha.cpp" />
+		<Unit filename="Fecha.h" />
+		<Unit filename="MenuClientes.cpp" />
+		<Unit filename="MenuClientes.h" />
+		<Unit filename="MenuProfesionales.cpp" />
+		<Unit filename="MenuProfesionales.h" />
+		<Unit filename="MenuServicios.cpp" />
+		<Unit filename="MenuServicios.h" />
+		<Unit filename="MenuServiciosXProfesional.cpp" />
+		<Unit filename="MenuServiciosXProfesional.h" />
+		<Unit filename="MenuTurnos.cpp" />
+		<Unit filename="MenuTurnos.h" />
 		<Unit filename="Profesional.cpp" />
 		<Unit filename="Profesional.h" />
 		<Unit filename="README.md" />
@@ -42,6 +57,8 @@
 		<Unit filename="ServicioXProfesional.cpp" />
 		<Unit filename="ServicioXProfesional.h" />
 		<Unit filename="SistemaEstetica.cbp" />
+		<Unit filename="Turno.cpp" />
+		<Unit filename="Turno.h" />
 		<Unit filename="clientes.dat" />
 		<Unit filename="main.cpp" />
 		<Unit filename="main.h" />

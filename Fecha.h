@@ -19,6 +19,10 @@ class Fecha {
         void mostrar();
         void mostrarFormateada();
 
+        // Metodo auxiliar para avanzar fechas
+        void sumarDias(int cantidad);
+         //(Suma dias a la fecha actual contemplando cambio de mes y año)
+
         // Setters
         void setDia(int d);
         void setMes(int m);

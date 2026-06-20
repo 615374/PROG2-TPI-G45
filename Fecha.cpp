@@ -36,6 +36,23 @@ int Fecha::getAnio() {
     return anio;
 }
 
+// Suma dias a la fecha actual contemplando cambio de mes y anio
+void Fecha::sumarDias(int cantidad) {
+    for (int i = 0; i < cantidad; i++) {
+        dia++;
+
+        if (!validar()) {
+            dia = 1;
+            mes++;
+
+            if (mes > 12) {
+                mes = 1;
+                anio++;
+            }
+        }
+    }
+}
+
 // VALIDACION GENERAL
 bool Fecha::validar() {
     if (anio < 2025) return false;

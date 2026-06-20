@@ -54,5 +54,8 @@ bool darDeBajaCliente();
 void listarClientasPorApellido();
 void listarClientasPorFrecuencia();
 void listarClientasConSaldos();
+void historialTratamientosPorClienta();
 
+// Permite buscar una clienta por apellido y devuelve el ID seleccionado
+int seleccionarClientePorApellido();
 

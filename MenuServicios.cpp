@@ -3,6 +3,7 @@
 #include <cstring>
 #include "MenuServicios.h"
 #include "Servicio.h"
+#include "DetalleTurno.h"
 
 using namespace std;
 
@@ -103,6 +104,100 @@ void listarServiciosInactivos() {
         cout << "No hay servicios inactivos para mostrar.\n" << endl;
     }
 }
+
+
+// Algoritmo: lista servicios ordenados por cantidad de veces solicitados
+void rankingServiciosMasPedidos() {
+    Servicio servicio;
+    DetalleTurno detalle;
+    int posServicio = 0;
+    int cantidadServicios = 0;
+
+    // Cuenta cuantos servicios activos existen
+    while (servicio.leerDisco(posServicio)) {
+        if (servicio.getEstado()) {
+            cantidadServicios++;
+        }
+        posServicio++;
+    }
+
+    if (cantidadServicios == 0) {
+        cout << "No hay servicios activos registrados.\n\n";
+        return;
+    }
+
+    Servicio* vectorServicios = new Servicio[cantidadServicios];
+    int* vectorCantidadPedidos = new int[cantidadServicios];
+
+    if (vectorServicios == NULL || vectorCantidadPedidos == NULL) {
+        cout << "[ERROR] Memoria insuficiente para generar el ranking.\n\n";
+        delete[] vectorServicios;
+        delete[] vectorCantidadPedidos;
+        return;
+    }
+
+    // Carga servicios activos y calcula cuantas veces fue pedido cada uno
+    posServicio = 0;
+    int indice = 0;
+
+    while (servicio.leerDisco(posServicio)) {
+        if (servicio.getEstado()) {
+            vectorServicios[indice] = servicio;
+
+            int cantidadPedidos = 0;
+            int posDetalle = 0;
+
+            while (detalle.leerDisco(posDetalle)) {
+                if (detalle.getEstado() &&
+                    detalle.getIdServicio() == servicio.getIdServicio()) {
+                    cantidadPedidos++;
+                }
+                posDetalle++;
+            }
+
+            vectorCantidadPedidos[indice] = cantidadPedidos;
+            indice++;
+        }
+
+        posServicio++;
+    }
+
+    // Ordena de mayor a menor segun la cantidad de pedidos
+    for (int i = 0; i < cantidadServicios - 1; i++) {
+        for (int j = 0; j < cantidadServicios - i - 1; j++) {
+            if (vectorCantidadPedidos[j] < vectorCantidadPedidos[j + 1]) {
+                int auxCantidad = vectorCantidadPedidos[j];
+                vectorCantidadPedidos[j] = vectorCantidadPedidos[j + 1];
+                vectorCantidadPedidos[j + 1] = auxCantidad;
+
+                Servicio auxServicio = vectorServicios[j];
+                vectorServicios[j] = vectorServicios[j + 1];
+                vectorServicios[j + 1] = auxServicio;
+            }
+        }
+    }
+    bool hayPedidos = false;
+
+    for (int i = 0; i < cantidadServicios; i++) {
+        if (vectorCantidadPedidos[i] > 0) {
+            cout << "-----------------------------------" << endl;
+            cout << "SERVICIO: " << vectorServicios[i].getNombre() << endl;
+            cout << "ID SERVICIO: " << vectorServicios[i].getIdServicio() << endl;
+            cout << "TIPO: " << vectorServicios[i].getTipo() << endl;
+            cout << "VECES SOLICITADO: " << vectorCantidadPedidos[i] << endl;
+            cout << "-----------------------------------" << endl;
+
+            hayPedidos = true;
+        }
+    }
+    if (!hayPedidos) {
+        cout << "No hay servicios solicitados en turnos.\n\n";
+    }
+
+    delete[] vectorServicios;
+    delete[] vectorCantidadPedidos;
+}
+
 
 // FUNCIONES GLOBALES DE MANTENIMIENTO
 
@@ -258,6 +353,7 @@ void menuConsultasServicios() {
         cout << "1. Listar Todos los Servicios Activos"             << endl;
         cout << "2. Listar Servicios Agrupados por Tipo"            << endl;
         cout << "3. Ver Fichas de Servicios Inactivos (Bajas)"      << endl;
+        cout << "4. Ranking de Servicios Mas Pedidos" << endl;
         cout << "0. Volver al Menu anterior" << endl;
         cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion: ";
@@ -303,6 +399,17 @@ void menuConsultasServicios() {
             cin.get();
             system("cls");
         }
+        else if (op == 4) {
+            system("cls");
+            cout << "=================================================" << endl;
+            cout << "             RANKING DE SERVICIOS MAS PEDIDOS    " << endl;
+            cout << "=================================================" << endl;
+            rankingServiciosMasPedidos();
+            cout << "\nPresione ENTER para continuar...";
+            cin.ignore(1000, '\n');
+            cin.get();
+            system("cls");
+        }
     } while (op != 0);
 }
 
@@ -318,7 +425,7 @@ void menuServicios() {
         cout << "1. Registrar Servicio (Alta)" << endl;
         cout << "2. Listado de Servicios y Consultas" << endl;
         cout << "3. Modificar Datos de Servicio" << endl;
-        cout << "4. Dar de baja Servicio" << endl;
+        cout << "4. Dar de baja Servicio (Baja Logica)" << endl;
         cout << "0. Volver al Menu Principal" << endl;
         cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion: ";

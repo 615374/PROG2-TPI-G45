@@ -84,61 +84,12 @@ bool Turno::getEstado() {
 
 
 // METODOS PRINCIPALES DE LA CLASE
-bool Turno::cargar() {
-
-    cout << "=================================================" << endl;
-    cout << "              REGISTRAR NUEVO TURNO              " << endl;
-    cout << "=================================================" << endl;
-    cout << "0. Volver al Menu Principal / Cancelar alta      " << endl;
-    cout << "-------------------------------------------------" << endl;
-
-    Cliente cli;
-    bool idValido = false;
-
-    // Si el idCliente ya se asigno en el menu (es mayor a 0), saltamos el pedido por teclado
-    if (idCliente > 0) {
-        cout << "ID CLIENTA ASOCIADA AL TURNO: " << idCliente << " (";
-        cli.mostrarNombrePorId(idCliente);
-        cout << ")" << endl << endl;
-    }
-    else {
-        // Si por alguna razon arranca en 0, lo pide como antes
-        do {
-            cout << "Ingrese ID de la clienta: ";
-            cin >> idCliente;
-
-            if (idCliente == 0) {
-                estado = false;
-                return false;
-            }
-
-            if (!cli.buscarPorId(idCliente)) {
-                cout << "[ERROR] No existe ninguna clienta activa con el ID ingresado.\n\n";
-            } else {
-                idValido = true;
-            }
-        } while (!idValido);
-    }
-
+// Carga la cabecera del turno con datos ya seleccionados desde el menu
+bool Turno::cargar(int idClienteSeleccionado, Fecha fechaSeleccionada, float senaIngresada) {
     idTurno = generarNuevoId();
-    cout << "ID TURNO ASIGNADO AUTOMATICAMENTE: " << idTurno << endl;
-
-    // Carga de la clase Fecha asociada
-    if (!fecha.cargar()) {
-        estado = false;
-        return false;
-    }
-
-    // Validacion del monto de la seña
-    do {
-        cout << "Ingrese monto de senia: $";
-        cin >> sena;
-
-        if (sena < 0) {
-            cout << "[ERROR] La senia no puede ser un valor negative.\n";
-        }
-    } while (sena < 0);
-
+    idCliente = idClienteSeleccionado;
+    fecha = fechaSeleccionada;
+    sena = senaIngresada;
     asistio = false;
     estado = true;
 

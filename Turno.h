@@ -18,7 +18,8 @@ class Turno {
         Turno();
 
         // Metodos principales del objeto
-        bool cargar();
+                   // (Carga la cabecera del turno con datos ya seleccionados desde el menu
+        bool cargar(int idClienteSeleccionado, Fecha fechaSeleccionada, float senaIngresada);
         void mostrar();
 
         // Metodos de búsqueda interna
@@ -50,5 +51,3 @@ class Turno {
 // Mantenimiento
 bool darDeBajaTurno();
 
-// Asistencia para el Menú (UX/UI)
-int buscarClienteParaTurno(const char* apellidoBuscado);
