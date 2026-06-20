@@ -3,6 +3,8 @@
 #include <cstring>
 #include "MenuProfesionales.h"
 #include "Profesional.h"
+#include "DetalleTurno.h"
+#include "Turno.h"
 
 using namespace std;
 
@@ -19,7 +21,7 @@ void listarProfesionalesPorEspecialidad() {
     bool repetida;
     bool encontrado = false;
 
-    // Armamos la lista de especialidades únicas en memoria
+    // Armamos la lista de especialidades unicas en memoria
     while (reg.leerDisco(pos)) {
         if (reg.getEstado()) {
             repetida = false;
@@ -121,14 +123,169 @@ void listarProfesionalesInactivos() {
     cout << "=================================================" << endl << endl;
 }
 
-// Algoritmo: Filtrara el listado ordenando por volumen de servicios brindados
+// Algoritmo: Lista profesionales ordenados por volumen de servicios brindados
 void listarProfesionalesPorVolumenServicios() {
-    cout << " [Proximamente: Se resolvera al avanzar con el modulo Turnos]\n\n";
+    Profesional profesional;
+    DetalleTurno detalle;
+    int posProfesional = 0;
+    int cantidadProfesionales = 0;
+
+    while (profesional.leerDisco(posProfesional)) {
+        if (profesional.getEstado()) {
+            cantidadProfesionales++;
+        }
+        posProfesional++;
+    }
+
+    if (cantidadProfesionales == 0) {
+        cout << "No hay profesionales activos registrados.\n\n";
+        return;
+    }
+
+    Profesional* vectorProfesionales = new Profesional[cantidadProfesionales];
+    int* vectorCantidadServicios = new int[cantidadProfesionales];
+
+    if (vectorProfesionales == NULL || vectorCantidadServicios == NULL) {
+        cout << "[ERROR] Memoria insuficiente para generar el listado.\n\n";
+        delete[] vectorProfesionales;
+        delete[] vectorCantidadServicios;
+        return;
+    }
+
+    posProfesional = 0;
+    int indice = 0;
+
+    while (profesional.leerDisco(posProfesional)) {
+        if (profesional.getEstado()) {
+            vectorProfesionales[indice] = profesional;
+
+            int cantidadServicios = 0;
+            int posDetalle = 0;
+
+            while (detalle.leerDisco(posDetalle)) {
+                if (detalle.getEstado() &&
+                    detalle.getIdProfesional() == profesional.getIdProfesional()) {
+                    cantidadServicios++;
+                }
+                posDetalle++;
+            }
+
+            vectorCantidadServicios[indice] = cantidadServicios;
+            indice++;
+        }
+        posProfesional++;
+    }
+
+    for (int i = 0; i < cantidadProfesionales - 1; i++) {
+        for (int j = 0; j < cantidadProfesionales - i - 1; j++) {
+            if (vectorCantidadServicios[j] < vectorCantidadServicios[j + 1]) {
+                int auxCantidad = vectorCantidadServicios[j];
+                vectorCantidadServicios[j] = vectorCantidadServicios[j + 1];
+                vectorCantidadServicios[j + 1] = auxCantidad;
+
+                Profesional auxProfesional = vectorProfesionales[j];
+                vectorProfesionales[j] = vectorProfesionales[j + 1];
+                vectorProfesionales[j + 1] = auxProfesional;
+            }
+        }
+    }
+
+    bool hayServicios = false;
+
+    for (int i = 0; i < cantidadProfesionales; i++) {
+        if (vectorCantidadServicios[i] > 0) {
+            cout << "-----------------------------------" << endl;
+            cout << "PROFESIONAL: " << vectorProfesionales[i].getApellido()
+                 << ", " << vectorProfesionales[i].getNombre() << endl;
+            cout << "ID PROFESIONAL: " << vectorProfesionales[i].getIdProfesional() << endl;
+            cout << "SERVICIOS REALIZADOS: " << vectorCantidadServicios[i] << endl;
+            cout << "-----------------------------------" << endl;
+
+            hayServicios = true;
+        }
+    }
+    if (!hayServicios) {
+        cout << "No hay profesionales con servicios registrados.\n\n";
+    }
+    delete[] vectorProfesionales;
+    delete[] vectorCantidadServicios;
 }
 
-// Algoritmo: Filtrara la liquidacion cruzando comisiones del mes
+// Algoritmo: Filtra la liquidacion cruzando comisiones del mes con asistencias reales
 void liquidacionComisiones() {
-    cout << " [Proximamente: Reporte de Liquidacion de Comisiones]\n\n";
+    int mesBuscado;
+    int anioBuscado;
+
+    cout << "Ingrese mes a liquidar (1-12): ";
+    cin >> mesBuscado;
+
+    cout << "Ingrese anio a liquidar: ";
+    cin >> anioBuscado;
+
+    if (mesBuscado < 1 || mesBuscado > 12) {
+        cout << "[ERROR] Mes invalido.\n\n";
+        return;
+    }
+
+    Profesional profesional;
+    DetalleTurno detalle;
+    Turno turno;
+    int posProfesional = 0;
+    bool encontroLiquidaciones = false;
+
+    while (profesional.leerDisco(posProfesional)) {
+        if (profesional.getEstado()) {
+            float totalProducido = 0;
+            int cantidadServicios = 0;
+            int posDetalle = 0;
+
+            while (detalle.leerDisco(posDetalle)) {
+                if (detalle.getEstado() &&
+                    detalle.getIdProfesional() == profesional.getIdProfesional()) {
+
+                    int posTurno = 0;
+
+                    while (turno.leerDisco(posTurno)) {
+                        if (turno.getEstado() &&
+                            turno.getAsistio() == true && // Valida que la clienta fue al centro
+                            turno.getIdTurno() == detalle.getIdTurno()) {
+
+                            Fecha fechaTurno = turno.getFecha();
+
+                            if (fechaTurno.getMes() == mesBuscado &&
+                                fechaTurno.getAnio() == anioBuscado) {
+                                totalProducido += detalle.getPrecioAlMomento();
+                                cantidadServicios++;
+                            }
+                            break;
+                        }
+                        posTurno++;
+                    }
+                }
+                posDetalle++;
+            }
+            if (cantidadServicios > 0) {
+                float comision = totalProducido * profesional.getComision() / 100;
+
+                cout << "-----------------------------------" << endl;
+                cout << "PROFESIONAL: " << profesional.getApellido()
+                     << ", " << profesional.getNombre() << endl;
+                cout << "ID PROFESIONAL: " << profesional.getIdProfesional() << endl;
+                cout << "MES LIQUIDADO: " << mesBuscado << "/" << anioBuscado << endl;
+                cout << "SERVICIOS ASISTIDOS: " << cantidadServicios << endl;
+                cout << "TOTAL PRODUCIDO: $" << totalProducido << endl;
+                cout << "PORCENTAJE COMISION: " << profesional.getComision() << "%" << endl;
+                cout << "COMISION A PAGAR: $" << comision << endl;
+                cout << "-----------------------------------" << endl;
+
+                encontroLiquidaciones = true;
+            }
+        }
+        posProfesional++;
+    }
+    if (!encontroLiquidaciones) {
+        cout << "No hay servicios asistidos para liquidar en ese mes.\n\n";
+    }
 }
 
 // FUNCIONES GLOBALES DE MANTENIMIENTO
