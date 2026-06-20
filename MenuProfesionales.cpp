@@ -251,6 +251,7 @@ void liquidacionComisiones() {
 
                     while (turno.leerDisco(posTurno)) {
                         if (turno.getEstado() &&
+                            turno.getAsistio() == true &&
                             turno.getIdTurno() == detalle.getIdTurno()) {
 
                             Fecha fechaTurno = turno.getFecha();
@@ -260,7 +261,6 @@ void liquidacionComisiones() {
                                 totalProducido += detalle.getPrecioAlMomento();
                                 cantidadServicios++;
                             }
-
                             break;
                         }
                         posTurno++;
@@ -268,7 +268,6 @@ void liquidacionComisiones() {
                 }
                 posDetalle++;
             }
-
             if (cantidadServicios > 0) {
                 float comision = totalProducido * profesional.getComision() / 100;
 
@@ -277,7 +276,7 @@ void liquidacionComisiones() {
                      << ", " << profesional.getNombre() << endl;
                 cout << "ID PROFESIONAL: " << profesional.getIdProfesional() << endl;
                 cout << "MES LIQUIDADO: " << mesBuscado << "/" << anioBuscado << endl;
-                cout << "SERVICIOS REALIZADOS: " << cantidadServicios << endl;
+                cout << "SERVICIOS ASISTIDOS: " << cantidadServicios << endl;
                 cout << "TOTAL PRODUCIDO: $" << totalProducido << endl;
                 cout << "PORCENTAJE COMISION: " << profesional.getComision() << "%" << endl;
                 cout << "COMISION A PAGAR: $" << comision << endl;
@@ -286,11 +285,10 @@ void liquidacionComisiones() {
                 encontroLiquidaciones = true;
             }
         }
-
         posProfesional++;
     }
     if (!encontroLiquidaciones) {
-        cout << "No hay servicios realizados para liquidar en ese mes.\n\n";
+        cout << "No hay servicios asistidos para liquidar en ese mes.\n\n";
     }
 }
 
