@@ -1,41 +1,41 @@
 #pragma once
 
-class Profesional{
+class Profesional {
     private:
         int idProfesional;
         char nombre[50];
         char apellido[50];
         char especialidad[50];
         float porcentajeComision;
-        bool estado; // baja lógica
+        bool estado; // Baja lógica
 
-        // Método privado auxiliar para calcular el ID autoincremental
+        // Metodo privado auxiliar para calcular el ID autoincremental
         int generarNuevoId();
 
     public:
         // Constructor
         Profesional();
 
-        // Métodos principales
+        // Metodos principales del objeto
         bool cargar();
         void mostrar();
         bool modificar();
 
-        //Método para validar Id
+        // Metodo para validar existencia de ID
         bool buscarPorId(int id);
 
-        //Metodo que nos sirve para ServicioXProfesional
+        // Metodo auxiliar para la relacion ServicioXProfesional
         bool mostrarNombrePorId(int id);
 
         // Setters
         void setIdProfesional(int id);
         void setNombre(const char* n);
-        void setApellido(const char* n);
+        void setApellido(const char* a);
         void setEspecialidad(const char* e);
         void setComision(float c);
-        void setEstado(bool e);
+        void setEstado(bool est);
 
-        //Getters
+        // Getters
         int getIdProfesional();
         const char* getNombre();
         const char* getApellido();
@@ -48,12 +48,15 @@ class Profesional{
         bool escribirDisco();
 };
 
-      //FUNCIONES GLOBALES
-//MANTENIMIENTO
-bool darDeBajaProfesional();
-void modificarProfesional();
+//DECLARACIONES DE FUNCIONES GLOBALES
 
-//LISTADOS, recorremos todo el archivo
+// Mantenimiento
+void modificarProfesional();
+bool darDeBajaProfesional();
+
+// Listados Masivos
 void listarProfesionalesPorEspecialidad();
+void listarProfesionalesPorVolumenServicios();
 void listarProfesionalesInactivos();
+void liquidacionComisiones();
 
