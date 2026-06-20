@@ -2,47 +2,52 @@
 #include "Fecha.h"
 
 class Turno {
-private:
-    int idTurno;
-    int idCliente;
-    Fecha fecha;
-    float sena;
-    bool asistio;
-    bool estado;
+    private:
+        int idTurno;
+        int idCliente;
+        Fecha fecha;
+        float sena;
+        bool asistio;
+        bool estado; // Baja logica
 
-    int generarNuevoId();
+        // Metodo privado auxiliar para el autoincremental
+        int generarNuevoId();
 
-public:
-    // CONSTRUCTOR
-    Turno();
+    public:
+        // Constructor
+        Turno();
 
-    // METODOS PRINCIPALES
-    bool cargar();
-    void mostrar();
+        // Metodos principales del objeto
+                   // (Carga la cabecera del turno con datos ya seleccionados desde el menu
+        bool cargar(int idClienteSeleccionado, Fecha fechaSeleccionada, float senaIngresada);
+        void mostrar();
 
-    // BÚSQUEDA
-    bool buscarPorId(int id);
+        // Metodos de búsqueda interna
+        bool buscarPorId(int id);
 
-    // SETTERS
-    void setIdTurno(int id);
-    void setIdCliente(int id);
-    void setFecha(Fecha f);
-    void setSena(float s);
-    void setAsistio(bool a);
-    void setEstado(bool e);
+        // Setters
+        void setIdTurno(int id);
+        void setIdCliente(int id);
+        void setFecha(Fecha f);
+        void setSena(float s);
+        void setAsistio(bool a);
+        void setEstado(bool e);
 
-    // GETTERS
-    int getIdTurno();
-    int getIdCliente();
-    Fecha getFecha();
-    float getSena();
-    bool getAsistio();
-    bool getEstado();
+        // Getters
+        int getIdTurno();
+        int getIdCliente();
+        Fecha getFecha();
+        float getSena();
+        bool getAsistio();
+        bool getEstado();
 
-    // PERSISTENCIA/MECANICA
-    bool leerDisco(int pos);
-    bool escribirDisco();
+        // Metodos de persistencia binaria (.dat)
+        bool leerDisco(int pos);
+        bool escribirDisco();
 };
 
-// FUNCIONES GLOBALES
+// DECLARACIONES DE FUNCIONES GLOBALES
+
+// Mantenimiento
 bool darDeBajaTurno();
+
