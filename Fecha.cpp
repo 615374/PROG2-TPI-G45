@@ -36,11 +36,29 @@ int Fecha::getAnio() {
     return anio;
 }
 
+// Suma dias a la fecha actual contemplando cambio de mes y anio
+void Fecha::sumarDias(int cantidad) {
+    for (int i = 0; i < cantidad; i++) {
+        dia++;
+
+        if (!validar()) {
+            dia = 1;
+            mes++;
+
+            if (mes > 12) {
+                mes = 1;
+                anio++;
+            }
+        }
+    }
+}
+
 // VALIDACION GENERAL
 bool Fecha::validar() {
     if (anio < 2025) return false;
     if (mes < 1 || mes > 12) return false;
     if (dia < 1 || dia > 31) return false;
+
     switch (mes) {
         case 4:
         case 6:
@@ -68,31 +86,41 @@ bool Fecha::esBisiesto() {
 }
 
 // METODOS PRINCIPALES
+
 bool Fecha::cargar() {
     do {
         cout << "Ingrese dia (0 para cancelar): ";
         cin >> dia;
+
+        //Cancelacion inmediata si se presiona 0
         if (dia == 0) {
             return false;
         }
+
         cout << "Ingrese mes: ";
         cin >> mes;
 
         cout << "Ingrese anio: ";
         cin >> anio;
+
         if (!validar()) {
-            cout << "\nFecha invalida. Reingrese.\n\n";
+            cout << "\n[ERROR] Fecha invalida. Reingrese los datos.\n\n";
         }
     } while (!validar());
+
     return true;
 }
 
 void Fecha::mostrar() {
-    getFechaFormateada();
+    mostrarFormateada();
     cout << endl;
 }
 
-//MOSTRAMOS FECHA FORMATEADA
-void Fecha::getFechaFormateada() {
-    cout << dia << "/" << mes << "/" << anio;
+// Agrega el cero adelante (05/01/2026)
+void Fecha::mostrarFormateada() {
+    if (dia < 10) cout << "0";
+    cout << dia << "/";
+
+    if (mes < 10) cout << "0";
+    cout << mes << "/" << anio;
 }
