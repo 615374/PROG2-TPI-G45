@@ -190,39 +190,56 @@ void listarAgendaPorProfesional() {
 void reporteRecaudacionCaja() {
     Turno turno;
     int pos = 0;
-    float totalSenias = 0;
-    float totalServicios = 0;
-    float totalPendiente = 0;
-    int cantidadTurnos = 0;
+
+    int cantidadTurnosActivos = 0;
+    int cantidadTurnosAsistidos = 0;
+    int cantidadTurnosPendientes = 0;
+
+    float totalSeniasReservadas = 0;
+    float totalServiciosRealizados = 0;
+    float totalSaldosPendientes = 0;
 
     while (turno.leerDisco(pos)) {
-        if (turno.getEstado()) {
+        if (turno.getEstado() == true) {
+            cantidadTurnosActivos++;
+            totalSeniasReservadas += turno.getSena();
+
             float totalTurno = calcularTotalTurno(turno.getIdTurno());
-            float saldoTurno = totalTurno - turno.getSena();
 
-            if (saldoTurno < 0) {
-                saldoTurno = 0;
+            if (turno.getAsistio() == true) {
+                cantidadTurnosAsistidos++;
+                totalServiciosRealizados += totalTurno;
+
+                float saldoTurno = totalTurno - turno.getSena();
+
+                if (saldoTurno < 0) {
+                    saldoTurno = 0;
+                }
+
+                totalSaldosPendientes += saldoTurno;
             }
-
-            totalSenias += turno.getSena();
-            totalServicios += totalTurno;
-            totalPendiente += saldoTurno;
-            cantidadTurnos++;
+            else {
+                cantidadTurnosPendientes++;
+            }
         }
 
         pos++;
     }
 
-    cout << "-----------------------------------" << endl;
-    cout << "CANTIDAD DE TURNOS ACTIVOS: " << cantidadTurnos << endl;
-    cout << "TOTAL PRODUCIDO POR SERVICIOS: $" << totalServicios << endl;
-    cout << "TOTAL COBRADO EN SENIAS: $" << totalSenias << endl;
-    cout << "TOTAL PENDIENTE DE COBRO: $" << totalPendiente << endl;
-    cout << "-----------------------------------" << endl;
-
-    if (cantidadTurnos == 0) {
+    if (cantidadTurnosActivos == 0) {
         cout << "No hay turnos activos para calcular caja.\n\n";
+        return;
     }
+
+    cout << "TURNOS ACTIVOS: " << cantidadTurnosActivos << endl;
+    cout << "TURNOS ASISTIDOS: " << cantidadTurnosAsistidos << endl;
+    cout << "TURNOS PENDIENTES DE ASISTENCIA: " << cantidadTurnosPendientes << endl;
+    cout << "----------------------------------------" << endl;
+    cout << "TOTAL SENIAS RESERVADAS: $" << totalSeniasReservadas << endl;
+    cout << "TOTAL SERVICIOS REALIZADOS: $" << totalServiciosRealizados << endl;
+    cout << "TOTAL SALDOS PENDIENTES: $" << totalSaldosPendientes << endl;
+    cout << "----------------------------------------" << endl;
+    cout << "TOTAL ESTIMADO A COBRAR: $" << totalServiciosRealizados + totalSaldosPendientes << endl;
 }
 
 
@@ -286,6 +303,50 @@ bool darDeBajaTurno() {
     cin.get();
 
     return true;
+}
+
+// Marca un turno activo como asistido
+void marcarAsistenciaTurno() {
+    int idBuscado;
+    Turno reg;
+    int pos = 0;
+    bool encontrado = false;
+
+    cout << "Ingrese ID del turno a marcar como asistido (0 para cancelar): ";
+    cin >> idBuscado;
+
+    if (idBuscado == 0) {
+        cout << "\nOperacion cancelada.\n";
+        return;
+    }
+
+    while (reg.leerDisco(pos)) {
+        if (reg.getIdTurno() == idBuscado && reg.getEstado() == true) {
+            encontrado = true;
+
+            cout << "\nTurno encontrado:\n";
+            reg.mostrar();
+
+            reg.setAsistio(true);
+
+            FILE* p = fopen("turnos.dat", "rb+");
+            if (p == NULL) {
+                cout << "\n[ERROR] No se pudo abrir el archivo de turnos.\n";
+                return;
+            }
+
+            fseek(p, sizeof(Turno) * pos, SEEK_SET);
+            fwrite(&reg, sizeof(Turno), 1, p);
+            fclose(p);
+
+            cout << "\n[OK] Turno marcado como asistido.\n";
+            return;
+        }
+        pos++;
+    }
+    if (!encontrado) {
+        cout << "\n[ERROR] No se encontro un turno activo con ese ID.\n";
+    }
 }
 
 // Estructura auxiliar para guardar una opcion de disponibilidad
@@ -483,12 +544,11 @@ int listarDisponibilidad(int idServicio, int idProfesionalElegido, bool cualquie
 
     for (int d = 0; d < 7 && cantidadOpciones < maxOpciones; d++) {
         Fecha fechaActual = fechaInicio;
-        fechaActual.setDia(fechaInicio.getDia() + d);
+        fechaActual.sumarDias(d);
 
         if (!fechaActual.validar()) {
             continue;
         }
-
         bool agregoEnDia = false;
 
         // Una opcion de manana
@@ -645,125 +705,236 @@ void registrarTurno() {
     }
 }
 
-// SUB-MENU PRINCIPAL: MODULO DE TURNOS
-void menuTurnos() {
+// Submenu para administrar turnos ya registrados
+void submenuGestionTurnos() {
     int op;
-    Turno aux;
 
     do {
         cout << "=================================================" << endl;
-        cout << "           MODULO: GESTION DE TURNOS             " << endl;
+        cout << "             GESTION DE TURNOS EXISTENTES        " << endl;
         cout << "=================================================" << endl;
-        cout << "1. Registrar Turno (Agendar)" << endl;
-        cout << "2. Ver Agenda de Turnos Activos" << endl;
+        cout << "1. Ver Agenda de Turnos Activos" << endl;
+        cout << "2. Marcar Asistencia de Turno" << endl;
         cout << "3. Cancelar Turno (Baja Logica)" << endl;
-        cout << "4. Reporte de Recaudacion y Caja" << endl;
-        cout << "5. Consultar Agenda por Fecha" << endl;
-        cout << "6. Consultar Agenda por Profesional" << endl;
-        cout << "0. Volver al Menu Principal" << endl;
+        cout << "0. Volver al Menu de Turnos" << endl;
         cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion: ";
         cin >> op;
-        cout << endl;
 
         if (op == 1) {
-                system("cls");
-                registrarTurno();
-                cout << "\nPresione ENTER para continuar...";
-                cin.ignore(1000, '\n');
-                cin.get();
-                system("cls");
-                }
-        else if (op == 2) {
             system("cls");
             cout << "=================================================" << endl;
             cout << "           AGENDA DE TURNOS ACTIVOS              " << endl;
             cout << "=================================================" << endl;
 
+            Turno aux;
             int pos = 0;
-            bool hayTurnos = false;
+            bool encontrado = false;
 
             while (aux.leerDisco(pos)) {
                 if (aux.getEstado() == true) {
                     aux.mostrar();
                     mostrarDetallesPorTurno(aux.getIdTurno());
 
-                    // Calcula el total del turno sumando sus detalles y obtiene el saldo pendiente descontando la senia
                     float totalTurno = calcularTotalTurno(aux.getIdTurno());
                     float saldoPendiente = totalTurno - aux.getSena();
 
-                    // Evita mostrar saldos negativos si la senia supera el total del turno
                     if (saldoPendiente < 0) {
                         saldoPendiente = 0;
                     }
+
                     cout << "TOTAL DEL TURNO: $" << totalTurno << endl;
                     cout << "SALDO PENDIENTE: $" << saldoPendiente << endl;
-                    cout << "-----------------------------------" << endl;
-
-                    hayTurnos = true;
-                    }
+                    cout << "----------------------------------------" << endl;
+                    encontrado = true;
+                }
                 pos++;
             }
-            if (pos == 0) {
-                cout << "Archivo de turnos vacio.\n\n";
-            } else if (!hayTurnos) {
+
+            if (!encontrado) {
                 cout << "No hay turnos activos agendados para mostrar.\n\n";
             }
-            cout << "=================================================" << endl << endl;
 
+            cout << "\nPresione ENTER para continuar...";
             cin.ignore(1000, '\n');
-            cout << "Presione ENTER para volver al menu...";
+            cin.get();
+            system("cls");
+        }
+        else if (op == 2) {
+            system("cls");
+            cout << "=================================================" << endl;
+            cout << "              MARCAR ASISTENCIA DE TURNO         " << endl;
+            cout << "=================================================" << endl;
+
+            marcarAsistenciaTurno();
+
+            cout << "\nPresione ENTER para continuar...";
+            cin.ignore(1000, '\n');
             cin.get();
             system("cls");
         }
         else if (op == 3) {
             system("cls");
             darDeBajaTurno();
-            system("cls");
-        }
-        else if (op == 4) {
-            system("cls");
-            cout << "=================================================" << endl;
-            cout << "             REPORTE DE RECAUDACION Y CAJA       " << endl;
-            cout << "=================================================" << endl;
-            reporteRecaudacionCaja();
+
             cout << "\nPresione ENTER para continuar...";
             cin.ignore(1000, '\n');
             cin.get();
             system("cls");
         }
-        else if (op == 5) {
+        else if (op != 0) {
+            cout << "\n[ERROR] Opcion invalida.\n";
+            cout << "Presione ENTER para continuar...";
+            cin.ignore(1000, '\n');
+            cin.get();
+            system("cls");
+            }
+        } while (op != 0);
+    system("cls");
+}
+
+// Submenu para consultar la agenda con distintos filtros
+void submenuConsultasAgenda() {
+    int op;
+
+    do {
+        cout << "=================================================" << endl;
+        cout << "               CONSULTAS DE AGENDA               " << endl;
+        cout << "=================================================" << endl;
+        cout << "1. Consultar Agenda por Fecha" << endl;
+        cout << "2. Consultar Agenda por Profesional" << endl;
+        cout << "0. Volver al Menu de Turnos" << endl;
+        cout << "-------------------------------------------------" << endl;
+        cout << "Seleccione una opcion: ";
+        cin >> op;
+
+        if (op == 1) {
             system("cls");
             cout << "=================================================" << endl;
             cout << "              CONSULTA DE AGENDA POR FECHA       " << endl;
             cout << "=================================================" << endl;
+
             listarAgendaPorFecha();
+
             cout << "\nPresione ENTER para continuar...";
             cin.ignore(1000, '\n');
             cin.get();
             system("cls");
         }
-        else if (op == 6) {
+        else if (op == 2) {
             system("cls");
             cout << "=================================================" << endl;
             cout << "           CONSULTA DE AGENDA POR PROFESIONAL    " << endl;
             cout << "=================================================" << endl;
+
             listarAgendaPorProfesional();
+
             cout << "\nPresione ENTER para continuar...";
             cin.ignore(1000, '\n');
             cin.get();
             system("cls");
         }
-                else if (op != 0) {
-            cout << "[ERROR] Opcion incorrecta. Reintente.\n\n";
-            cin.ignore(1000, '\n');
+        else if (op != 0) {
+            cout << "\n[ERROR] Opcion invalida.\n";
             cout << "Presione ENTER para continuar...";
+            cin.ignore(1000, '\n');
             cin.get();
             system("cls");
         }
-    } while (op != 0);
 
+    } while (op != 0);
     system("cls");
 }
 
 
+// Submenu para reportes economicos del modulo turnos
+void submenuReportesTurnos() {
+    int op;
+
+    do {
+        cout << "=================================================" << endl;
+        cout << "              REPORTES DE TURNOS Y CAJA          " << endl;
+        cout << "=================================================" << endl;
+        cout << "1. Reporte de Recaudacion y Caja" << endl;
+        cout << "0. Volver al Menu de Turnos" << endl;
+        cout << "-------------------------------------------------" << endl;
+        cout << "Seleccione una opcion: ";
+        cin >> op;
+
+        if (op == 1) {
+            system("cls");
+            cout << "=================================================" << endl;
+            cout << "             REPORTE DE RECAUDACION Y CAJA       " << endl;
+            cout << "=================================================" << endl;
+
+            reporteRecaudacionCaja();
+
+            cout << "\nPresione ENTER para continuar...";
+            cin.ignore(1000, '\n');
+            cin.get();
+            system("cls");
+        }
+        else if (op != 0) {
+            cout << "\n[ERROR] Opcion invalida.\n";
+            cout << "Presione ENTER para continuar...";
+            cin.ignore(1000, '\n');
+            cin.get();
+            system("cls");
+        }
+
+    } while (op != 0);
+    system("cls");
+}
+
+
+
+// SUB-MENU PRINCIPAL: MODULO DE TURNOS
+// Menu principal del modulo de turnos
+void menuTurnos() {
+    int op;
+
+    do {
+        cout << "=================================================" << endl;
+        cout << "              MODULO: GESTION DE TURNOS          " << endl;
+        cout << "=================================================" << endl;
+        cout << "1. Registrar Nuevo Turno" << endl;
+        cout << "2. Gestionar Turnos Existentes" << endl;
+        cout << "3. Consultas de Agenda" << endl;
+        cout << "4. Reportes de Turnos y Caja" << endl;
+        cout << "0. Volver al Menu Principal" << endl;
+        cout << "-------------------------------------------------" << endl;
+        cout << "Seleccione una opcion: ";
+        cin >> op;
+
+        if (op == 1) {
+            system("cls");
+            registrarTurno();
+
+            cout << "\nPresione ENTER para continuar...";
+            cin.ignore(1000, '\n');
+            cin.get();
+            system("cls");
+        }
+        else if (op == 2) {
+            system("cls");
+            submenuGestionTurnos();
+        }
+        else if (op == 3) {
+            system("cls");
+            submenuConsultasAgenda();
+        }
+        else if (op == 4) {
+            system("cls");
+            submenuReportesTurnos();
+        }
+        else if (op != 0) {
+            cout << "\n[ERROR] Opcion invalida.\n";
+            cout << "Presione ENTER para continuar...";
+            cin.ignore(1000, '\n');
+            cin.get();
+            system("cls");
+        }
+
+    } while (op != 0);
+    system("cls");
+}
