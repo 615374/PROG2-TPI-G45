@@ -1,14 +1,93 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
+#include <ctime>
 #include "MenuTurnos.h"
 #include "Turno.h"
 #include "Cliente.h"
+#include "Servicio.h"
+#include "DetalleTurno.h"
 
 using namespace std;
 
+// =============================================================================
+// FUNCIONES GLOBALES DE AUXILIO PARA EL MENÚ
+// =============================================================================
 
-// FUNCIONES GLOBALES
+// Función Auxiliar 1: Revisa si hay un turno activo en esa fecha y hora específica
+bool verificarBloqueOcupado(int d, int m, int a, int horaEvaluar) {
+    Turno t;
+    DetalleTurno dt;
+    int posT = 0;
+
+    // Recorremos las cabeceras de turnos
+    while (t.leerDisco(posT)) {
+        if (t.getEstado() == true &&
+            t.getFecha().getDia() == d &&
+            t.getFecha().getMes() == m &&
+            t.getFecha().getAnio() == a) {
+
+            // Si encontramos un turno para ese día, revisamos sus detalles por la hora
+            int posDT = 0;
+            while (dt.leerDisco(posDT)) {
+                if (dt.getEstado() == true &&
+                    dt.getIdTurno() == t.getIdTurno() &&
+                    dt.getHora() == horaEvaluar) {
+                    return true; // Bloque ocupado
+                }
+                posDT++;
+            }
+        }
+        posT++;
+    }
+    return false; // Bloque libre
+}
+
+// Función Auxiliar 2: Renderiza la Grilla Semanal Vertical Inteligente
+void mostrarGrillaSemanalAuto() {
+    time_t tActual = time(0);
+    tm* ahora = localtime(&tActual);
+
+    // calculamos la diferencia de días para posicionarnos en el Lunes de la semana actual
+    // ahora->tm_wday va de 0 (Domingo) a 6 (Sábado)
+    int corregirALunes = ahora->tm_wday - 1;
+    if (ahora->tm_wday == 0) corregirALunes = 6; // Si es domingo, retrocedemos al lunes de la semana que cierra
+
+    cout << "=================================================" << endl;
+    cout << "          GRILLA DE DISPONIBILIDAD SEMANAL       " << endl;
+    cout << "=================================================" << endl;
+
+    const char* diasNombres[] = {"LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES"};
+
+    // Iteramos de Lunes a Viernes
+    for (int i = 0; i < 5; i++) {
+        // Desplazamos los días en segundos con respecto al Lunes actual
+        time_t tDia = tActual - (corregirALunes - i) * 24 * 60 * 60;
+        tm* infoDia = localtime(&tDia);
+
+        int diaCalculado = infoDia->tm_mday;
+        int mesCalculado = infoDia->tm_mon + 1;
+        int anioCalculado = infoDia->tm_year + 1900;
+
+        cout << "\n-------------------------------------------------" << endl;
+        cout << "  " << diasNombres[i] << " " << (diaCalculado < 10 ? "0" : "") << diaCalculado
+             << "/" << (mesCalculado < 10 ? "0" : "") << mesCalculado << "/" << anioCalculado << endl;
+        cout << "-------------------------------------------------" << endl;
+
+        // Horario comercial de atención restringido: de 09 a 18 hs
+        for (int h = 9; h <= 18; h++) {
+            bool ocupado = verificarBloqueOcupado(diaCalculado, mesCalculado, anioCalculado, h);
+
+            if (!ocupado) {
+                cout << "  [" << (h < 10 ? "0" : "") << h << ":00 hs] --> DISPONIBLE" << endl;
+            } else {
+                cout << "  [" << (h < 10 ? "0" : "") << h << ":00 hs] --> [OCUPADO]" << endl;
+            }
+        }
+    }
+    cout << "=================================================\n" << endl;
+}
 
 // Algoritmo: Busca clientas por coincidencia parcial en el apellido y retorna el ID seleccionado
 int buscarClienteParaTurno(const char* apellidoBuscado) {
@@ -16,21 +95,18 @@ int buscarClienteParaTurno(const char* apellidoBuscado) {
     int pos = 0;
     bool encontrado = false;
 
-    // Calculamos cuantas letras escribio la recepcionista (ej: si puso "A", tam es 1; si puso "Per", tam es 3)
     int tam = strlen(apellidoBuscado);
 
-    // Si la recepcionista no escribio nada, salimos para evitar que se congele el programa
     if (tam == 0) {
         cout << "\n[ERROR] No se ingreso ningun criterio de busqueda.\n";
         return -1;
     }
 
     cout << "=================================================" << endl;
-    cout << "  CLIENTAS ACTIVAS QUE EMPIEZAN CON: "             << apellidoBuscado << endl;
+    cout << "  CLIENTAS ACTIVAS QUE EMPIEZAN CON: " << apellidoBuscado << endl;
     cout << "=================================================" << endl;
 
     while (reg.leerDisco(pos)) {
-        // Usamos strncmp para comparar solo los primeros 'tam' caracteres
         if (reg.getEstado() == true && strncmp(reg.getApellido(), apellidoBuscado, tam) == 0) {
             cout << " ID: [" << reg.getIdCliente() << "] - "
                  << reg.getApellido() << ", " << reg.getNombre()
@@ -50,7 +126,6 @@ int buscarClienteParaTurno(const char* apellidoBuscado) {
     cout << "Ingrese el ID de la clienta elegida: ";
     cin >> idSeleccionado;
 
-    // Validacion directa contra el disco
     pos = 0;
     Cliente verificador;
     while (verificador.leerDisco(pos)) {
@@ -77,7 +152,6 @@ bool darDeBajaTurno() {
     cout << "0. Volver al Menu Principal / Cancelar Baja      " << endl;
     cout << "-------------------------------------------------" << endl;
 
-    // Lista los turnos activos
     while (reg.leerDisco(pos)) {
         if (reg.getEstado() == true) {
             reg.mostrar();
@@ -126,20 +200,21 @@ bool darDeBajaTurno() {
     return true;
 }
 
-
 // SUB-MENU PRINCIPAL: MODULO DE TURNOS
+
 void menuTurnos() {
     int op;
     Turno aux;
 
     do {
         cout << "=================================================" << endl;
-        cout << "           MODULO: GESTION DE TURNOS             " << endl;
+        cout << "            MODULO: GESTION DE TURNOS            " << endl;
         cout << "=================================================" << endl;
-        cout << "1. Registrar Turno (Agendar)" << endl;
-        cout << "2. Ver Agenda de Turnos Activos" << endl;
-        cout << "3. Cancelar Turno (Baja Logica)" << endl;
-        cout << "0. Volver al Menu Principal" << endl;
+        cout << "1. Registrar Turno (Agendar)"                      << endl;
+        cout << "2. Ver Agenda de Turnos Activos"                   << endl;
+        cout << "3. Cancelar Turno (Baja Logica)"                   << endl;
+        cout << "4. Consultar Disponibilidad Semanal (Grilla)"      << endl;
+        cout << "0. Volver al Menu Principal"                       << endl;
         cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion: ";
         cin >> op;
@@ -153,8 +228,8 @@ void menuTurnos() {
             cout << "=================================================" << endl;
             cout << "          REGISTRAR TURNO: TIPO DE CLIENTA       " << endl;
             cout << "=================================================" << endl;
-            cout << "1. Para Clienta NUEVA (Registrar Primero)" << endl;
-            cout << "2. Para Clienta HABITUAL (Buscar por Apellido)" << endl;
+            cout << "1. Para Clienta NUEVA (Registrar Primero)"         << endl;
+            cout << "2. Para Clienta HABITUAL (Buscar por Apellido)"    << endl;
             cout << "0. Cancelar / Volver" << endl;
             cout << "-------------------------------------------------" << endl;
             cout << "Seleccione una opcion: ";
@@ -163,11 +238,10 @@ void menuTurnos() {
             if (subOp == 1) {
                 system("cls");
                 Cliente nuevoCliente;
-                // Registramos a la clienta en caliente
                 if (nuevoCliente.cargar() == true) {
                     if (nuevoCliente.escribirDisco()) {
                         cout << "\n[OK] Clienta registrada con éxito en el sistema.\n";
-                        idResuelto = nuevoCliente.getIdCliente(); // Capturamos el ID asignado
+                        idResuelto = nuevoCliente.getIdCliente();
                     } else {
                         cout << "\n[ERROR] No se pudo guardar la clienta en el disco.\n";
                     }
@@ -179,35 +253,101 @@ void menuTurnos() {
                 cin.ignore(1000, '\n');
 
                 cout << "=================================================" << endl;
-                cout << "          BUSQUEDA DE CLIENTA HABITUAL           " << endl;
+                cout << "           BUSQUEDA DE CLIENTA HABITUAL          " << endl;
                 cout << "=================================================" << endl;
-                cout << "Ingrese Apellido de la clienta: ";
+                cout << "Ingrese Apellido (o su primera letra): ";
                 cin.getline(apellidoBuscado, 50);
 
-                // Buscamos las coincidencias y obtenemos el ID elegido
                 idResuelto = buscarClienteParaTurno(apellidoBuscado);
             }
 
+            // Si logramos resolver el ID de la cliente (Nueva o Habitual) pasamos al Tratamiento
             if (idResuelto != -1) {
-                Turno turnoNuevo;
-                turnoNuevo.setIdCliente(idResuelto);
+                cout << "\nPresione ENTER para ir al panel de tratamientos...";
+                cin.ignore(1000, '\n');
+                cin.get();
+                system("cls");
 
-                if (turnoNuevo.cargar() == true) {
-                    if (turnoNuevo.escribirDisco()) {
-                        cout << "\n[OK] Turno agendado con exito.\n";
-                    } else {
-                        cout << "\n[ERROR] No se pudo guardar en disco.\n";
+                int idServicioElegido = -1;
+                Servicio servAux;
+
+                cout << "=================================================" << endl;
+                cout << "        SELECCIONE EL TRATAMIENTO DESEADO        " << endl;
+                cout << "=================================================" << endl;
+                cout << " TRATAMIENTOS DISPONIBLES:\n";
+                cout << "-------------------------------------------------\n";
+
+                int posListado = 0;
+                Servicio listador;
+                bool hayServicios = false;
+
+                // Listamos los tratamientos activos en el sistema
+                while (listador.leerDisco(posListado)) {
+                    if (listador.getEstado() == true) {
+                        cout << " ID: [" << listador.getIdServicio() << "] - "
+                             << listador.getNombre() << " ($" << listador.getPrecio() << ")\n";
+                        hayServicios = true;
                     }
+                    posListado++;
                 }
+
+                if (!hayServicios) {
+                    cout << "[AVISO] No hay servicios activos cargados en el sistema.\n";
+                }
+                cout << "-------------------------------------------------\n";
+
+                cout << "Ingrese ID del Servicio deseado (0 para cancelar): ";
+                cin >> idServicioElegido;
+
+                // Validacion del servicio seleccionado
+                if (idServicioElegido != 0) {
+                    int posS = 0;
+                    bool servEncontrado = false;
+                    float precioBase = 0;
+
+                    while (servAux.leerDisco(posS)) {
+                        if (servAux.getIdServicio() == idServicioElegido && servAux.getEstado() == true) {
+                            servEncontrado = true;
+                            precioBase = servAux.getPrecio();
+                            break;
+                        }
+                        posS++;
+                    }
+
+                    if (servEncontrado) {
+                        system("cls");
+                        cout << "=================================================" << endl;
+                        cout << "           TRATAMIENTO VALIDADO EXITOSAMENTE     " << endl;
+                        cout << "=================================================" << endl;
+                        cout << ">> Nombre: " << servAux.getNombre()                << endl;
+                        cout << ">> Precio Base: $" << precioBase                   << endl;
+                        cout << "-------------------------------------------------" << endl;
+
+                        // =========================================================
+                        // PASO 3: ACÁ IRÁ EL FILTRADO Y SELECCIÓN DE PROFESIONALES
+                        // =========================================================
+                        cout << "\n[SISTEMA] Clienta y Servicio guardados temporalmente en memoria." << endl;
+                        cout << "ID Cliente listo: " << idResuelto << " | ID Servicio listo: " << idServicioElegido << endl;
+
+                    } else {
+                        cout << "\n[ERROR] El ID de servicio ingresado no existe o esta inactivo.\n";
+                    }
+                } else {
+                    cout << "\nOperacion cancelada. Volviendo al menu...\n";
+                }
+            } else if (subOp != 0) {
+                cout << "\n[AVISO] No se pudo procesar el turno porque no se identifico a la clienta.\n\n";
             }
+
+            cout << "\nPresione ENTER para continuar...";
             cin.ignore(1000, '\n');
-            cout << "Presione ENTER para continuar..."; cin.get();
+            cin.get();
             system("cls");
         }
         else if (op == 2) {
             system("cls");
             cout << "=================================================" << endl;
-            cout << "           AGENDA DE TURNOS ACTIVOS              " << endl;
+            cout << "              AGENDA DE TURNOS ACTIVOS           " << endl;
             cout << "=================================================" << endl;
 
             int pos = 0;
@@ -236,6 +376,14 @@ void menuTurnos() {
         else if (op == 3) {
             system("cls");
             darDeBajaTurno();
+            system("cls");
+        }
+        else if (op == 4) {
+            system("cls");
+            mostrarGrillaSemanalAuto();
+            cout << "Presione ENTER para volver al menu...";
+            cin.ignore(1000, '\n');
+            cin.get();
             system("cls");
         }
         else if (op != 0) {
