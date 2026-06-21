@@ -136,6 +136,123 @@ int buscarClienteParaTurno(const char* apellidoBuscado) {
     return -1;
 }
 
+// Algoritmo: Extrae, ordena cronologicamente y lista la agenda diaria con horario de arribo
+void listarAgendaCronologica() {
+    Turno tReg;
+    int pos = 0;
+    int totalTurnosActivos = 0;
+
+    // Contamos cuantos turnos activos hay para dimensionar la memoria exacta
+    while (tReg.leerDisco(pos++)) {
+        if (tReg.getEstado() == true) {
+            totalTurnosActivos++;
+        }
+    }
+
+    if (totalTurnosActivos == 0) {
+        cout << "No hay turnos activos agendados para mostrar.\n\n";
+        return;
+    }
+
+    // Creamos los arrays dinamicos en memoria
+    Turno* listaTurnos = new Turno[totalTurnosActivos];
+    int* horasArribo = new int[totalTurnosActivos];
+    int* minsArribo = new int[totalTurnosActivos];
+
+    if (listaTurnos == nullptr || horasArribo == nullptr || minsArribo == nullptr) {
+        cout << "\n[ERROR] Fallo crítico de asignación de memoria dinámica.\n";
+        return;
+    }
+
+    pos = 0;
+    int idx = 0;
+    // Volcamos los registros del disco a las estructuras en memoria y calculamos la hora de llegada
+    while (tReg.leerDisco(pos++)) {
+        if (tReg.getEstado() == true) {
+            listaTurnos[idx] = tReg;
+
+            DetalleTurno dtReg;
+            int posDT = 0;
+            int horaMinima = 99;
+            int minMinimo = 99;
+
+            while (dtReg.leerDisco(posDT++)) {
+                if (dtReg.getEstado() == true && dtReg.getIdTurno() == tReg.getIdTurno()) {
+                    if (dtReg.getHora() < horaMinima || (dtReg.getHora() == horaMinima && dtReg.getMinuto() < minMinimo)) {
+                        horaMinima = dtReg.getHora();
+                        minMinimo = dtReg.getMinuto();
+                    }
+                }
+            }
+
+            horasArribo[idx] = (horaMinima == 99) ? 0 : horaMinima;
+            minsArribo[idx] = (minMinimo == 99) ? 0 : minMinimo;
+            idx++;
+        }
+    }
+
+    // Algoritmo de Ordenamiento cronologico (Burbuja)
+    for (int i = 0; i < totalTurnosActivos - 1; i++) {
+        for (int j = 0; j < totalTurnosActivos - i - 1; j++) {
+            bool intercambiar = false;
+            Fecha f1 = listaTurnos[j].getFecha();
+            Fecha f2 = listaTurnos[j+1].getFecha();
+
+            if (f1.getAnio() > f2.getAnio()) intercambiar = true;
+            else if (f1.getAnio() == f2.getAnio()) {
+                if (f1.getMes() > f2.getMes()) intercambiar = true;
+                else if (f1.getMes() == f2.getMes()) {
+                    if (f1.getDia() > f2.getDia()) intercambiar = true;
+                    else if (f1.getDia() == f2.getDia()) {
+                        if (horasArribo[j] > horasArribo[j+1]) intercambiar = true;
+                        else if (horasArribo[j] == horasArribo[j+1] && minsArribo[j] > minsArribo[j+1]) intercambiar = true;
+                    }
+                }
+            }
+
+            if (intercambiar) {
+                // Intercambio de Turnos
+                Turno tAux = listaTurnos[j];
+                listaTurnos[j] = listaTurnos[j+1];
+                listaTurnos[j+1] = tAux;
+
+                // Intercambio paralelo de horarios de arribo
+                int hAux = horasArribo[j];
+                horasArribo[j] = horasArribo[j+1];
+                horasArribo[j+1] = hAux;
+
+                int mAux = minsArribo[j];
+                minsArribo[j] = minsArribo[j+1];
+                minsArribo[j+1] = mAux;
+            }
+        }
+    }
+
+    // Renderizado estetico de la Agenda diaria
+    for (int i = 0; i < totalTurnosActivos; i++) {
+        Cliente cli;
+        cout << "-------------------------------------------------" << endl;
+        cout << "ID TURNO: " << listaTurnos[i].getIdTurno() << endl;
+        cout << "CLIENTA: ";
+        if (!cli.mostrarNombrePorId(listaTurnos[i].getIdCliente())) {
+            cout << "No disponible (ID: " << listaTurnos[i].getIdCliente() << ")";
+        }
+        cout << endl;
+        cout << "FECHA CITA: "; listaTurnos[i].getFecha().mostrar();
+        cout << "HORA DE LLEGADA: "
+             << (horasArribo[i] < 10 ? "0" : "") << horasArribo[i] << ":"
+             << (minsArribo[i] < 10 ? "0" : "") << minsArribo[i] << " hs" << endl;
+        cout << "MONTO SENIA: $" << listaTurnos[i].getSena() << endl;
+        cout << "ASISTIO: " << (listaTurnos[i].getAsistio() ? "SI" : "NO") << endl;
+    }
+    cout << "-------------------------------------------------" << endl;
+
+    // Liberacion obligatoria de la memoria dinamica
+    delete[] listaTurnos;
+    delete[] horasArribo;
+    delete[] minsArribo;
+}
+
 // BAJA LOGICA TURNO
 bool darDeBajaTurno() {
     int idBuscado;
@@ -523,114 +640,16 @@ void menuTurnos() {
             system("cls");
         }
         else if (op == 2) {
-            system("cls");
+          system("cls");
             cout << "=================================================" << endl;
             cout << "         AGENDA DE TURNOS ACTIVO (CRONOLOGICA)   " << endl;
             cout << "=================================================" << endl;
 
-            Turno tReg;
-            int pos = 0;
-            int totalTurnosActivos = 0;
-
-            while (tReg.leerDisco(pos++)) {
-                if (tReg.getEstado() == true) {
-                    totalTurnosActivos++;
-                }
-            }
-
-            if (totalTurnosActivos == 0) {
-                cout << "No hay turnos activos agendados para mostrar.\n\n";
-            }
-            else {
-                Turno* listaTurnos = new Turno[totalTurnosActivos];
-                int* horasArribo = new int[totalTurnosActivos];
-                int* minsArribo = new int[totalTurnosActivos];
-
-                pos = 0;
-                int idx = 0;
-                while (tReg.leerDisco(pos++)) {
-                    if (tReg.getEstado() == true) {
-                        listaTurnos[idx] = tReg;
-
-                        DetalleTurno dtReg;
-                        int posDT = 0;
-                        int horaMinima = 99;
-                        int minMinimo = 99;
-
-                        while (dtReg.leerDisco(posDT++)) {
-                            if (dtReg.getEstado() == true && dtReg.getIdTurno() == tReg.getIdTurno()) {
-                                if (dtReg.getHora() < horaMinima || (dtReg.getHora() == horaMinima && dtReg.getMinuto() < minMinimo)) {
-                                    horaMinima = dtReg.getHora();
-                                    minMinimo = dtReg.getMinuto();
-                                }
-                            }
-                        }
-
-                        horasArribo[idx] = (horaMinima == 99) ? 0 : horaMinima;
-                        minsArribo[idx] = (minMinimo == 99) ? 0 : minMinimo;
-                        idx++;
-                    }
-                }
-
-                for (int i = 0; i < totalTurnosActivos - 1; i++) {
-                    for (int j = 0; j < totalTurnosActivos - i - 1; j++) {
-                        bool intercambiar = false;
-                        Fecha f1 = listaTurnos[j].getFecha();
-                        Fecha f2 = listaTurnos[j+1].getFecha();
-
-                        if (f1.getAnio() > f2.getAnio()) intercambiar = true;
-                        else if (f1.getAnio() == f2.getAnio()) {
-                            if (f1.getMes() > f2.getMes()) intercambiar = true;
-                            else if (f1.getMes() == f2.getMes()) {
-                                if (f1.getDia() > f2.getDia()) intercambiar = true;
-                                else if (f1.getDia() == f2.getDia()) {
-                                    if (horasArribo[j] > horasArribo[j+1]) intercambiar = true;
-                                    else if (horasArribo[j] == horasArribo[j+1] && minsArribo[j] > minsArribo[j+1]) intercambiar = true;
-                                }
-                            }
-                        }
-
-                        if (intercambiar) {
-                            Turno tAux = listaTurnos[j];
-                            listaTurnos[j] = listaTurnos[j+1];
-                            listaTurnos[j+1] = tAux;
-
-                            int hAux = horasArribo[j];
-                            horasArribo[j] = horasArribo[j+1];
-                            horasArribo[j+1] = hAux;
-
-                            int mAux = minsArribo[j];
-                            minsArribo[j] = minsArribo[j+1];
-                            minsArribo[j+1] = mAux;
-                        }
-                    }
-                }
-
-                for (int i = 0; i < totalTurnosActivos; i++) {
-                    Cliente cli;
-                    cout << "-------------------------------------------------" << endl;
-                    cout << "ID TURNO: " << listaTurnos[i].getIdTurno() << endl;
-                    cout << "CLIENTA: ";
-                    if (!cli.mostrarNombrePorId(listaTurnos[i].getIdCliente())) {
-                        cout << "No disponible (ID: " << listaTurnos[i].getIdCliente() << ")";
-                    }
-                    cout << endl;
-                    cout << "FECHA CITA: "; listaTurnos[i].getFecha().mostrar();
-                    cout << "HORA DE LLEGADA: "
-                         << (horasArribo[i] < 10 ? "0" : "") << horasArribo[i] << ":"
-                         << (minsArribo[i] < 10 ? "0" : "") << minsArribo[i] << " hs" << endl;
-                    cout << "MONTO SENIA: $" << listaTurnos[i].getSena() << endl;
-                    cout << "ASISTIO: " << (listaTurnos[i].getAsistio() ? "SI" : "NO") << endl;
-                }
-                cout << "-------------------------------------------------" << endl;
-
-                delete[] listaTurnos;
-                delete[] horasArribo;
-                delete[] minsArribo;
-            }
+            // Invocamos a la nueva funcion modular externa
+            listarAgendaCronologica();
 
             cin.ignore(1000, '\n');
-            cout << "\nPresione ENTER para volver...";
+            cout << "\nPresione ENTER para volver al menu...";
             cin.get();
             system("cls");
         }
