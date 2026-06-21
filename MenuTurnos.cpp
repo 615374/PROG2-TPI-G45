@@ -189,27 +189,19 @@ void menuTurnos() {
             }
 
             if (idResuelto != -1) {
-                cout << "\nPresione ENTER para ingresar los datos del Turno...";
-                cin.get();
-                system("cls");
+                Turno turnoNuevo;
+                turnoNuevo.setIdCliente(idResuelto);
 
-                // Seteamos el ID de la clienta en el objeto Turno para que no lo pida a ciegas
-                aux.setIdCliente(idResuelto);
-
-                if (aux.cargar() == true) {
-                    if (aux.escribirDisco()) {
-                        cout << "\n[OK] Turno agendado con exito.\n\n";
+                if (turnoNuevo.cargar() == true) {
+                    if (turnoNuevo.escribirDisco()) {
+                        cout << "\n[OK] Turno agendado con exito.\n";
                     } else {
-                        cout << "\n[ERROR] No se pudo registrar en el archivo.\n\n";
+                        cout << "\n[ERROR] No se pudo guardar en disco.\n";
                     }
                 }
-            } else if (subOp != 0) {
-                cout << "\n[AVISO] No se pudo procesar el turno porque no se identifico a la clienta.\n\n";
             }
-
             cin.ignore(1000, '\n');
-            cout << "Presione ENTER para continuar...";
-            cin.get();
+            cout << "Presione ENTER para continuar..."; cin.get();
             system("cls");
         }
         else if (op == 2) {
