@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cstdio>
-#include <cstring>
 #include "Turno.h"
 #include "Cliente.h"
 

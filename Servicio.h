@@ -6,50 +6,42 @@ class Servicio {
         char nombre[50];
         char tipo[30];
         float precioActual;
-        bool estado;
+        bool estado; // Para el borrado lógico
 
+
+        // Método privado auxiliar para calcular el ID autoincremental
         int generarNuevoId();
 
     public:
+        // Constructor
         Servicio();
 
+        // Metodos principales del objeto
         bool cargar();
         void mostrar();
         bool modificar();
 
-        //Método para validar Id
+        // Metodo para validar existencia de I
         bool buscarPorId(int id);
 
-        //Método que despues nos sirve ServicioXProfesional
+        // Metodo auxiliar para la relacion ServicioXProfesional
         bool mostrarNombrePorId(int id);
 
-        // Setters
+        // Setters (Encapsulamiento)
         void setIdServicio(int id);
         void setNombre(const char* n);
         void setTipo(const char* t);
         void setPrecio(float p);
         void setEstado(bool e);
 
-        // Getters
+        // Getters (Encapsulamiento)
         int getIdServicio();
         const char* getNombre();
         const char* getTipo();
         float getPrecio();
         bool getEstado();
 
-        // Persistencia
+        // Métodos de persistencia binaria (.dat)
         bool leerDisco(int pos);
         bool escribirDisco();
 };
-
-//DECLARACIONES DE FUNCIONES GLOBALES
-
-// Mantenimiento
-void modificarServicio();
-bool darDeBajaServicio();
-
-// Listados
-void listarServiciosPorTipo();
-void listarServiciosInactivos();
-// Lista servicios ordenados por cantidad de veces solicitados
-void rankingServiciosMasPedidos();

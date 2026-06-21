@@ -4,6 +4,7 @@
 #include "MenuTurnos.h"
 #include "Turno.h"
 #include "DetalleTurno.h"
+#include "GestorTurnos.h"
 #include "Servicio.h"
 #include "Cliente.h"
 #include "Profesional.h"

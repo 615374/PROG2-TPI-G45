@@ -3,6 +3,7 @@
 #include <cstring>
 #include "MenuProfesionales.h"
 #include "Profesional.h"
+#include "Turno.h"
 #include "DetalleTurno.h"
 
 using namespace std;

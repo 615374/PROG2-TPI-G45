@@ -27,7 +27,7 @@ class Profesional {
         // Metodo auxiliar para la relacion ServicioXProfesional
         bool mostrarNombrePorId(int id);
 
-        // Setters
+        // Setters (Encapsulamiento)
         void setIdProfesional(int id);
         void setNombre(const char* n);
         void setApellido(const char* a);
@@ -35,7 +35,7 @@ class Profesional {
         void setComision(float c);
         void setEstado(bool est);
 
-        // Getters
+        // Getters (Encapsulamiento)
         int getIdProfesional();
         const char* getNombre();
         const char* getApellido();
@@ -48,15 +48,4 @@ class Profesional {
         bool escribirDisco();
 };
 
-//DECLARACIONES DE FUNCIONES GLOBALES
-
-// Mantenimiento
-void modificarProfesional();
-bool darDeBajaProfesional();
-
-// Listados Masivos
-void listarProfesionalesPorEspecialidad();
-void listarProfesionalesPorVolumenServicios();
-void listarProfesionalesInactivos();
-void liquidacionComisiones();
 

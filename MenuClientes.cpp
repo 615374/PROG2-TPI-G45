@@ -4,7 +4,7 @@
 #include "MenuClientes.h"
 #include "Cliente.h"
 #include "Turno.h"
-#include "DetalleTurno.h"
+#include "GestorTurnos.h"
 
 using namespace std;
 

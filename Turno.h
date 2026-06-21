@@ -18,7 +18,7 @@ class Turno {
         Turno();
 
         // Metodos principales del objeto
-                   // (Carga la cabecera del turno con datos ya seleccionados desde el menu
+        // Carga la cabecera del turno con datos ya seleccionados desde el menu
         bool cargar(int idClienteSeleccionado, Fecha fechaSeleccionada, float senaIngresada);
         void mostrar();
 
@@ -45,9 +45,4 @@ class Turno {
         bool leerDisco(int pos);
         bool escribirDisco();
 };
-
-// DECLARACIONES DE FUNCIONES GLOBALES
-
-// Mantenimiento
-bool darDeBajaTurno();
 

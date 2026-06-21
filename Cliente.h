@@ -26,13 +26,14 @@ class Cliente {
         // Metodo auxiliar para la relacion Turno
         bool mostrarNombrePorId(int id);
 
-        // Setters y Getters (Encapsulamiento)
+        // Setters (Encapsulamiento)
         void setIdCliente(int id);
         void setNombre(const char* n);
         void setApellido(const char* a);
         void setTelefono(const char* tel);
         void setEstado(bool e);
 
+        //Getters (Encapsulamiento)
         int getIdCliente();
         const char* getNombre();
         const char* getApellido();
@@ -43,19 +44,4 @@ class Cliente {
         bool leerDisco(int pos);
         bool escribirDisco();
 };
-
-//DECLARACIONES DE FUNCIONES GLOBALES
-
-// Mantenimiento
-void modificarCliente();
-bool darDeBajaCliente();
-
-// Listados Masivos / Reportes
-void listarClientasPorApellido();
-void listarClientasPorFrecuencia();
-void listarClientasConSaldos();
-void historialTratamientosPorClienta();
-
-// Permite buscar una clienta por apellido y devuelve el ID seleccionado
-int seleccionarClientePorApellido();
 
