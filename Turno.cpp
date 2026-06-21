@@ -1,8 +1,10 @@
 #include <iostream>
 #include <cstdio>
 #include <cstring>
+#include <ctime>
 #include "Turno.h"
 #include "Cliente.h"
+#include "MenuTurnos.h"
 
 using namespace std;
 
@@ -82,63 +84,106 @@ bool Turno::getEstado() {
     return estado;
 }
 
+//METODOS PRINCIPALES DE LA CLASE
 
-// METODOS PRINCIPALES DE LA CLASE
+//METODO CARGAR
 bool Turno::cargar() {
-
     cout << "=================================================" << endl;
-    cout << "              REGISTRAR NUEVO TURNO              " << endl;
+    cout << "              AGENDAR FECHA DEL TURNO            " << endl;
     cout << "=================================================" << endl;
-    cout << "0. Volver al Menu Principal / Cancelar alta      " << endl;
-    cout << "-------------------------------------------------" << endl;
 
     Cliente cli;
-    bool idValido = false;
-
-    // Si el idCliente ya se asigno en el menu (es mayor a 0), saltamos el pedido por teclado
     if (idCliente > 0) {
-        cout << "ID CLIENTA ASOCIADA AL TURNO: " << idCliente << " (";
+        cout << "Clienta: ";
         cli.mostrarNombrePorId(idCliente);
-        cout << ")" << endl << endl;
+        cout << "\n-------------------------------------------------" << endl;
     }
-    else {
-        // Si por alguna razon arranca en 0, lo pide como antes
-        do {
-            cout << "Ingrese ID de la clienta: ";
-            cin >> idCliente;
 
-            if (idCliente == 0) {
-                estado = false;
-                return false;
+    int modoFecha;
+    int diaT = 0, mesT = 0, anioT = 2026;
+    bool fechaValida = false;
+
+    do {
+        cout << "SELECCIONE MODO DE CARGA DE FECHA:\n";
+        cout << "1. Ver Grilla Semanal en vivo y elegir dia\n";
+        cout << "2. Cargar Dia y Mes manualmente\n";
+        cout << "0. Cancelar alta de turno\n";
+        cout << "-------------------------------------------------\n";
+        cout << "Seleccione una opcion: ";
+        cin >> modoFecha;
+
+        if (modoFecha == 0) {
+            estado = false;
+            return false;
+        }
+
+        if (modoFecha == 1) {
+            system("cls");
+            mostrarGrillaSemanalAuto(); // Muestra los 5 dias habiles a partir de hoy
+
+            cout << "-------------------------------------------------\n";
+            cout << "Ingrese el NUMERO de dia elegido (ej. 25): ";
+            cin >> diaT;
+
+            time_t tActual = time(0);
+            bool encontrado = false;
+            int diasListados = 0;
+            int offset = 0;
+
+            // Buscamos solo en los proximos 5 dias habiles (igual que la grilla)
+            while (diasListados < 5) {
+                time_t tDia = tActual + (offset * 24 * 60 * 60);
+                tm* infoDia = localtime(&tDia);
+
+                if (infoDia->tm_wday >= 1 && infoDia->tm_wday <= 5) {
+                    if (infoDia->tm_mday == diaT) {
+                        mesT = infoDia->tm_mon + 1;
+                        anioT = infoDia->tm_year + 1900;
+                        encontrado = true;
+                        break;
+                    }
+                    diasListados++;
+                }
+                offset++;
+                // Evitamos un bucle infinito si el usuario ingresa un numero absurdo
+                if (offset > 30) break;
             }
 
-            if (!cli.buscarPorId(idCliente)) {
-                cout << "[ERROR] No existe ninguna clienta activa con el ID ingresado.\n\n";
+            if (encontrado) {
+                fechaValida = true;
+                cout << "\n[OK] Fecha detectada: " << (diaT < 10 ? "0" : "") << diaT
+                     << "/" << (mesT < 10 ? "0" : "") << mesT << "/" << anioT << endl;
             } else {
-                idValido = true;
+                cout << "\n[ERROR] El dia ingresado no figura en la grilla actual. Reintente.\n\n";
+                system("pause");
+                system("cls");
             }
-        } while (!idValido);
-    }
+        }
+        else if (modoFecha == 2) {
+            cout << "Ingrese dia (1-31): "; cin >> diaT;
+            cout << "Ingrese mes (1-12): "; cin >> mesT;
+            anioT = 2026;
+            fechaValida = true;
+        }
+        else {
+            cout << "[ERROR] Opcion incorrecta.\n";
+        }
 
-    idTurno = generarNuevoId();
-    cout << "ID TURNO ASIGNADO AUTOMATICAMENTE: " << idTurno << endl;
+    } while (!fechaValida);
 
-    // Carga de la clase Fecha asociada
-    if (!fecha.cargar()) {
-        estado = false;
-        return false;
-    }
+    // Guardamos la fecha resuelta
+    fecha.setDia(diaT);
+    fecha.setMes(mesT);
+    fecha.setAnio(anioT);
 
-    // Validacion del monto de la seña
+    // Validacion de senia
     do {
         cout << "Ingrese monto de senia: $";
         cin >> sena;
-
-        if (sena < 0) {
-            cout << "[ERROR] La senia no puede ser un valor negative.\n";
-        }
+        if (sena < 0) cout << "[ERROR] La senia no puede ser negativa.\n";
     } while (sena < 0);
 
+    idTurno = generarNuevoId();
     asistio = false;
     estado = true;
 

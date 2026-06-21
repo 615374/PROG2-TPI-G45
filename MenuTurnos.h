@@ -1,7 +1,11 @@
-#ifndef MENUTURNOS_H_INCLUDED
-#define MENUTURNOS_H_INCLUDED
+#pragma once
 
 
 void menuTurnos();
 
-#endif // MENUTURNOS_H_INCLUDED
+void mostrarGrillaSemanalAuto();
+bool verificarBloqueOcupado(int d, int m, int a, int horaEvaluar);
+
+void listarTurnosActivosCronologicos();
+
+

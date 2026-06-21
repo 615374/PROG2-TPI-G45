@@ -1,6 +1,5 @@
-#ifndef MENUPROFESIONALES_H_INCLUDED
-#define MENUPROFESIONALES_H_INCLUDED
+#pragma once
 
 void menuProfesionales();
 
-#endif // MENUPROFESIONALES_H_INCLUDED
+

@@ -19,7 +19,7 @@ void listarProfesionalesPorEspecialidad() {
     bool repetida;
     bool encontrado = false;
 
-    // Armamos la lista de especialidades únicas en memoria
+    // Armamos la lista de especialidades unicas en memoria
     while (reg.leerDisco(pos)) {
         if (reg.getEstado()) {
             repetida = false;

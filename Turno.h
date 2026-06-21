@@ -50,5 +50,5 @@ class Turno {
 // Mantenimiento
 bool darDeBajaTurno();
 
-// Asistencia para el Menú (UX/UI)
+// Asistencia para el Menú
 int buscarClienteParaTurno(const char* apellidoBuscado);
