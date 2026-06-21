@@ -10,74 +10,91 @@ using namespace std;
 
 // Algoritmo: lista los servicios activos agrupados por tipo
 void listarServiciosPorTipo() {
-    char tipos[100][30];
-    int cantidadTipos = 0;
-    int opcionTipo;
     Servicio reg;
-    int pos = 0;
-    bool repetido;
-    bool encontrado = false;
+    int pos = 0, cant = 0;
 
-    while (reg.leerDisco(pos)) {
+    // Contamos servicios activos para reservar memoria exacta
+    while (reg.leerDisco(pos++)) {
+        if (reg.getEstado()) cant++;
+    }
+
+    if (cant == 0) {
+        cout << " [AVISO] No hay servicios activos registrados.\n\n";
+        system("pause");
+        return;
+    }
+
+    // Usamos memoria dinamica para guardar tipos unicos
+    char** tipos = new char*[cant];
+    int cantidadTipos = 0;
+
+    pos = 0;
+    while (reg.leerDisco(pos++)) {
         if (reg.getEstado()) {
-            repetido = false;
+            bool repetido = false;
             for (int i = 0; i < cantidadTipos; i++) {
-                if (strcmp(tipos[i], reg.getTipo()) == 0) {
-                    repetido = true;
-                }
+                if (strcmp(tipos[i], reg.getTipo()) == 0) repetido = true;
             }
             if (!repetido) {
+                tipos[cantidadTipos] = new char[30];
                 strcpy(tipos[cantidadTipos], reg.getTipo());
                 cantidadTipos++;
             }
         }
-        pos++;
     }
 
-    if (cantidadTipos == 0) {
-        cout << " [AVISO] No hay tipos disponibles porque no hay servicios activos.\n\n";
-        return;
-    }
-    cout << " TIPOS DISPONIBLES:" << endl;
-    cout << "-------------------------------------------------" << endl;
+    // Menu de seleccion
+    system("cls");
+    cout << "=================================================" << endl;
+    cout << "            LISTAR SERVICIOS POR TIPO            " << endl;
+    cout << "=================================================" << endl;
     for (int i = 0; i < cantidadTipos; i++) {
         cout << i + 1 << ". " << tipos[i] << endl;
     }
     cout << "0. Volver al menu anterior" << endl;
     cout << "-------------------------------------------------" << endl;
 
+    int opcionTipo;
     do {
-        cout << "Seleccione un tipo: ";
+        cout << "Seleccione una opcion: ";
         cin >> opcionTipo;
         if (opcionTipo < 0 || opcionTipo > cantidadTipos) {
             cout << "[ERROR] Opcion invalida.\n";
         }
     } while (opcionTipo < 0 || opcionTipo > cantidadTipos);
 
+    // CORRECCION: Limpiamos el buffer ANTES de evaluar la opcion 0
     cin.ignore(1000, '\n');
 
     if (opcionTipo == 0) {
-        cout << "\nVolviendo al menu...\n";
+        for (int i = 0; i < cantidadTipos; i++) delete[] tipos[i];
+        delete[] tipos;
         return;
     }
 
+    // Mostrar resultados filtrados
+    system("cls");
+    cout << "=================================================" << endl;
+    cout << "   SERVICIOS DE TIPO: " << tipos[opcionTipo - 1]   << endl;
+    cout << "=================================================" << endl;
+
+    bool encontrado = false;
     pos = 0;
-    cout << endl;
-    cout << "=================================================" << endl;
-    cout << "  SERVICIOS DE TIPO: " << tipos[opcionTipo - 1]    << endl;
-    cout << "=================================================" << endl;
-
-
-    while (reg.leerDisco(pos)) {
-        if (reg.getEstado() == true && strcmp(reg.getTipo(), tipos[opcionTipo - 1]) == 0) {
+    while (reg.leerDisco(pos++)) {
+        if (reg.getEstado() && strcmp(reg.getTipo(), tipos[opcionTipo - 1]) == 0) {
             reg.mostrar();
             encontrado = true;
         }
-        pos++;
     }
-    if (!encontrado) {
-        cout << "No se encontraron servicios activos con ese tipo.\n";
-    }
+
+    if (!encontrado) cout << "No se encontraron servicios de este tipo.\n";
+
+    // Limpieza de memoria dinamica y pausa final
+    for (int i = 0; i < cantidadTipos; i++) delete[] tipos[i];
+    delete[] tipos;
+
+    cout << "\nPresione ENTER para continuar...";
+    cin.get();
 }
 
 // Algoritmo: lista los servicios inactivos recorriendo el archivo
@@ -106,7 +123,6 @@ void listarServiciosInactivos() {
 
 // FUNCIONES GLOBALES DE MANTENIMIENTO
 
-// Algoritmo: Busca un ID activo, permite reingresar datos y los sobrescribe en el archivo servicios.dat
 void modificarServicio() {
     int idBuscado;
     Servicio reg;
@@ -114,12 +130,11 @@ void modificarServicio() {
     bool encontrado = false;
 
     cout << "=================================================" << endl;
-    cout << "             SELECCIONE SERVICIO A MODIFICAR     " << endl;
+    cout << "              SELECCIONE SERVICIO A MODIFICAR    " << endl;
     cout << "=================================================" << endl;
     cout << "0. Volver al Menu Principal / Cancelar Modificacion" << endl;
     cout << "-------------------------------------------------" << endl;
 
-    // Listamos todos los servicios activos para que el usuario elija
     while (reg.leerDisco(pos)) {
         if (reg.getEstado() == true) {
             cout << "ID: [" << reg.getIdServicio() << "] - "
@@ -152,7 +167,6 @@ void modificarServicio() {
             cout << "\nServicio encontrado. Reingrese los datos:\n\n";
             cout << "ID SERVICIO: " << idBuscado << endl;
 
-            // Invocamos el metodo de la clase para cargar y validar variables en RAM
             if (!reg.modificar()) {
                 cout << "\nModificacion cancelada.\n";
                 fclose(p);
@@ -161,7 +175,6 @@ void modificarServicio() {
             reg.setIdServicio(idBuscado);
             reg.setEstado(true);
 
-            // Volvemos el puntero una posicion atras y reescribimos en disco
             fseek(p, pos * sizeof(Servicio), SEEK_SET);
             fwrite(&reg, sizeof(Servicio), 1, p);
             cout << "\n[OK] Servicio modificado correctamente.\n";
@@ -177,10 +190,10 @@ void modificarServicio() {
     }
 
     cout << "\nPresione ENTER para continuar...";
+    cin.ignore(1000, '\n');
     cin.get();
 }
 
-//BAJA LOGICA SERVICIO
 bool darDeBajaServicio() {
     int idBuscado;
     Servicio reg;
@@ -188,7 +201,7 @@ bool darDeBajaServicio() {
     bool encontrado = false;
 
     cout << "=================================================" << endl;
-    cout << "        SELECCIONE UN SERVICIO PARA DAR DE BAJA  " << endl;
+    cout << "         SELECCIONE UN SERVICIO PARA DAR DE BAJA " << endl;
     cout << "=================================================" << endl;
     cout << " 0. Volver al Menu Principal / Cancelar Baja     " << endl;
     cout << "-------------------------------------------------" << endl;
@@ -206,7 +219,6 @@ bool darDeBajaServicio() {
     cout << "Ingrese el ID del servicio a dar de baja: ";
     cin >> idBuscado;
 
-    //Si el usuario presiona 0, corta la funcion
     if (idBuscado == 0) {
         cout << "\nOperacion cancelada. Volviendo al menu...\n";
         return false;
@@ -219,8 +231,7 @@ bool darDeBajaServicio() {
         return true;
     }
     while (fread(&reg, sizeof(Servicio), 1, p) == 1) {
-        if (reg.getIdServicio() == idBuscado &&
-            reg.getEstado() == true) {
+        if (reg.getIdServicio() == idBuscado && reg.getEstado() == true) {
             encontrado = true;
             reg.setEstado(false);
             fseek(p, pos * sizeof(Servicio), SEEK_SET);
@@ -242,10 +253,6 @@ bool darDeBajaServicio() {
     return true;
 }
 
-
-// SUB-MENUS INTERMEDIOS Y CONSULTAS
-
-// Menu secundario de reportes y listados especificos
 void menuConsultasServicios() {
     int op;
     Servicio aux;
@@ -255,9 +262,9 @@ void menuConsultasServicios() {
         cout << "=================================================" << endl;
         cout << "         CONSULTAS Y REPORTES: SERVICIOS         " << endl;
         cout << "=================================================" << endl;
-        cout << "1. Listar Todos los Servicios Activos"             << endl;
-        cout << "2. Listar Servicios Agrupados por Tipo"            << endl;
-        cout << "3. Ver Fichas de Servicios Inactivos (Bajas)"      << endl;
+        cout << "1. Listar Todos los Servicios Activos            " << endl;
+        cout << "2. Listar Servicios Agrupados por Tipo           " << endl;
+        cout << "3. Ver Fichas de Servicios Inactivos (Bajas)     " << endl;
         cout << "0. Volver al Menu anterior" << endl;
         cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion: ";
@@ -268,52 +275,39 @@ void menuConsultasServicios() {
             system("cls");
             pos = 0;
             cout << "=================================================\n";
-            cout << "           LISTADO DE SERVICIOS ACTIVOS           \n";
+            cout << "           LISTADO DE SERVICIOS ACTIVOS          \n";
             cout << "=================================================\n";
-            while (aux.leerDisco(pos)) {
-                aux.mostrar();
-                pos++;
-            }
-            if (pos == 0) {
-                cout << "Archivo de servicios vacio.\n\n";
-            }
-            cin.ignore(1000, '\n');
+            while (aux.leerDisco(pos++)) if (aux.getEstado()) aux.mostrar();
+
             cout << "\nPresione ENTER para continuar...";
-            cin.get();
+            cin.ignore(1000, '\n'); cin.get();
             system("cls");
         }
         else if (op == 2) {
             system("cls");
-            cout << "=================================================" << endl;
-            cout << "             LISTADO DE SERVICIOS POR TIPO       " << endl;
-            cout << "=================================================" << endl;
             listarServiciosPorTipo();
-            cout << "\nPresione ENTER para continuar...";
-            cin.get();
             system("cls");
         }
         else if (op == 3) {
             system("cls");
             cout << "=================================================" << endl;
-            cout << "             LISTADO DE SERVICIOS INACTIVOS      " << endl;
+            cout << "           LISTADO DE SERVICIOS INACTIVOS        " << endl;
             cout << "=================================================" << endl;
             listarServiciosInactivos();
             cout << "\nPresione ENTER para continuar...";
-            cin.ignore(1000, '\n');
-            cin.get();
+            cin.ignore(1000, '\n'); cin.get();
             system("cls");
         }
     } while (op != 0);
 }
 
-// SUB-MENU PRINCIPAL: MODULO DE SERVICIOS
 void menuServicios() {
     int op;
     Servicio aux;
 
     do {
         cout << "=================================================" << endl;
-        cout << "     MODULO: GESTION SERVICIOS                   " << endl;
+        cout << "       MODULO: GESTION SERVICIOS                 " << endl;
         cout << "=================================================" << endl;
         cout << "1. Registrar Servicio (Alta)" << endl;
         cout << "2. Listado de Servicios y Consultas" << endl;
@@ -351,12 +345,9 @@ void menuServicios() {
         }
         else if (op == 4) {
             system("cls");
-            if (darDeBajaServicio()) {
-
-            }
+            darDeBajaServicio();
             system("cls");
         }
     } while (op != 0);
-
     system("cls");
 }
