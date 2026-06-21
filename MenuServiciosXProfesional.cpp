@@ -15,9 +15,9 @@ void menuServicioXProfesional() {
         cout << "=================================================" << endl;
         cout << "     MODULO: SERVICIOS POR PROFESIONAL           " << endl;
         cout << "=================================================" << endl;
-        cout << "1. Registrar relacion Profesional-Servicio" << endl;
-        cout << "2. Listar servicios por profesional" << endl;
-        cout << "0. Volver al Menu Principal" << endl;
+        cout << "1. Registrar relacion Profesional-Servicio"        << endl;
+        cout << "2. Listar servicios por profesional"               << endl;
+        cout << "0. Volver al Menu Principal"                       << endl;
         cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion: ";
         cin >> op;
@@ -57,19 +57,42 @@ void menuServicioXProfesional() {
                     tieneServicios = false;
                     posRel = 0;
 
+                    // Array de control para no repetir tratamientos de esta profesional
+                    int IDsServiciosMostrados[100] = {0};
+                    int cantServiciosMostrados = 0;
+
                     while (rel.leerDisco(posRel)) {
                         if (rel.getEstado() && rel.getIdProfesional() == prof.getIdProfesional()) {
-                            if (!tieneServicios) {
-                                cout << "PROFESIONAL: ";
-                                prof.mostrarNombrePorId(prof.getIdProfesional());
-                                cout << endl;
-                                cout << "SERVICIOS:" << endl;
-                                tieneServicios = true;
-                                hayRelaciones = true;
+
+                            // Validamos si ya listamos este tratamiento para esta misma profesional
+                            bool servicioYaMostrado = false;
+                            for (int k = 0; k < cantServiciosMostrados; k++) {
+                                if (IDsServiciosMostrados[k] == rel.getIdServicio()) {
+                                    servicioYaMostrado = true;
+                                    break;
+                                }
                             }
-                            cout << "   - ";
-                            serv.mostrarNombrePorId(rel.getIdServicio());
-                            cout << endl;
+
+                            // Si no se mostro todavia, lo imprimimos en el panel
+                            if (!servicioYaMostrado) {
+                                if (!tieneServicios) {
+                                    cout << "PROFESIONAL: ";
+                                    prof.mostrarNombrePorId(prof.getIdProfesional());
+                                    cout << endl;
+                                    cout << "SERVICIOS:" << endl;
+                                    tieneServicios = true;
+                                    hayRelaciones = true;
+                                }
+                                cout << "   - ";
+                                serv.mostrarNombrePorId(rel.getIdServicio());
+                                cout << endl;
+
+                                // Registramos el ID en el historial para bloquear duplicados
+                                if (cantServiciosMostrados < 100) {
+                                    IDsServiciosMostrados[cantServiciosMostrados] = rel.getIdServicio();
+                                    cantServiciosMostrados++;
+                                }
+                            }
                         }
                         posRel++;
                     }
