@@ -240,28 +240,53 @@ void listarProfesionalesPorVolumenServicios() {
 }
 
 
-// Algoritmo: Filtra la liquidacion cruzando comisiones del mes
+// Algoritmo: Filtra la liquidacion de comisiones (menusal / semanal)
+
 void liquidacionComisiones() {
-    int mesBuscado;
-    int anioBuscado;
+    int mesBuscado, anioBuscado, opcionPeriodo;
+    int diaInicio = 1, diaFin = 31; // Rangos por defecto para mes completo
+    int semanaBuscada = 0;
 
     cout << "=================================================" << endl;
     cout << "        LIQUIDACION MENSUAL DE COMISIONES        " << endl;
     cout << "=================================================" << endl;
+    cout << " 1. Liquidar Mes Completo" << endl;
+    cout << " 2. Liquidar por Semana Especifica" << endl;
+    cout << "-------------------------------------------------" << endl;
+    cout << "Seleccione modalidad: ";
+    cin >> opcionPeriodo;
 
-    cout << "Ingrese mes a liquidar (1-12): ";
+    if (opcionPeriodo != 1 && opcionPeriodo != 2) {
+        cout << "\n[ERROR] Opcion invalida.\n\n";
+        return;
+    }
+
+    cout << "\nIngrese mes a liquidar (1-12): ";
     cin >> mesBuscado;
 
     cout << "Ingrese anio a liquidar: ";
     cin >> anioBuscado;
 
-    if (mesBuscado < 1 || mesBuscado > 12) {
-        cout << "\n[ERROR] Mes invalido.\n\n";
+    if (mesBuscado < 1 || mesBuscado > 12 || anioBuscado < 2025) {
+        cout << "\n[ERROR] Periodo invalido.\n\n";
         return;
     }
-    if (anioBuscado < 2025) {
-        cout << "\n[ERROR] Anio invalido.\n\n";
-        return;
+
+    // Si es por semana, configuramos el rango de dias del mes
+    if (opcionPeriodo == 2) {
+        cout << "Ingrese numero de semana (1 a 4): ";
+        cin >> semanaBuscada;
+
+        if (semanaBuscada < 1 || semanaBuscada > 4) {
+            cout << "\n[ERROR] Semana invalida.\n\n";
+            return;
+        }
+
+        // Mapeo de los bloques de dias
+        if (semanaBuscada == 1) { diaInicio = 1;  diaFin = 7;  }
+        else if (semanaBuscada == 2) { diaInicio = 8;  diaFin = 14; }
+        else if (semanaBuscada == 3) { diaInicio = 15; diaFin = 21; }
+        else if (semanaBuscada == 4) { diaInicio = 22; diaFin = 31; } // Cubre hasta fin de mes
     }
 
     Profesional profesional;
@@ -270,7 +295,11 @@ void liquidacionComisiones() {
 
     system("cls");
     cout << "========================================================================" << endl;
-    cout << "                 ORDEN DE LIQUIDACION EMITIDA EN PERIODO " << (mesBuscado < 10 ? "0" : "") << mesBuscado << "/" << anioBuscado << endl;
+    if (opcionPeriodo == 1) {
+        cout << "        ORDEN DE LIQUIDACION MENSUAL EMITIDA EN PERIODO " << (mesBuscado < 10 ? "0" : "") << mesBuscado << "/" << anioBuscado << endl;
+    } else {
+        cout << "    ORDEN DE LIQUIDACION EMITIDA: SEMANA " << semanaBuscada << " DEL MES " << (mesBuscado < 10 ? "0" : "") << mesBuscado << "/" << anioBuscado << endl;
+    }
     cout << "========================================================================" << endl;
 
     while (profesional.leerDisco(posProfesional)) {
@@ -290,7 +319,12 @@ void liquidacionComisiones() {
                         if (turno.getEstado() && turno.getAsistio() && turno.getIdTurno() == detalle.getIdTurno()) {
                             Fecha fechaTurno = turno.getFecha();
 
-                            if (fechaTurno.getMes() == mesBuscado && fechaTurno.getAnio() == anioBuscado) {
+                            // Filtrado cruzado: anio + mes + rango de dias (semanal o mensual)
+                            if (fechaTurno.getAnio() == anioBuscado &&
+                                fechaTurno.getMes() == mesBuscado &&
+                                fechaTurno.getDia() >= diaInicio &&
+                                fechaTurno.getDia() <= diaFin) {
+
                                 totalProducido += detalle.getPrecioAlMomento();
                                 cantidadServicios++;
                             }
@@ -320,7 +354,7 @@ void liquidacionComisiones() {
     }
 
     if (!encontroLiquidaciones) {
-        cout << "\n No se registraron servicios asistidos para liquidar en ese periodo.\n";
+        cout << "\n No se registraron servicios asistidos para liquidar en este rango temporal.\n";
     }
     cout << "========================================================================\n" << endl;
 }
