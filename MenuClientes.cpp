@@ -174,9 +174,72 @@ void listarClientasPorFrecuencia() {
     delete[] listaFrecuencia;
 }
 
-// Algoritmo: Filtrara las clientas que posean deudas registradas
+// Algoritmo: Listar clientas con saldos pendientes (agendados futuros / y en gabinete x liquidar)
 void listarClientasConSaldos() {
-    cout << " [Proximamente: Reporte de Cuentas Corrientes]\n\n";
+    Cliente cli;
+    int posC = 0;
+    bool hayDeudas = false;
+
+    cout << "=================================================" << endl;
+    cout << "       REPORTES DE CUENTAS CORRIENTES: SALDOS    " << endl;
+    cout << "=================================================" << endl;
+
+    // Recorremos cada clienta activa del sistema
+    while (cli.leerDisco(posC++)) {
+        if (cli.getEstado() == true) {
+            float deudatotalClienta = 0;
+
+            Turno tur;
+            int posT = 0;
+
+            // Buscamos todos los turnos activos que tengan saldos pendientes (NO liquidados)
+            while (tur.leerDisco(posT++)) {
+                if (tur.getEstado() == true &&
+                    tur.getIdCliente() == cli.getIdCliente() &&
+                    tur.getLiquidado() == false) { // Si no esta liquidado, es un saldo pendiente
+
+                    // Calculamos el costo total del servicio
+                    DetalleTurno det;
+                    int posD = 0;
+                    float precioServicio = 0;
+                    while (det.leerDisco(posD++)) {
+                        if (det.getEstado() == true && det.getIdTurno() == tur.getIdTurno()) {
+                            precioServicio += det.getPrecioAlMomento();
+                        }
+                    }
+
+                    // El saldo pendiente es el total del tratamiento menos la seña que ya dejo
+                    float saldoPendiente = precioServicio - tur.getSena();
+                    if (saldoPendiente > 0) {
+                        deudatotalClienta += saldoPendiente;
+                    }
+                }
+            }
+
+            // Si la clienta acumula saldos (ya sea por turnos futuros o de hoy), la listamos
+            if (deudatotalClienta > 0) {
+                if (!hayDeudas) {
+                    cout << " ID   | Clienta                    | Saldo Pendiente " << endl;
+                    cout << "-------------------------------------------------" << endl;
+                    hayDeudas = true;
+                }
+
+                cout << " [" << (cli.getIdCliente() < 10 ? "0" : "") << cli.getIdCliente() << "] | "
+                     << cli.getApellido() << ", " << cli.getNombre();
+
+                // Formateador de espacios para alinear las columnas en la consola
+                int largoNombre = strlen(cli.getApellido()) + strlen(cli.getNombre()) + 2;
+                for (int e = largoNombre; e < 26; e++) cout << " ";
+
+                cout << " | $" << deudatotalClienta << endl;
+            }
+        }
+    }
+
+    if (!hayDeudas) {
+        cout << "\n[OK] No se registran saldos pendientes de cobro en este momento.\n";
+    }
+    cout << "=================================================" << endl << endl;
 }
 
 // FUNCIONES GLOBALES DE MANTENIMIENTO

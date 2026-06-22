@@ -8,6 +8,8 @@ class Turno {
         Fecha fecha;
         float sena;
         bool asistio;
+        bool liquidado;
+        Fecha fechaLiquidacion;
         bool estado; // Baja logica
 
         // Metodo privado auxiliar para el autoincremental
@@ -21,7 +23,7 @@ class Turno {
         bool cargar();
         void mostrar();
 
-        // Metodos de búsqueda interna
+        // Metodos de busqueda interna
         bool buscarPorId(int id);
 
         // Setters
@@ -30,6 +32,8 @@ class Turno {
         void setFecha(Fecha f);
         void setSena(float s);
         void setAsistio(bool a);
+        void setLiquidado(bool l);
+        void setFechaLiquidacion(Fecha fLiq);
         void setEstado(bool e);
 
         // Getters
@@ -38,6 +42,8 @@ class Turno {
         Fecha getFecha();
         float getSena();
         bool getAsistio();
+        bool getLiquidado();
+        Fecha getFechaLiquidacion();
         bool getEstado();
 
         // Metodos de persistencia binaria (.dat)
@@ -46,9 +52,5 @@ class Turno {
 };
 
 // DECLARACIONES DE FUNCIONES GLOBALES
-
-// Mantenimiento
 bool darDeBajaTurno();
-
-// Asistencia para el Menú
 int buscarClienteParaTurno(const char* apellidoBuscado);

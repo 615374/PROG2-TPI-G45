@@ -14,6 +14,7 @@ Turno::Turno() {
     idCliente = 0;
     sena = 0;
     asistio = false;
+    liquidado = false;
     estado = false;
 }
 
@@ -58,6 +59,13 @@ void Turno::setAsistio(bool a) {
 void Turno::setEstado(bool e) {
     estado = e;
 }
+void Turno::setLiquidado(bool l) {
+    liquidado = l;
+}
+
+void Turno::setFechaLiquidacion(Fecha fLiq) {
+    fechaLiquidacion = fLiq;
+}
 
 // GETTERS
 int Turno::getIdTurno() {
@@ -82,6 +90,14 @@ bool Turno::getAsistio() {
 
 bool Turno::getEstado() {
     return estado;
+}
+
+bool Turno::getLiquidado() {
+    return liquidado;
+}
+
+Fecha Turno::getFechaLiquidacion() {
+    return fechaLiquidacion;
 }
 
 //METODOS PRINCIPALES DE LA CLASE
@@ -185,6 +201,7 @@ bool Turno::cargar() {
 
     idTurno = generarNuevoId();
     asistio = false;
+    liquidado = false;
     estado = true;
 
     return true;
@@ -203,10 +220,15 @@ void Turno::mostrar() {
         }
         cout << endl;
 
-        cout << "FECHA: ";
+        cout << "FECHA CITA: ";
         fecha.mostrar();
-        cout << "SENIA: $" << sena << endl;
+        cout << "SENIA EN CUENTA: $" << sena << endl;
         cout << "ASISTIO: " << (asistio ? "SI" : "NO") << endl;
+        cout << "LIQUIDADO EN CAJA: " << (liquidado ? "SI" : "NO") << endl;
+        if (liquidado) {
+            cout << "FECHA DE PAGO: ";
+            fechaLiquidacion.mostrar();
+        }
         cout << "-----------------------------------" << endl;
     }
 }
