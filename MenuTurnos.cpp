@@ -244,24 +244,119 @@ void listarAgendaCronologica() {
         }
     }
 
-    // Renderizado estetico de la Agenda diaria
+    // Renderizado estetico de la Agenda diaria con detalle de servicio/s y profesional/es
+    cout << "========================================================================================================================" << endl;
+    cout << " ID | FECHA      | HORA  | CLIENTA                  | TRATAMIENTO                   | PROFESIONAL  | SENIA  | ASIS | LIQ" << endl;
+    cout << "========================================================================================================================" << endl;
+
     for (int i = 0; i < totalTurnosActivos; i++) {
         Cliente cli;
-        cout << "-------------------------------------------------" << endl;
-        cout << "ID TURNO: " << listaTurnos[i].getIdTurno() << endl;
-        cout << "CLIENTA: ";
-        if (!cli.mostrarNombrePorId(listaTurnos[i].getIdCliente())) {
-            cout << "No disponible (ID: " << listaTurnos[i].getIdCliente() << ")";
+        char nombreClienta[40] = "No disp.";
+
+        // Recuperamos el nombre de la clienta de forma compacta
+        int posC = 0;
+        while (cli.leerDisco(posC++)) {
+            if (cli.getIdCliente() == listaTurnos[i].getIdCliente()) {
+                strcpy(nombreClienta, cli.getApellido());
+                strcat(nombreClienta, ", ");
+                strcat(nombreClienta, cli.getNombre());
+                if (strlen(nombreClienta) > 24) {
+                    nombreClienta[21] = '.'; nombreClienta[22] = '.'; nombreClienta[23] = '.'; nombreClienta[24] = '\0';
+                }
+                break;
+            }
         }
-        cout << endl;
-        cout << "FECHA CITA: "; listaTurnos[i].getFecha().mostrar();
-        cout << "HORA DE LLEGADA: "
-             << (horasArribo[i] < 10 ? "0" : "") << horasArribo[i] << ":"
-             << (minsArribo[i] < 10 ? "0" : "") << minsArribo[i] << " hs" << endl;
-        cout << "MONTO SENIA: $" << listaTurnos[i].getSena() << endl;
-        cout << "ASISTIO: " << (listaTurnos[i].getAsistio() ? "SI" : "NO") << endl;
+
+        // Imprimimos los datos fijos de la Cabecera del Turno
+        // ID
+        cout << " " << (listaTurnos[i].getIdTurno() < 10 ? "0" : "") << listaTurnos[i].getIdTurno() << " | ";
+
+        // Fecha
+        cout << (listaTurnos[i].getFecha().getDia() < 10 ? "0" : "") << listaTurnos[i].getFecha().getDia() << "/"
+             << (listaTurnos[i].getFecha().getMes() < 10 ? "0" : "") << listaTurnos[i].getFecha().getMes() << "/"
+             << listaTurnos[i].getFecha().getAnio() << " | ";
+
+        // Hora
+        cout << (horasArribo[i] < 10 ? "0" : "") << horasArribo[i] << ":"
+             << (minsArribo[i] < 10 ? "0" : "") << minsArribo[i] << " | ";
+
+        // Clienta
+        cout << nombreClienta;
+        int largoC = strlen(nombreClienta);
+        for (int e = largoC; e < 24; e++) cout << " ";
+        cout << " | ";
+
+        // Buscamos e imprimimos los tratamientos asociados
+        DetalleTurno dtReg;
+        int posDT = 0;
+        bool primerServicio = true;
+
+        while (dtReg.leerDisco(posDT++)) {
+            if (dtReg.getEstado() == true && dtReg.getIdTurno() == listaTurnos[i].getIdTurno()) {
+
+                // Buscamos datos del Servicio
+                Servicio serv;
+                int posS = 0;
+                char nombreServicio[30] = "Desconocido";
+                while (serv.leerDisco(posS++)) {
+                    if (serv.getIdServicio() == dtReg.getIdServicio()) {
+                        strcpy(nombreServicio, serv.getNombre());
+                        if (strlen(nombreServicio) > 28) {
+                            nombreServicio[25] = '.'; nombreServicio[26] = '.'; nombreServicio[27] = '.'; nombreServicio[28] = '\0';
+                        }
+                        break;
+                    }
+                }
+
+                // Buscamos datos del Profesional
+                Profesional prof;
+                int posP = 0;
+                char apellidoProf[15] = "Sin Asig.";
+                while (prof.leerDisco(posP++)) {
+                    if (prof.getIdProfesional() == dtReg.getIdProfesional()) {
+                        strcpy(apellidoProf, prof.getApellido());
+                        if (strlen(apellidoProf) > 11) {
+                            apellidoProf[9] = '.'; apellidoProf[10] = '.'; apellidoProf[11] = '\0';
+                        }
+                        break;
+                    }
+                }
+
+                // Si es el primer servicio del turno, va en la misma linea horizontal
+                if (primerServicio) {
+                    cout << nombreServicio;
+                    for (int e = strlen(nombreServicio); e < 29; e++) cout << " ";
+                    cout << " | " << apellidoProf;
+                    for (int e = strlen(apellidoProf); e < 12; e++) cout << " ";
+
+                    // Completamos la fila horizontal con los estados finales
+                    cout << " | $" << (int)listaTurnos[i].getSena();
+                    cout << (listaTurnos[i].getSena() < 10000 ? "  " : " ");
+                    cout << " | " << (listaTurnos[i].getAsistio() ? "SI  " : "NO  ");
+                    cout << " | " << (listaTurnos[i].getLiquidado() ? "SI " : "NO ");
+                    cout << endl;
+                    primerServicio = false;
+                }
+                // Si es un segundo o tercer servicio del mismo turno, se desglosa abajo perfectamente alineado
+                else {
+
+                    cout << "    |            |       |                          | ";
+                    cout << nombreServicio;
+                    for (int e = strlen(nombreServicio); e < 29; e++) cout << " ";
+                    cout << " | " << apellidoProf;
+                    for (int e = strlen(apellidoProf); e < 12; e++) cout << " ";
+                    cout << " |       |      |    " << endl;
+                }
+            }
+        }
+
+        // Si un turno se quedo sin desgloses cargados, cerramos la linea
+        if (primerServicio) {
+            cout << "Sin tratamientos registrados    | Sin Asig.    | $"
+                 << (int)listaTurnos[i].getSena() << "  | NO   | NO " << endl;
+        }
     }
-    cout << "-------------------------------------------------" << endl;
+    cout << "=================================================================================================================" << endl << endl;
 
     // Liberacion obligatoria de la memoria dinamica
     delete[] listaTurnos;
@@ -525,7 +620,7 @@ void menuTurnos() {
         cout << "=================================================" << endl;
         cout << "            MODULO: GESTION DE TURNOS            " << endl;
         cout << "=================================================" << endl;
-        cout << "1. Registrar Turno (Agendar)"                       << endl;
+        cout << "1. Registrar Turno (Agendar)"                      << endl;
         cout << "2. Ver Agenda de Turnos Activos"                   << endl;
         cout << "3. Registrar Asistencia (Dar Presente)"            << endl;
         cout << "4. Re-programar Turno (Cambiar Fecha/Hora)"        << endl;
@@ -844,9 +939,10 @@ void menuTurnos() {
         }
         else if (op == 2) {
             system("cls");
-            cout << "=================================================" << endl;
-            cout << "         AGENDA DE TURNOS ACTIVO (CRONOLOGICA)   " << endl;
-            cout << "=================================================" << endl;
+
+            cout << "========================================================================================================================" << endl;
+            cout << "                                        AGENDA DE TURNOS ACTIVOS (CRONOLOGICA)                                          " << endl;
+            cout << "========================================================================================================================" << endl;
             listarAgendaCronologica();
             cin.ignore(1000, '\n'); cout << "\nPresione ENTER para volver..."; cin.get();
             system("cls");
