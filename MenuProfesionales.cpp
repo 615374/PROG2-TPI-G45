@@ -9,45 +9,69 @@ using namespace std;
 
 // FUNCIONES GLOBALES
 
-// Algoritmo: Filtra y muestra los profesionales activos agrupados por especialidad
+// Algoritmo: Filtra y muestra los profesionales activos agrupados por especialidad usando memoria dinamica
 void listarProfesionalesPorEspecialidad() {
-    char especialidades[100][50];
-    int cantidadEspecialidades = 0;
-    int opcionEspecialidad;
     Profesional reg;
     int pos = 0;
-    bool repetida;
-    bool encontrado = false;
+    int totalActivos = 0;
 
-    // Armamos la lista de especialidades unicas en memoria
-    while (reg.leerDisco(pos)) {
+    // Contamos cuantos profesionales activas hay en disco para dimensionar la memoria exacta
+    while (reg.leerDisco(pos++)) {
         if (reg.getEstado()) {
-            repetida = false;
-            for (int i = 0; i < cantidadEspecialidades; i++) {
-                if (strcmp(especialidades[i], reg.getEspecialidad()) == 0) {
-                    repetida = true;
-                }
-            }
-            if (!repetida) {
-                strcpy(especialidades[cantidadEspecialidades], reg.getEspecialidad());
-                cantidadEspecialidades++;
-            }
+            totalActivos++;
         }
-        pos++;
     }
 
-    if (cantidadEspecialidades == 0) {
-        cout << "[AVISO] No hay especialidades disponibles porque no hay profesionales activos.\n\n";
+    if (totalActivos == 0) {
+        cout << "\n[AVISO] No hay profesionales activos cargados en el sistema.\n";
         return;
     }
-    cout << "ESPECIALIDADES DISPONIBLES EN SISTEMA:" << endl;
-    cout << "-------------------------------------------------" << endl;
-    for (int i = 0; i < cantidadEspecialidades; i++) {
-        cout << i + 1 << ". " << especialidades[i] << endl;
+
+    // Asignacion Dinamica de memoria para almacenar el staff activo temporalmente
+    Profesional* staffActivo = new Profesional[totalActivos];
+    if (staffActivo == nullptr) {
+        cout << "\n[ERROR] Fallo crítico de memoria dinámica.\n";
+        return;
     }
-    cout << "0. Volver al menu anterior" << endl;
+
+    // Volcamos los registros del disco a nuestro espacio dinamico en memoria
+    pos = 0;
+    int indice = 0;
+    while (reg.leerDisco(pos++)) {
+        if (reg.getEstado()) {
+            staffActivo[indice] = reg;
+            indice++;
+        }
+    }
+    // Extraemos las especialidades de nuestro array dinamico
+    // Usamos memoria dinamica tambien para la lista de cadenas de texto
+    char (*especialidades)[50] = new char[totalActivos][50];
+    int cantidadEspecialidades = 0;
+
+    for (int i = 0; i < totalActivos; i++) {
+        bool repetida = false;
+        for (int j = 0; j < cantidadEspecialidades; j++) {
+            if (strcmp(especialidades[j], staffActivo[i].getEspecialidad()) == 0) {
+                repetida = true;
+                break;
+            }
+        }
+        if (!repetida) {
+            strcpy(especialidades[cantidadEspecialidades], staffActivo[i].getEspecialidad());
+            cantidadEspecialidades++;
+        }
+    }
+
+    cout << "=================================================" << endl;
+    cout << "          ESPECIALIDADES EN EL SISTEMA           " << endl;
+    cout << "=================================================" << endl;
+    for (int i = 0; i < cantidadEspecialidades; i++) {
+        cout << " " << i + 1 << ". " << especialidades[i]       << endl;
+    }
+    cout << " 0. Volver al menu anterior"                       << endl;
     cout << "-------------------------------------------------" << endl;
 
+    int opcionEspecialidad;
     do {
         cout << "Seleccione una especialidad: ";
         cin >> opcionEspecialidad;
@@ -56,42 +80,30 @@ void listarProfesionalesPorEspecialidad() {
         }
     } while (opcionEspecialidad < 0 || opcionEspecialidad > cantidadEspecialidades);
 
-    cin.ignore(1000, '\n');
+    if (opcionEspecialidad != 0) {
+        system("cls");
+        char* espSeleccionada = especialidades[opcionEspecialidad - 1];
 
-    if (opcionEspecialidad == 0) {
-        cout << "\nOperacion cancelada. Volviendo al menu...\n";
-        return;
-    }
+        cout << "=================================================" << endl;
+        cout << "   STAFF DISPONIBLE: " << espSeleccionada          << endl;
+        cout << "=================================================" << endl;
 
-    system("cls");
-
-    cout << "=================================================" << endl;
-    cout << "          PANEL DE CONSULTAS Y REPORTES          " << endl;
-    cout << "=================================================" << endl;
-    cout << "1. Ver Staff de Profesionales Activas" << endl;
-    cout << "2. Listar por Especialidad" << endl;
-    cout << "3. Listar Ordenadas por Volumen de Servicios" << endl;
-    cout << "4. Ver Staff Profesionales Inactivas" << endl;
-    cout << "5. Liquidacion de Comisiones" << endl;
-    cout << "0. Volver al Menu de Gestion" << endl;
-    cout << "-------------------------------------------------" << endl;
-    cout << "Opcion seleccionada: 2" << endl << endl;
-
-    pos = 0;
-    cout << "=================================================" << endl;
-    cout << "  RESULTADOS PARA: " << especialidades[opcionEspecialidad - 1] << endl;
-    cout << "=================================================" << endl;
-
-    while (reg.leerDisco(pos)) {
-        if (reg.getEstado() && strcmp(reg.getEspecialidad(), especialidades[opcionEspecialidad - 1]) == 0) {
-            reg.mostrar();
-            encontrado = true;
+        bool encontrado = false;
+        for (int i = 0; i < totalActivos; i++) {
+            if (strcmp(staffActivo[i].getEspecialidad(), espSeleccionada) == 0) {
+                staffActivo[i].mostrar();
+                encontrado = true;
+            }
         }
-        pos++;
+        if (!encontrado) {
+            cout << "No se encontraron profesionales para la seleccion.\n";
+        }
+        cout << "=================================================" << endl;
     }
-    if (!encontrado) {
-        cout << "No se encontraron profesionales activos con esa especialidad.\n";
-    }
+
+    // Liberacion de memoria dinamica (Evita Memory Leaks)
+    delete[] staffActivo;
+    delete[] especialidades;
 }
 
 // Algoritmo: Recorre el archivo mostrando unicamente el staff dado de baja
