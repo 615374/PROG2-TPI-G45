@@ -244,24 +244,24 @@ void listarAgendaCronologica() {
         }
     }
 
-    // Renderizado estetico de la Agenda diaria con detalle de servicio/s y profesional/es
+    // Renderizado estetico de la agenda diaria con detalle de servicio/s y profesional/es
     cout << "========================================================================================================================" << endl;
-    cout << " ID | FECHA      | HORA  | CLIENTA                  | TRATAMIENTO                   | PROFESIONAL  | SENIA  | ASIS | LIQ" << endl;
+    cout << " ID | FECHA      | HORA  | CLIENTA            | TRATAMIENTO                         | PROFESIONAL  | SENIA  | ASIS | LIQ " << endl;
     cout << "========================================================================================================================" << endl;
 
     for (int i = 0; i < totalTurnosActivos; i++) {
         Cliente cli;
         char nombreClienta[40] = "No disp.";
 
-        // Recuperamos el nombre de la clienta de forma compacta
+        // Recuperamos el nombre de la clienta
         int posC = 0;
         while (cli.leerDisco(posC++)) {
             if (cli.getIdCliente() == listaTurnos[i].getIdCliente()) {
                 strcpy(nombreClienta, cli.getApellido());
                 strcat(nombreClienta, ", ");
                 strcat(nombreClienta, cli.getNombre());
-                if (strlen(nombreClienta) > 24) {
-                    nombreClienta[21] = '.'; nombreClienta[22] = '.'; nombreClienta[23] = '.'; nombreClienta[24] = '\0';
+                if (strlen(nombreClienta) > 18) {
+                    nombreClienta[15] = '.'; nombreClienta[16] = '.'; nombreClienta[17] = '.'; nombreClienta[18] = '\0';
                 }
                 break;
             }
@@ -283,7 +283,7 @@ void listarAgendaCronologica() {
         // Clienta
         cout << nombreClienta;
         int largoC = strlen(nombreClienta);
-        for (int e = largoC; e < 24; e++) cout << " ";
+        for (int e = largoC; e < 18; e++) cout << " ";
         cout << " | ";
 
         // Buscamos e imprimimos los tratamientos asociados
@@ -297,12 +297,12 @@ void listarAgendaCronologica() {
                 // Buscamos datos del Servicio
                 Servicio serv;
                 int posS = 0;
-                char nombreServicio[30] = "Desconocido";
+                char nombreServicio[40] = "Desconocido";
                 while (serv.leerDisco(posS++)) {
                     if (serv.getIdServicio() == dtReg.getIdServicio()) {
                         strcpy(nombreServicio, serv.getNombre());
-                        if (strlen(nombreServicio) > 28) {
-                            nombreServicio[25] = '.'; nombreServicio[26] = '.'; nombreServicio[27] = '.'; nombreServicio[28] = '\0';
+                        if (strlen(nombreServicio) > 34) {
+                            nombreServicio[31] = '.'; nombreServicio[32] = '.'; nombreServicio[33] = '.'; nombreServicio[34] = '\0';
                         }
                         break;
                     }
@@ -325,7 +325,7 @@ void listarAgendaCronologica() {
                 // Si es el primer servicio del turno, va en la misma linea horizontal
                 if (primerServicio) {
                     cout << nombreServicio;
-                    for (int e = strlen(nombreServicio); e < 29; e++) cout << " ";
+                    for (int e = strlen(nombreServicio); e < 35; e++) cout << " ";
                     cout << " | " << apellidoProf;
                     for (int e = strlen(apellidoProf); e < 12; e++) cout << " ";
 
@@ -337,12 +337,12 @@ void listarAgendaCronologica() {
                     cout << endl;
                     primerServicio = false;
                 }
-                // Si es un segundo o tercer servicio del mismo turno, se desglosa abajo perfectamente alineado
+                // Si es un segundo o tercer servicio del mismo turno, se desglosa abajo en forma de lista
                 else {
 
-                    cout << "    |            |       |                          | ";
+                    cout << "    |            |       |                    | ";
                     cout << nombreServicio;
-                    for (int e = strlen(nombreServicio); e < 29; e++) cout << " ";
+                    for (int e = strlen(nombreServicio); e < 35; e++) cout << " ";
                     cout << " | " << apellidoProf;
                     for (int e = strlen(apellidoProf); e < 12; e++) cout << " ";
                     cout << " |       |      |    " << endl;
@@ -350,13 +350,13 @@ void listarAgendaCronologica() {
             }
         }
 
-        // Si un turno se quedo sin desgloses cargados, cerramos la linea
+        // Si un turno se quedo sin desgloses cargados, cerramos la linea de forma balanceada
         if (primerServicio) {
-            cout << "Sin tratamientos registrados    | Sin Asig.    | $"
+            cout << "Sin tratamientos registrados        | Sin Asig.    | $"
                  << (int)listaTurnos[i].getSena() << "  | NO   | NO " << endl;
         }
     }
-    cout << "=================================================================================================================" << endl << endl;
+    cout << "========================================================================================================================" << endl << endl;
 
     // Liberacion obligatoria de la memoria dinamica
     delete[] listaTurnos;
