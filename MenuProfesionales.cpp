@@ -3,6 +3,8 @@
 #include <cstring>
 #include "MenuProfesionales.h"
 #include "Profesional.h"
+#include "DetalleTurno.h"
+#include "Turno.h"
 
 using namespace std;
 
@@ -135,12 +137,192 @@ void listarProfesionalesInactivos() {
 
 // Algoritmo: Filtrara el listado ordenando por volumen de servicios brindados
 void listarProfesionalesPorVolumenServicios() {
-    cout << " [Proximamente: Se resolvera al avanzar con el modulo Turnos]\n\n";
+    Profesional profReg;
+    int posP = 0;
+    int totalProfesionalesActivos = 0;
+
+    // Contamos cuantos profesionales activos hay en el sistema para dimensionar la memoria
+    while (profReg.leerDisco(posP++)) {
+        if (profReg.getEstado()) {
+            totalProfesionalesActivos++;
+        }
+    }
+
+    if (totalProfesionalesActivos == 0) {
+        cout << "No hay profesionales activos registrados para analizar.\n\n";
+        return;
+    }
+
+    // Creamos los arrays dinamicos en memoria
+    Profesional* listaProfesionales = new Profesional[totalProfesionalesActivos];
+    int* volumenServicios = new int[totalProfesionalesActivos];
+
+    if (listaProfesionales == nullptr || volumenServicios == nullptr) {
+        cout << "\n[ERROR] Fallo critico de asignacion de memoria dinamica.\n";
+        return;
+    }
+
+    // Volcamos los profesionales a la memoria e inicialmente calculamos su volumen recorriendo los desgloses asistidos
+    posP = 0;
+    int idx = 0;
+    while (profReg.leerDisco(posP++)) {
+        if (profReg.getEstado()) {
+            listaProfesionales[idx] = profReg;
+            int contadorServicios = 0;
+
+            DetalleTurno dtReg;
+            int posDT = 0;
+            while (dtReg.leerDisco(posDT++)) {
+                // El detalle debe estar activo y pertenecer al profesional actual
+                if (dtReg.getEstado() && dtReg.getIdProfesional() == profReg.getIdProfesional()) {
+                    Turno tReg;
+                    int posT = 0;
+                    while (tReg.leerDisco(posT++)) {
+                        // El turno padre debe estar activo y la clienta haber asistido de verdad
+                        if (tReg.getEstado() && tReg.getAsistio() && tReg.getIdTurno() == dtReg.getIdTurno()) {
+                            contadorServicios++;
+                            break;
+                        }
+                    }
+                }
+            }
+            volumenServicios[idx] = contadorServicios;
+            idx++;
+        }
+    }
+
+    // Algoritmo de ordenamiento de mayor a menor (Burbuja)
+    for (int i = 0; i < totalProfesionalesActivos - 1; i++) {
+        for (int j = 0; j < totalProfesionalesActivos - i - 1; j++) {
+            if (volumenServicios[j] < volumenServicios[j + 1]) {
+                // Intercambio de volumen
+                int vAux = volumenServicios[j];
+                volumenServicios[j] = volumenServicios[j + 1];
+                volumenServicios[j + 1] = vAux;
+
+                // Intercambio paralelo de objetos de Profesionales
+                Profesional pAux = listaProfesionales[j];
+                listaProfesionales[j] = listaProfesionales[j + 1];
+                listaProfesionales[j + 1] = pAux;
+            }
+        }
+    }
+
+    // Renderizado del reporte por pantalla
+    cout << "========================================================================" << endl;
+    cout << "             RANKING DE PROFESIONALES POR VOLUMEN DE SERVICIOS          " << endl;
+    cout << "========================================================================" << endl;
+    cout << " PUESTO | ID  | PROFESIONAL                  | TOTAL SERVICIOS BRINDADOS" << endl;
+    cout << "------------------------------------------------------------------------" << endl;
+
+    for (int i = 0; i < totalProfesionalesActivos; i++) {
+        char nombreCompleto[50];
+        strcpy(nombreCompleto, listaProfesionales[i].getApellido());
+        strcat(nombreCompleto, ", ");
+        strcat(nombreCompleto, listaProfesionales[i].getNombre());
+
+        if (strlen(nombreCompleto) > 26) {
+            nombreCompleto[23] = '.'; nombreCompleto[24] = '.'; nombreCompleto[25] = '.'; nombreCompleto[26] = '\0';
+        }
+
+        cout << "   #" << (i + 1) << "   | "
+             << (listaProfesionales[i].getIdProfesional() < 10 ? "0" : "") << listaProfesionales[i].getIdProfesional() << "  | "
+             << nombreCompleto;
+
+        for (int e = strlen(nombreCompleto); e < 28; e++) cout << " ";
+        cout << " | " << volumenServicios[i] << " servicios" << endl;
+    }
+    cout << "========================================================================\n" << endl;
+
+    // Liberacion obligatoria de memoria dinamica
+    delete[] listaProfesionales;
+    delete[] volumenServicios;
 }
 
-// Algoritmo: Filtrara la liquidacion cruzando comisiones del mes
+
+// Algoritmo: Filtra la liquidacion cruzando comisiones del mes
 void liquidacionComisiones() {
-    cout << " [Proximamente: Reporte de Liquidacion de Comisiones]\n\n";
+    int mesBuscado;
+    int anioBuscado;
+
+    cout << "=================================================" << endl;
+    cout << "        LIQUIDACION MENSUAL DE COMISIONES        " << endl;
+    cout << "=================================================" << endl;
+
+    cout << "Ingrese mes a liquidar (1-12): ";
+    cin >> mesBuscado;
+
+    cout << "Ingrese anio a liquidar: ";
+    cin >> anioBuscado;
+
+    if (mesBuscado < 1 || mesBuscado > 12) {
+        cout << "\n[ERROR] Mes invalido.\n\n";
+        return;
+    }
+    if (anioBuscado < 2025) {
+        cout << "\n[ERROR] Anio invalido.\n\n";
+        return;
+    }
+
+    Profesional profesional;
+    int posProfesional = 0;
+    bool encontroLiquidaciones = false;
+
+    system("cls");
+    cout << "========================================================================" << endl;
+    cout << "                 ORDEN DE LIQUIDACION EMITIDA EN PERIODO " << (mesBuscado < 10 ? "0" : "") << mesBuscado << "/" << anioBuscado << endl;
+    cout << "========================================================================" << endl;
+
+    while (profesional.leerDisco(posProfesional)) {
+        if (profesional.getEstado()) {
+            float totalProducido = 0;
+            int cantidadServicios = 0;
+
+            DetalleTurno detalle;
+            int posDetalle = 0;
+
+            while (detalle.leerDisco(posDetalle)) {
+                if (detalle.getEstado() && detalle.getIdProfesional() == profesional.getIdProfesional()) {
+                    Turno turno;
+                    int posTurno = 0;
+
+                    while (turno.leerDisco(posTurno)) {
+                        if (turno.getEstado() && turno.getAsistio() && turno.getIdTurno() == detalle.getIdTurno()) {
+                            Fecha fechaTurno = turno.getFecha();
+
+                            if (fechaTurno.getMes() == mesBuscado && fechaTurno.getAnio() == anioBuscado) {
+                                totalProducido += detalle.getPrecioAlMomento();
+                                cantidadServicios++;
+                            }
+                            break;
+                        }
+                        posTurno++;
+                    }
+                }
+                posDetalle++;
+            }
+
+            if (cantidadServicios > 0) {
+                float comision = totalProducido * profesional.getComision() / 100;
+
+                cout << " PROFESIONAL:     " << profesional.getApellido() << ", " << profesional.getNombre()
+                     << " [ID: " << profesional.getIdProfesional() << "]" << endl;
+                cout << " SERV. BRINDADOS: " << cantidadServicios << endl;
+                cout << " FACTURACION:     $" << totalProducido << endl;
+                cout << " COMISION (%):    " << profesional.getComision() << "%" << endl;
+                cout << " NETO A LIQUIDAR: $" << comision << endl;
+                cout << "------------------------------------------------------------------------" << endl;
+
+                encontroLiquidaciones = true;
+            }
+        }
+        posProfesional++;
+    }
+
+    if (!encontroLiquidaciones) {
+        cout << "\n No se registraron servicios asistidos para liquidar en ese periodo.\n";
+    }
+    cout << "========================================================================\n" << endl;
 }
 
 // FUNCIONES GLOBALES DE MANTENIMIENTO
