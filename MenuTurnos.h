@@ -3,8 +3,8 @@
 
 void menuTurnos();
 
-void mostrarGrillaSemanalAuto();
-bool verificarBloqueOcupado(int d, int m, int a, int horaEvaluar);
+void mostrarGrillaSemanalAuto(int idProfesionalGrilla);
+bool verificarBloqueOcupado(int d, int m, int a, int horaEvaluar, int idProfesionalEvaluar);
 
 void listarTurnosActivosCronologicos();
 

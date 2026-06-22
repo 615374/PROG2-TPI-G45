@@ -20,75 +20,106 @@ using namespace std;
 // VERIFICAR BLOQUE HORARIO OCUPADO
 //-------------------------------------
 
-// Revisa si hay un turno activo en esa fecha y hora especifica
-bool verificarBloqueOcupado(int d, int m, int a, int horaEvaluar) {
+// Revisa si la profesional elegida ya tiene un turno activo en esa fecha y hora especifica
+bool verificarBloqueOcupado(int d, int m, int a, int horaEvaluar, int idProfesionalEvaluar) {
     Turno t;
     DetalleTurno dt;
     int posT = 0;
 
     while (t.leerDisco(posT)) {
+        // Primero buscamos que la cabecera del turno coincida en fecha y este activa
         if (t.getEstado() == true &&
             t.getFecha().getDia() == d &&
             t.getFecha().getMes() == m &&
             t.getFecha().getAnio() == a) {
 
             int posDT = 0;
+            // Recorremos los desgloses para ver si la profesional esta ocupada a esa hora
             while (dt.leerDisco(posDT)) {
                 if (dt.getEstado() == true &&
                     dt.getIdTurno() == t.getIdTurno() &&
                     dt.getHora() == horaEvaluar) {
-                    return true;
+
+                    // Si pasamos un ID especifico validamos esa profesional, si pasamos 0 valida ocupacion general para la grilla macro
+                    if (idProfesionalEvaluar == 0 || dt.getIdProfesional() == idProfesionalEvaluar) {
+                        return true;
+                    }
                 }
                 posDT++;
             }
         }
         posT++;
     }
-    return false;
+    return false; // Profesional libre (gabinete disponible)
 }
 
 //-----------------------------------------------
 // GRILLA DE DISPONIBILIDAD SEMANAL INTERACTIVA
 //-----------------------------------------------
 
-//Renderiza la grilla de la semana entrante si es fin de semana
-void mostrarGrillaSemanalAuto() {
+// Renderiza los proximos 5 dias habiles disponibles a partir de hoy
+void mostrarGrillaSemanalAuto(int idProfesionalGrilla) {
     time_t tActual = time(0);
-    tm* ahora = localtime(&tActual);
 
-    // Si es sabado (6) o domingo (0), nos paramos en la semana que entra
-    int corregirALunes = ahora->tm_wday - 1;
-    if (ahora->tm_wday == 0) corregirALunes = -1; // Apunta al lunes de mañana
-    else if (ahora->tm_wday == 6) corregirALunes = -2; // Apunta al lunes siguiente
+    // Capturamos el momento exacto de hoy de forma estatica
+    time_t tSincro = time(0);
+    tm* infoActual = localtime(&tSincro);
+    int anioHoy = infoActual->tm_year + 1900;
+    int mesHoy = infoActual->tm_mon + 1;
+    int diaHoy = infoActual->tm_mday;
+    int horaHoy = infoActual->tm_hour;
 
     cout << "=================================================" << endl;
     cout << "         GRILLA DE DISPONIBILIDAD SEMANAL        " << endl;
     cout << "=================================================" << endl;
 
-    const char* diasNombres[] = {"LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES"};
+    const char* diasNombres[] = {"DOMINGO", "LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO"};
 
-    for (int i = 0; i < 5; i++) {
-        time_t tDia = tActual - (corregirALunes - i) * 24 * 60 * 60;
+    int diasMostrados = 0;
+    int saltoTemporal = 0;
+
+    // Buscamos e imprimimos los proximos 5 dias de atencion (Lunes a Viernes) a partir de hoy
+    while (diasMostrados < 5) {
+        time_t tDia = tActual + (saltoTemporal * 24 * 60 * 60);
         tm* infoDia = localtime(&tDia);
 
-        int diaCalculado = infoDia->tm_mday;
-        int mesCalculado = infoDia->tm_mon + 1;
-        int anioCalculado = infoDia->tm_year + 1900;
+        int numDiaSemana = infoDia->tm_wday;
 
-        cout << "\n-------------------------------------------------" << endl;
-        cout << "  " << diasNombres[i] << " " << (diaCalculado < 10 ? "0" : "") << diaCalculado
-             << "/" << (mesCalculado < 10 ? "0" : "") << mesCalculado << "/" << anioCalculado << endl;
-        cout << "-------------------------------------------------" << endl;
+        // Omitimos Sabado (6) y Domingo (0)
+        if (numDiaSemana != 0 && numDiaSemana != 6) {
+            int diaCalculado = infoDia->tm_mday;
+            int mesCalculado = infoDia->tm_mon + 1;
+            int anioCalculado = infoDia->tm_year + 1900;
 
-        for (int h = 9; h <= 18; h++) {
-            bool ocupado = verificarBloqueOcupado(diaCalculado, mesCalculado, anioCalculado, h);
+            cout << "\n-------------------------------------------------" << endl;
+            cout << "  " << diasNombres[numDiaSemana] << " " << (diaCalculado < 10 ? "0" : "") << diaCalculado
+                 << "/" << (mesCalculado < 10 ? "0" : "") << mesCalculado << "/" << anioCalculado << endl;
+            cout << "-------------------------------------------------" << endl;
 
-            if (!ocupado) {
-                cout << "  [" << (h < 10 ? "0" : "") << h << ":00 hs] --> DISPONIBLE" << endl;
-            } else {
-                cout << "  [" << (h < 10 ? "0" : "") << h << ":00 hs] --> [OCUPADO]" << endl;
+            for (int h = 9; h <= 18; h++) {
+                bool esPasadoHoy = false;
+
+                // Solo bloquea por "horario pasado" si el anio, mes y dia coinciden exactamente con hoy
+                if (anioCalculado == anioHoy && mesCalculado == mesHoy && diaCalculado == diaHoy) {
+                    if (h <= horaHoy) {
+                        esPasadoHoy = true;
+                    }
+                }
+
+                if (esPasadoHoy) {
+                    cout << "  [" << (h < 10 ? "0" : "") << h << ":00 hs] --> [NO DISPONIBLE - HORARIO PASADO]" << endl;
+                } else {
+                    bool ocupado = verificarBloqueOcupado(diaCalculado, mesCalculado, anioCalculado, h, idProfesionalGrilla);
+                    if (!ocupado) {
+                        cout << "  [" << (h < 10 ? "0" : "") << h << ":00 hs] --> DISPONIBLE" << endl;
+                    } else {
+                        cout << "  [" << (h < 10 ? "0" : "") << h << ":00 hs] --> [OCUPADO]" << endl;
+                    }
+                }
             }
+            diasMostrados++;
         }
+        saltoTemporal++;
     }
     cout << "=================================================\n" << endl;
 }
@@ -476,7 +507,7 @@ void reprogramarTurno() {
 
     // Desplegamos la agenda interactiva y capturamos la nueva fecha
     system("cls");
-    mostrarGrillaSemanalAuto(); // Grilla semanal actualizada
+    mostrarGrillaSemanalAuto(dt.getIdProfesional()); // Grilla semanal actualizada por profesional
 
     int diaElegido, mesElegido, anioElegido, horaElegida, minElegida;
     cout << "CONFECCION DEL NUEVO HORARIO PARA EL TURNO Nro [" << idBuscado << "]:\n";
@@ -486,8 +517,8 @@ void reprogramarTurno() {
     cout << "Ingrese la Hora elegida (09 a 18): "; cin >> horaElegida;
     cout << "Ingrese los Minutos elegidos: "; cin >> minElegida;
 
-    // Validamos disponibilidad en el disco
-    if (horaElegida < 9 || horaElegida > 18 || verificarBloqueOcupado(diaElegido, mesElegido, anioElegido, horaElegida)) {
+    // Validamos disponibilidad en el disco pasandole el ID de la profesional involucrada
+    if (horaElegida < 9 || horaElegida > 18 || verificarBloqueOcupado(diaElegido, mesElegido, anioElegido, horaElegida, dt.getIdProfesional())) {
         cout << "\n[ERROR] Horario ocupado o fuera de rango comercial. Operacion cancelada.\n";
         cout << "        (Los horarios previos se restauraran de forma segura al salir).\n";
 
@@ -675,7 +706,7 @@ void cobrarLiquidarTurno() {
 
             system("cls");
             cout << "=================================================" << endl;
-            cout << "               TICKET DE COBRO COMPLETO          " << endl;
+            cout << "                TICKET DE COBRO COMPLETO          " << endl;
             cout << "=================================================" << endl;
             cout << " TURNO Nro:        [" << idBuscado << "]"          << endl;
             cout << " TOTAL SERVICIOS:  $" << precioTotalServicios      << endl;
@@ -700,7 +731,7 @@ void cobrarLiquidarTurno() {
                 fwrite(&reg, sizeof(Turno), 1, p);
                 cout << "\n[OK] ¡Cobro exitoso! El turno paso a estado LIQUIDADO.\n";
             } else {
-                cout << "\nOperacion cancelada. No se registro el ingreso de dinero.\n";
+                cout << "\n|Operacion cancelada. No se registro el ingreso de dinero.\n";
             }
             break;
         }
@@ -721,13 +752,12 @@ void menuTurnos() {
         cout << "=================================================" << endl;
         cout << "            MODULO: GESTION DE TURNOS            " << endl;
         cout << "=================================================" << endl;
-        cout << "1. Registrar Turno (Agendar)"                       << endl;
-        cout << "2. Ver Agenda de Turnos Activos"                    << endl;
+        cout << "1. Registrar Turno (Agendar)"                      << endl;
+        cout << "2. Ver Agenda de Turnos Activos"                   << endl;
         cout << "3. Registrar Asistencia (Dar Presente)"            << endl;
         cout << "4. Re-programar Turno (Cambiar Fecha/Hora)"        << endl;
         cout << "5. Cancelar Turno (Baja Logica)"                   << endl;
-        cout << "6. Consultar Disponibilidad Semanal (Grilla)"      << endl;
-        cout << "7. Registrar Cobro en Caja (Liquidar Turno)"       << endl;
+        cout << "6. Registrar Cobro en Caja (Liquidar Turno)"       << endl;
         cout << "0. Volver al Menu Principal"                       << endl;
         cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion: ";
@@ -948,7 +978,7 @@ void menuTurnos() {
 
                         if (opAgenda == 1) {
                             system("cls");
-                            mostrarGrillaSemanalAuto();
+                            mostrarGrillaSemanalAuto(idProfesionalElegido);
                             cout << "CONFECCION DEL HORARIO:\n";
 
                             Fecha fValidar;
@@ -1012,8 +1042,8 @@ void menuTurnos() {
                             cout << "\n[ERROR] Horario fuera del rango comercial. Presione ENTER...";
                             cin.ignore(1000, '\n'); cin.get();
                         }
-                        else if (verificarBloqueOcupado(diaElegido, mesElegido, anioElegido, horaElegida)) {
-                            cout << "\n[ERROR] El bloque horario ya esta ocupado. Presione ENTER...";
+                        else if (verificarBloqueOcupado(diaElegido, mesElegido, anioElegido, horaElegida, idProfesionalElegido)) {
+                            cout << "\n[ERROR] La profesional ya tiene agenda ocupada en ese horario. Presione ENTER...";
                             cin.ignore(1000, '\n'); cin.get();
                         }
                         else {
@@ -1101,13 +1131,6 @@ void menuTurnos() {
             system("cls");
         }
         else if (op == 6) {
-            system("cls");
-            mostrarGrillaSemanalAuto();
-            cout << "Presione ENTER para volver al menu...";
-            cin.ignore(1000, '\n'); cin.get();
-            system("cls");
-        }
-        else if (op == 7) {
             system("cls");
             cobrarLiquidarTurno();
             cin.ignore(1000, '\n'); cout << "\nPresione ENTER para continuar..."; cin.get();

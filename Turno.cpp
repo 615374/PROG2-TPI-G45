@@ -135,7 +135,7 @@ bool Turno::cargar() {
 
         if (modoFecha == 1) {
             system("cls");
-            mostrarGrillaSemanalAuto(); // Muestra los 5 dias habiles a partir de hoy
+            void mostrarGrillaSemanalAuto(int idProfesionalGrilla); // Muestra los 5 dias habiles a partir de hoy
 
             cout << "-------------------------------------------------\n";
             cout << "Ingrese el NUMERO de dia elegido (ej. 25): ";

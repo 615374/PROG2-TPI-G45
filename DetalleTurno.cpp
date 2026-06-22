@@ -10,8 +10,8 @@
 using namespace std;
 
 // PROTOTIPOS
-bool verificarBloqueOcupado(int d, int m, int a, int horaEvaluar);
-void mostrarGrillaSemanalAuto();
+void mostrarGrillaSemanalAuto(int idProfesionalGrilla);
+bool verificarBloqueOcupado(int d, int m, int a, int horaEvaluar, int idProfesionalEvaluar);
 
 // Funcion auxiliar para filtrar profesionales por servicio (usando la tabla intermedia)
 bool elProfesionalHaceElServicio(int idProf, int idServ) {
@@ -107,8 +107,11 @@ bool DetalleTurno::getEstado() {
 // METODOS PRINCIPALES DE LA CLASE
 
 //METODO CARGAR
-bool DetalleTurno::cargar(int idT, int idS, float precioBase) {
-    idTurno = idT; idServicio = idS; precioAlMomento = precioBase;
+bool DetalleTurno::cargar(int idT, int idS, float precioBase, int idP) {
+    idTurno = idT;
+    idServicio = idS;
+    precioAlMomento = precioBase;
+    idProfesional = idP;
 
     Turno turnoPadre;
     int posT = 0, diaF = 0, mesF = 0, anioF = 2026;
@@ -121,73 +124,77 @@ bool DetalleTurno::cargar(int idT, int idS, float precioBase) {
         }
     }
 
+    // PANEL 2: PROFESIONAL (CON FILTRO)
+    // Se ejecuta primero para saber a que agenda de profesional consultar la grilla
+    if (idProfesional == 0) {
+        system("cls");
+        cout << "=================================================" << endl;
+        cout << "            SELECCIONAR PROFESIONAL              " << endl;
+        cout << "=================================================" << endl;
+
+        Profesional prof;
+        int posP = 0;
+        bool hayProf = false;
+
+        cout << "Profesionales aptos para este servicio:" << endl;
+        cout << "-------------------------------------------------" << endl;
+        while(prof.leerDisco(posP++)) {
+            // Filtro: Solo muestra si esta activo y tiene relacion en ServicioXProfesional
+            if(prof.getEstado() && elProfesionalHaceElServicio(prof.getIdProfesional(), idS)) {
+                cout << "ID [" << prof.getIdProfesional() << "] - "
+                     << prof.getApellido() << ", " << prof.getNombre() << endl;
+                hayProf = true;
+            }
+        }
+
+        if (!hayProf) {
+            cout << "[AVISO] No hay profesionales asignados a este servicio.\n";
+            system("pause");
+            return false;
+        }
+
+        bool profValido = false;
+        do {
+            cout << "-------------------------------------------------" << endl;
+            cout << "Ingrese ID del Profesional (0 para cancelar): ";
+            cin >> idProfesional;
+            if (idProfesional == 0) return false;
+
+            // Validar doble: que exista y que tenga la especialidad
+            if (prof.buscarPorId(idProfesional) && elProfesionalHaceElServicio(idProfesional, idS)) {
+                profValido = true;
+            } else {
+                cout << "[ERROR] ID invalido o no apto para este servicio.\n";
+            }
+        } while (!profValido);
+    }
+
     // PANEL 1: HORARIO
     system("cls");
     cout << "=================================================" << endl;
-    cout << "           ASIGNAR HORARIO DEL TURNO             " << endl;
+    cout << "            ASIGNAR HORARIO DEL TURNO             " << endl;
     cout << "=================================================" << endl;
 
     bool horarioValido = false;
     do {
-        cout << "Ingrese Hora (10-17) [0 para cancelar]: ";
+        cout << "Ingrese Hora (09-18) [0 para cancelar]: ";
         cin >> hora;
         if (hora == 0) return false;
 
-        if (hora < 10 || hora > 17) {
+        if (hora < 9 || hora > 18) {
             cout << "[ERROR] Fuera de horario comercial.\n";
-        } else if (verificarBloqueOcupado(diaF, mesF, anioF, hora)) {
+        }
+        else if (verificarBloqueOcupado(diaF, mesF, anioF, hora, idProfesional)) {
             cout << "[ERROR] Horario ocupado. Consultando grilla...\n";
             system("pause");
             system("cls");
-            mostrarGrillaSemanalAuto();
+            mostrarGrillaSemanalAuto(idProfesional);
             cout << "\nIngrese Hora nuevamente: ";
         } else {
             horarioValido = true;
         }
     } while (!horarioValido);
     minuto = 0;
-
-    // PANEL 2: PROFESIONAL (CON FILTRO)
-    system("cls");
-    cout << "=================================================" << endl;
-    cout << "           SELECCIONAR PROFESIONAL               " << endl;
-    cout << "=================================================" << endl;
-
-    Profesional prof;
-    int posP = 0;
-    bool hayProf = false;
-
-    cout << "Profesionales aptos para este servicio:" << endl;
-    cout << "-------------------------------------------------" << endl;
-    while(prof.leerDisco(posP++)) {
-        // Filtro: Solo muestra si esta activo y tiene relacion en ServicioXProfesional
-        if(prof.getEstado() && elProfesionalHaceElServicio(prof.getIdProfesional(), idS)) {
-            cout << "ID [" << prof.getIdProfesional() << "] - "
-                 << prof.getApellido() << ", " << prof.getNombre() << endl;
-            hayProf = true;
-        }
-    }
-
-    if (!hayProf) {
-        cout << "[AVISO] No hay profesionales asignados a este servicio.\n";
-        system("pause");
-        return false;
-    }
-
-    bool profValido = false;
-    do {
-        cout << "-------------------------------------------------" << endl;
-        cout << "Ingrese ID del Profesional (0 para cancelar): ";
-        cin >> idProfesional;
-        if (idProfesional == 0) return false;
-
-        // Validar doble: que exista y que tenga la especialidad
-        if (prof.buscarPorId(idProfesional) && elProfesionalHaceElServicio(idProfesional, idS)) {
-            profValido = true;
-        } else {
-            cout << "[ERROR] ID inválido o no apto para este servicio.\n";
-        }
-    } while (!profValido);
 
     // PANEL 3: OBSERVACIONES
     cin.ignore(1000, '\n');

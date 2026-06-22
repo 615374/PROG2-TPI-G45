@@ -14,8 +14,7 @@ class DetalleTurno {
     public:
         DetalleTurno();
 
-        // Cargar recibe el ID del turno padre y el precio base del servicio elegido
-        bool cargar(int idT, int idS, float precioBase);
+        bool cargar(int idT, int idS, float precioBase, int idP);
         void mostrar();
 
         // Getters y Setters
