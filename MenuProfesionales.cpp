@@ -3,6 +3,9 @@
 #include <cstring>
 #include "MenuProfesionales.h"
 #include "Profesional.h"
+#include "DetalleTurno.h"
+#include "Turno.h"
+#include "Fecha.h"
 
 using namespace std;
 
@@ -133,14 +136,167 @@ void listarProfesionalesInactivos() {
     cout << "=================================================" << endl << endl;
 }
 
-// Algoritmo: Filtrara el listado ordenando por volumen de servicios brindados
+// Algoritmo: Lista profesionales segun cantidad de servicios realizados
 void listarProfesionalesPorVolumenServicios() {
-    cout << " [Proximamente: Se resolvera al avanzar con el modulo Turnos]\n\n";
+    Profesional profesional;
+    int posProfesional = 0;
+    bool encontroServicios = false;
+
+    cout << "=================================================" << endl;
+    cout << "      PROFESIONALES POR SERVICIOS REALIZADOS     " << endl;
+    cout << "=================================================" << endl;
+
+    // Recorre todos los profesionales guardados
+    while (profesional.leerDisco(posProfesional)) {
+        if (profesional.getEstado()) { // Solo profesionales activos
+
+            int cantidadServicios = 0;
+
+            DetalleTurno detalle;
+            int posDetalle = 0;
+
+            // Recorre todos los detalles de turnos
+            while (detalle.leerDisco(posDetalle)) {
+
+                // Verifica si el detalle pertenece al profesional actual
+                if (detalle.getEstado() &&
+                    detalle.getIdProfesional() == profesional.getIdProfesional()) {
+
+                    Turno turno;
+                    int posTurno = 0;
+
+                    // Busca el turno padre del detalle
+                    while (turno.leerDisco(posTurno)) {
+
+                        // Cuenta solo servicios de turnos activos y asistidos
+                        if (turno.getEstado() &&
+                            turno.getAsistio() &&
+                            turno.getIdTurno() == detalle.getIdTurno()) {
+
+                            cantidadServicios++;
+                            break;
+                        }
+                        posTurno++;
+                    }
+                }
+                posDetalle++;
+            }
+
+            // Muestra solo profesionales que realizaron al menos un servicio
+            if (cantidadServicios > 0) {
+                cout << "PROFESIONAL: " << profesional.getApellido()
+                     << ", " << profesional.getNombre() << endl;
+                cout << "ID PROFESIONAL: " << profesional.getIdProfesional() << endl;
+                cout << "ESPECIALIDAD: " << profesional.getEspecialidad() << endl;
+                cout << "SERVICIOS REALIZADOS: " << cantidadServicios << endl;
+                cout << "-----------------------------------" << endl;
+
+                encontroServicios = true;
+            }
+        }
+        posProfesional++;
+    }
+    if (!encontroServicios) {
+        cout << "No hay servicios realizados por profesionales para mostrar.\n\n";
+    }
 }
 
-// Algoritmo: Filtrara la liquidacion cruzando comisiones del mes
+// Algoritmo: Filtra la liquidacion cruzando profesionales, detalles y turnos asistidos del mes
 void liquidacionComisiones() {
-    cout << " [Proximamente: Reporte de Liquidacion de Comisiones]\n\n";
+    int mesBuscado;
+    int anioBuscado;
+
+    // Se pide el periodo que se quiere liquidar
+    cout << "Ingrese mes a liquidar (1-12): ";
+    cin >> mesBuscado;
+
+    cout << "Ingrese anio a liquidar: ";
+    cin >> anioBuscado;
+
+    // Validacion del mes ingresado
+    if (mesBuscado < 1 || mesBuscado > 12) {
+        cout << "[ERROR] Mes invalido.\n\n";
+        return;
+    }
+    // Validacion del anio ingresado
+    if (anioBuscado < 2025) {
+        cout << "[ERROR] Anio invalido.\n\n";
+        return;
+    }
+    Profesional profesional;
+    int posProfesional = 0;
+    bool encontroLiquidaciones = false;
+
+    // Recorre todos los profesionales guardados en profesionales.dat
+    while (profesional.leerDisco(posProfesional)) {
+        if (profesional.getEstado()) { // Solo liquida profesionales activos
+            float totalProducido = 0;
+            int cantidadServicios = 0;
+
+            DetalleTurno detalle;
+            int posDetalle = 0;
+
+            // Recorre todos los detalles de turnos guardados
+            while (detalle.leerDisco(posDetalle)) {
+
+                // Verifica que el detalle este activo y pertenezca al profesional actual
+                if (detalle.getEstado() &&
+                    detalle.getIdProfesional() == profesional.getIdProfesional()) {
+
+                    Turno turno;
+                    int posTurno = 0;
+
+                    // Busca el turno padre al que pertenece ese detalle
+                    while (turno.leerDisco(posTurno)) {
+
+                        // Solo cuenta turnos activos, asistidos y relacionados con el detalle
+                        if (turno.getEstado() &&
+                            turno.getAsistio() &&
+                            turno.getIdTurno() == detalle.getIdTurno()) {
+
+                            Fecha fechaTurno = turno.getFecha();
+
+                            // Filtra por mes y anio solicitado
+                            if (fechaTurno.getMes() == mesBuscado &&
+                                fechaTurno.getAnio() == anioBuscado) {
+
+                                // Suma el precio congelado al momento de registrar el turno
+                                totalProducido += detalle.getPrecioAlMomento();
+
+                                // Cuenta un servicio realizado para ese profesional
+                                cantidadServicios++;
+                            }
+                            break; // Ya encontro el turno correspondiente, no hace falta seguir buscando
+                        }
+                        posTurno++;
+                    }
+                }
+                posDetalle++;
+            }
+            // Si el profesional tuvo servicios realizados, calcula su comision
+            if (cantidadServicios > 0) {
+                float comision = totalProducido * profesional.getComision() / 100;
+
+                cout << "-----------------------------------" << endl;
+                cout << "PROFESIONAL: " << profesional.getApellido()
+                     << ", " << profesional.getNombre() << endl;
+                cout << "ID PROFESIONAL: " << profesional.getIdProfesional() << endl;
+                cout << "MES LIQUIDADO: " << mesBuscado << "/" << anioBuscado << endl;
+                cout << "SERVICIOS REALIZADOS: " << cantidadServicios << endl;
+                cout << "TOTAL PRODUCIDO: $" << totalProducido << endl;
+                cout << "PORCENTAJE COMISION: " << profesional.getComision() << "%" << endl;
+                cout << "COMISION A PAGAR: $" << comision << endl;
+                cout << "-----------------------------------" << endl;
+
+                encontroLiquidaciones = true;
+            }
+        }
+        posProfesional++;
+    }
+    // Si ningun profesional tuvo servicios asistidos en ese mes, avisa
+    if (!encontroLiquidaciones) {
+        cout << "No hay servicios realizados para liquidar en ese mes.\n\n";
+    }
 }
 
 // FUNCIONES GLOBALES DE MANTENIMIENTO
@@ -412,7 +568,13 @@ void menuProfesionales() {
             darDeBajaProfesional();
             system("cls");
         }
-    } while (op != 0);
-
+        else if (op != 0) {
+            cout << "[ERROR] Opcion incorrecta. Reintente.\n\n";
+            cin.ignore(1000, '\n');
+            cout << "Presione ENTER para continuar...";
+            cin.get();
+            system("cls");
+        }
+            } while (op != 0);
     system("cls");
 }
