@@ -6,7 +6,7 @@ Un sistema de gestión desarrollado en **C++** orientado a la administración ef
 
 ---
 
-## 👥 Integrantes
+## Integrantes
 * **Gisela Grisel Lanzillotta**
 * **Sol Dánae Lezcano**
   
@@ -55,13 +55,10 @@ El programa procesa la información en disco para generar los siguientes reporte
 
 ---
 
-## Estructura del Repositorio
+## Estructura del Proyecto
 
-```text
-sistema-estetica/
-├── main.cpp                 # Punto de entrada de la aplicación
-├── include/                 # Archivos de cabecera (.h) para declaración de clases
-├── src/                     # Implementación de métodos (.cpp)
-├── data/                    # Archivos de datos binarios (.dat)
-├── backups/                 # Copias de seguridad del sistema
-└── README.md
+Para facilitar la compilación directa y mantener la compatibilidad con el entorno Code::Blocks del equipo, todos los componentes del sistema se encuentran organizados de forma plana en la raíz del directorio principal:
+
+* **Archivos de Código Fuente (`*.cpp`):** Contienen la lógica de negocio, flujos de menús y desarrollos de métodos de cada clase.
+* **Archivos de Cabecera (`*.h`):** Definen las estructuras de las clases, prototipos de funciones globales y atributos.
+* **Archivos de Base de Datos (`*.dat`):** Archivos binarios de persistencia donde se almacenan y modifican los registros del centro de estética (generados automáticamente al ejecutar el sistema).
