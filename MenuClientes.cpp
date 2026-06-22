@@ -3,9 +3,10 @@
 #include <cstring>
 #include "MenuClientes.h"
 #include "Cliente.h"
+#include "Turno.h"
+#include "DetalleTurno.h"
 
 using namespace std;
-
 
 // FUNCIONES GLOBALES DE LISTADOS Y REPORTES
 
@@ -67,9 +68,110 @@ void listarClientasPorApellido() {
     delete[] vectorClientes;
 }
 
-// Algoritmo: Filtrara el listado cruzando datos con la clase Turno
+// Algoritmo: Filtra el listado cruzando datos con la clase Turno
+
+// Estructura auxiliar local para el ordenamiento por frecuencia
+struct RegistroFrecuencia {
+    int idCliente;
+    int cantidadTurnos;
+};
+
 void listarClientasPorFrecuencia() {
-    cout << " [Proximamente: Se resolvera al avanzar con el modulo Turnos]\n\n";
+    Cliente cReg;
+    int posC = 0;
+    int totalClientas = 0;
+
+    // Contamos cuantas clientas activas hay en disco para dimensionar la memoria exacta
+    while (cReg.leerDisco(posC++)) {
+        if (cReg.getEstado() == true) {
+            totalClientas++;
+        }
+    }
+
+    if (totalClientas == 0) {
+        cout << "\n[AVISO] No hay clientas activas registradas en el sistema.\n";
+        return;
+    }
+
+    // Creamos el array dinamico para guardar temporalmente los IDs y sus contadores
+    RegistroFrecuencia* listaFrecuencia = new RegistroFrecuencia[totalClientas];
+    if (listaFrecuencia == nullptr) {
+        cout << "\n[ERROR] Fallo crítico de asignación de memoria dinámica.\n";
+        return;
+    }
+
+    // Volcamos las clientas activas al array inicializando los turnos en 0
+    posC = 0;
+    int idx = 0;
+    while (cReg.leerDisco(posC++)) {
+        if (cReg.getEstado() == true) {
+            listaFrecuencia[idx].idCliente = cReg.getIdCliente();
+            listaFrecuencia[idx].cantidadTurnos = 0;
+            idx++;
+        }
+    }
+
+    // Cruzamos datos: Recorremos turnos.dat acumulando las citas de cada una
+    Turno tReg;
+    int posT = 0;
+    while (tReg.leerDisco(posT++)) {
+        if (tReg.getEstado() == true) {
+            for (int i = 0; i < totalClientas; i++) {
+                if (listaFrecuencia[i].idCliente == tReg.getIdCliente()) {
+                    listaFrecuencia[i].cantidadTurnos++;
+                    break;
+                }
+            }
+        }
+    }
+
+    //Algo ritmo de Ordenamiento: Metodo de la burbuja (de Mayor a Menor)
+    for (int i = 0; i < totalClientas - 1; i++) {
+        for (int j = 0; j < totalClientas - i - 1; j++) {
+            if (listaFrecuencia[j].cantidadTurnos < listaFrecuencia[j+1].cantidadTurnos) {
+                // Intercambio completo de la estructura
+                RegistroFrecuencia aux = listaFrecuencia[j];
+                listaFrecuencia[j] = listaFrecuencia[j+1];
+                listaFrecuencia[j+1] = aux;
+            }
+        }
+    }
+
+    // Renderizado en pantalla con las mas frecuentes arriba
+    cout << "=================================================" << endl;
+    cout << "          LISTADO: CLIENTAS POR FRECUENCIA       " << endl;
+    cout << "=================================================" << endl;
+    cout << " ID   | Apellido y Nombre          | Citas Asignadas " << endl;
+    cout << "-------------------------------------------------" << endl;
+
+    for (int i = 0; i < totalClientas; i++) {
+        Cliente cliAux;
+        int posBusqueda = 0;
+        char nombreCompleto[100] = "";
+
+        // Buscamos el registro del cliente en disco para recuperar el nombre para el panel
+        while (cliAux.leerDisco(posBusqueda++)) {
+            if (cliAux.getIdCliente() == listaFrecuencia[i].idCliente) {
+                strcpy(nombreCompleto, cliAux.getApellido());
+                strcat(nombreCompleto, ", ");
+                strcat(nombreCompleto, cliAux.getNombre());
+                break;
+            }
+        }
+
+        cout << "[" << (listaFrecuencia[i].idCliente < 10 ? "0" : "") << listaFrecuencia[i].idCliente << "] | "
+             << nombreCompleto;
+
+        // Formateador de espacios para alinear las columnas
+        int largoTexto = strlen(nombreCompleto);
+        for (int e = largoTexto; e < 26; e++) cout << " ";
+
+        cout << " | " << listaFrecuencia[i].cantidadTurnos << " turno(s)" << endl;
+    }
+    cout << "=================================================" << endl << endl;
+
+    // Liberacion de memoria dinamica
+    delete[] listaFrecuencia;
 }
 
 // Algoritmo: Filtrara las clientas que posean deudas registradas
