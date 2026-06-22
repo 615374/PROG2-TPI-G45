@@ -13,9 +13,13 @@
 
 using namespace std;
 
-// FUNCIONES GLOBALES DE AUXILIO PARA EL MENÚ
+// FUNCIONES GLOBALES DE SOPORTE Y LOGICA DE NEGOCIO
 
-// Funcion auxiliar 1: Revisa si hay un turno activo en esa fecha y hora especifica
+//-------------------------------------
+// VERIFICAR BLOQUE HORARIO OCUPADO
+//-------------------------------------
+
+// Revisa si hay un turno activo en esa fecha y hora especifica
 bool verificarBloqueOcupado(int d, int m, int a, int horaEvaluar) {
     Turno t;
     DetalleTurno dt;
@@ -42,7 +46,11 @@ bool verificarBloqueOcupado(int d, int m, int a, int horaEvaluar) {
     return false;
 }
 
-// Funcion auxiliar 2: Renderiza la grilla de la semana entrante si es fin de semana
+//-----------------------------------------------
+// GRILLA DE DISPONIBILIDAD SEMANAL INTERACTIVA
+//-----------------------------------------------
+
+//Renderiza la grilla de la semana entrante si es fin de semana
 void mostrarGrillaSemanalAuto() {
     time_t tActual = time(0);
     tm* ahora = localtime(&tActual);
@@ -84,7 +92,11 @@ void mostrarGrillaSemanalAuto() {
     cout << "=================================================\n" << endl;
 }
 
-// Algoritmo: Busca clientas por coincidencia parcial en el apellido y retorna el ID seleccionado
+//------------------------------------------------------------
+// FILTRADO DE CLIENTAS ACTIVAS POR COINCIDENCIA DE APELLIDO
+//------------------------------------------------------------
+
+// Busca clientas por coincidencia parcial en el apellido y retorna el ID seleccionado
 int buscarClienteParaTurno(const char* apellidoBuscado) {
     Cliente reg;
     int pos = 0;
@@ -136,7 +148,11 @@ int buscarClienteParaTurno(const char* apellidoBuscado) {
     return -1;
 }
 
-// Algoritmo: Extrae, ordena cronologicamente y lista la agenda diaria con horario de arribo
+//-----------------------------------------------------
+// GENERACION CRONOLOGICA DE AGENDA (MEMORIA DINAMICA)
+//-----------------------------------------------------
+
+// Extrae, ordena cronologicamente y lista la agenda diaria con horario de llegada
 void listarAgendaCronologica() {
     Turno tReg;
     int pos = 0;
@@ -253,7 +269,9 @@ void listarAgendaCronologica() {
     delete[] minsArribo;
 }
 
-// Funcion: registrar asistencia (dar presente)
+//------------------------------------
+// REGISTRAR ASISTENCIA (DAR PRESENTE)
+//------------------------------------
 void registrarAsistencia() {
     int idBuscado;
     Turno reg;
@@ -263,7 +281,11 @@ void registrarAsistencia() {
     cout << "=================================================" << endl;
     cout << "          REGISTRAR ASISTENCIA DE CLIENTA        " << endl;
     cout << "=================================================" << endl;
-    cout << "Ingrese el ID del Turno (0 para cancelar): ";
+
+    // Mostramos todos los turnos activos ordenados cronologicamente
+    listarAgendaCronologica();
+
+    cout << "Ingrese el ID del Turno para dar el PRESENTE (0 para cancelar): ";
     cin >> idBuscado;
 
     if (idBuscado == 0) return;
@@ -292,7 +314,10 @@ void registrarAsistencia() {
     if (!encontrado) cout << "\n[ERROR] No se encontro ningun turno activo con ese ID.\n";
 }
 
-// Funcion: Re-programar turno (libera el horario viejo y selecciona uno nuevo)
+//--------------------------------------------------------
+// RE-PROGRAMAR HORARIO DE ATENCION (CON CAMBIO EN CASCADA)
+//--------------------------------------------------------
+
 void reprogramarTurno() {
     int idBuscado;
     Turno reg;
@@ -302,6 +327,10 @@ void reprogramarTurno() {
     cout << "=================================================" << endl;
     cout << "          RE-PROGRAMAR HORARIO DE TURNO          " << endl;
     cout << "=================================================" << endl;
+
+    // Desplegamos la lista para saber a quien vamos a re-programar
+    listarAgendaCronologica();
+
     cout << "Ingrese el ID del Turno a modificar (0 para volver): ";
     cin >> idBuscado;
 
