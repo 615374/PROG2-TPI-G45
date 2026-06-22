@@ -298,6 +298,13 @@ void menuConsultasServicios() {
             cin.ignore(1000, '\n'); cin.get();
             system("cls");
         }
+        else if (op != 0) {
+            cout << "[ERROR] Opcion incorrecta. Reintente.\n\n";
+            cin.ignore(1000, '\n');
+            cout << "Presione ENTER para continuar...";
+            cin.get();
+            system("cls");
+        }
     } while (op != 0);
 }
 
@@ -346,6 +353,13 @@ void menuServicios() {
         else if (op == 4) {
             system("cls");
             darDeBajaServicio();
+            system("cls");
+        }
+        else if (op != 0) {
+            cout << "[ERROR] Opcion incorrecta. Reintente.\n\n";
+            cin.ignore(1000, '\n');
+            cout << "Presione ENTER para continuar...";
+            cin.get();
             system("cls");
         }
     } while (op != 0);
