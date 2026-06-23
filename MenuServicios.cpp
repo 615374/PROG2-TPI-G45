@@ -412,6 +412,7 @@ void menuConsultasServicios() {
             cin.ignore(1000, '\n');
             cout << "Presione ENTER para continuar...";
             cin.get();
+        }
         else if (op == 4) {
             system("cls");
             rankingServiciosMasPedidos();

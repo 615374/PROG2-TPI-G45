@@ -6,6 +6,7 @@
 #include "MenuServicios.h"
 #include "MenuServiciosXProfesional.h"
 #include "MenuTurnos.h"
+#include "MenuConfiguracion.h"
 
 using namespace std;
 
@@ -20,6 +21,7 @@ int main(){
         cout << "3) Modulo: Catalogo de Servicios y Precios" << endl;
         cout << "4) Modulo: Agenda de Turnos y Detalles" << endl;
         cout << "5) Modulo: Servicio por Profesional" << endl;
+        cout << "6) Modulo: Configuracion del Sistema" << endl;
         cout << "0) Cerrar Sistema" << endl;
         cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion de las anteriores: ";
@@ -43,6 +45,9 @@ int main(){
                 break;
             case 5:
                 menuServicioXProfesional();
+                break;
+            case 6:
+                menuConfiguracion();
                 break;
             case 0:
                 cout << "Saliendo de la aplicacion de gestion..." << endl;
