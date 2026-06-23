@@ -64,10 +64,7 @@ Para facilitar la compilación directa y mantener la compatibilidad con el entor
 * **Archivos de Cabecera (`*.h`):** Definen las estructuras de las clases, prototipos de funciones globales y atributos.
 * **Archivos de Base de Datos (`*.dat`):** Archivos binarios de persistencia donde se almacenan y modifican los registros del centro de estética (generados automáticamente al ejecutar el sistema).
 
-## Posibles Mejoras Futuras
-* **Implementación de Herencia en POO:** Reestructurar el modelo para abstraer las clases `Cliente` y `Profesional` bajo una clase base común denominada `Persona`, optimizando la reutilización de código para atributos compartidos (Nombre, Apellido, DNI, Teléfono).
-* **Migración a Base de Datos Relacional:** Evolucionar la persistencia de archivos binarios `.dat` hacia un motor estructurado (como SQL) para facilitar consultas complejas y subconsultas mediante sentencias nativas.
-
+---
 
 ## Compilación y Ejecución
 
@@ -77,4 +74,12 @@ Para compilar y ejecutar el sistema en un entorno local, siga estos pasos:
 3. Asegúrese de realizar una compilación limpia seleccionando **Build -> Clean** y luego **Build -> Rebuild**.
 4. Presione el botón de **Run** (o `F9`) para iniciar la consola ejecutable.
 *Nota: Los archivos de base de datos `.dat` se generarán automáticamente en la raíz del proyecto tras la primera ejecución.*
+
+---
+
+## Posibles Mejoras Futuras
+* **Implementación de Herencia en POO:** Reestructurar el modelo para abstraer las clases `Cliente` y `Profesional` bajo una clase base común denominada `Persona`, optimizando la reutilización de código para atributos compartidos (Nombre, Apellido, DNI, Teléfono).
+* **Migración a Base de Datos Relacional:** Evolucionar la persistencia de archivos binarios `.dat` hacia un motor estructurado (como SQL) para facilitar consultas complejas y subconsultas mediante sentencias nativas.
+
+
 
