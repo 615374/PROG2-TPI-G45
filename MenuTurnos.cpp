@@ -719,18 +719,25 @@ void cobrarLiquidarTurno() {
             cout << "¿Confirma el pago en efectivo/tarjeta? (S/N): ";
             cin >> confirma;
 
-            if (confirma == 'S' || confirma == 's') {
+           if (confirma == 'S' || confirma == 's') {
                 reg.setLiquidado(true);
-                Fecha hoy; // Usa el constructor
-                hoy.setDia(22);
-                hoy.setMes(6);
-                hoy.setAnio(2026);
-                reg.setFechaLiquidacion(hoy);
+
+                Fecha fechaCobro;
+
+                cout << "\nIngrese fecha del cobro/liquidacion:" << endl;
+
+                if (!fechaCobro.cargar()) {
+                    cout << "\n[AVISO] Cobro cancelado. No se registro el ingreso de dinero.\n";
+                    fclose(p);
+                    return;
+                }
+
+                reg.setFechaLiquidacion(fechaCobro);
 
                 fseek(p, pos * sizeof(Turno), SEEK_SET);
                 fwrite(&reg, sizeof(Turno), 1, p);
                 cout << "\n[OK] ¡Cobro exitoso! El turno paso a estado LIQUIDADO.\n";
-            } else {
+              } else {
                 cout << "\n|Operacion cancelada. No se registro el ingreso de dinero.\n";
             }
             break;
@@ -741,6 +748,165 @@ void cobrarLiquidarTurno() {
 
     if (!encontrado) cout << "\n[ERROR] No se encontro ningun turno activo con ese ID.\n";
 }
+
+
+//-----------------------------------------------------
+// SUB-MENU: CAJA Y LIQUIDACIONES
+//-----------------------------------------------------
+// Algoritmo: Agrupa las operaciones economicas relacionadas con turnos
+void submenuCajaLiquidaciones() {
+    int op;
+
+    do {
+        cout << "=================================================" << endl;
+        cout << "              CAJA Y LIQUIDACIONES              " << endl;
+        cout << "=================================================" << endl;
+        cout << "1. Registrar Cobro en Caja" << endl;
+        cout << "2. Reporte General de Caja" << endl;
+        cout << "0. Volver al Modulo de Turnos" << endl;
+        cout << "-------------------------------------------------" << endl;
+        cout << "Seleccione una opcion: ";
+        cin >> op;
+        cout << endl;
+
+        if (op == 1) {
+            system("cls");
+            cobrarLiquidarTurno();
+            cin.ignore(1000, '\n');
+            cout << "\nPresione ENTER para continuar...";
+            cin.get();
+            system("cls");
+        }
+        else if (op == 2) {
+            system("cls");
+            reporteCajaGeneral();
+            cin.ignore(1000, '\n');
+            cout << "\nPresione ENTER para continuar...";
+            cin.get();
+            system("cls");
+        }
+        else if (op != 0) {
+            cout << "[ERROR] Opcion incorrecta. Reintente.\n\n";
+            cin.ignore(1000, '\n');
+            cout << "Presione ENTER para continuar...";
+            cin.get();
+            system("cls");
+        }
+
+    } while (op != 0);
+
+    system("cls");
+}
+
+
+
+//-----------------------------------------------------
+// REPORTE GENERAL DE CAJA
+//-----------------------------------------------------
+// Algoritmo: Filtra turnos liquidados por fecha de cobro y calcula la caja del dia
+void reporteCajaGeneral() {
+    int diaBuscado;
+    int mesBuscado;
+    int anioBuscado;
+
+    cout << "Ingrese dia de caja (1-31): ";
+    cin >> diaBuscado;
+
+    cout << "Ingrese mes de caja (1-12): ";
+    cin >> mesBuscado;
+
+    cout << "Ingrese anio de caja: ";
+    cin >> anioBuscado;
+
+    if (diaBuscado < 1 || diaBuscado > 31) {
+        cout << "[ERROR] Dia invalido.\n\n";
+        return;
+    }
+
+    if (mesBuscado < 1 || mesBuscado > 12) {
+        cout << "[ERROR] Mes invalido.\n\n";
+        return;
+    }
+
+    if (anioBuscado < 2025) {
+        cout << "[ERROR] Anio invalido.\n\n";
+        return;
+    }
+
+    Turno turno;
+    int posTurno = 0;
+    bool encontroMovimientos = false;
+    int cantidadTurnos = 0;
+
+    float totalSenas = 0;
+    float totalSaldosCobrados = 0;
+    float totalFacturadoServicios = 0;
+
+    cout << "=================================================" << endl;
+    cout << "              REPORTE GENERAL DE CAJA            " << endl;
+    cout << "=================================================" << endl;
+    cout << "FECHA DE CAJA: " << diaBuscado << "/" << mesBuscado << "/" << anioBuscado << endl;
+    cout << "-------------------------------------------------" << endl;
+
+    while (turno.leerDisco(posTurno)) {
+        if (turno.getEstado() && turno.getLiquidado()) {
+            Fecha fechaCaja = turno.getFechaLiquidacion();
+
+            if (fechaCaja.getDia() == diaBuscado &&
+                fechaCaja.getMes() == mesBuscado &&
+                fechaCaja.getAnio() == anioBuscado) {
+
+                DetalleTurno detalle;
+                int posDetalle = 0;
+                float totalServiciosTurno = 0;
+
+                while (detalle.leerDisco(posDetalle)) {
+                    if (detalle.getEstado() &&
+                        detalle.getIdTurno() == turno.getIdTurno()) {
+                        totalServiciosTurno += detalle.getPrecioAlMomento();
+                    }
+
+                    posDetalle++;
+                }
+
+                float saldoCobrado = totalServiciosTurno - turno.getSena();
+
+                if (saldoCobrado < 0) {
+                    saldoCobrado = 0;
+                }
+
+            cout << "TURNO ID: " << turno.getIdTurno()
+                 << " | CLIENTE ID: " << turno.getIdCliente()
+                 << " | SENIA: $" << turno.getSena()
+                 << " | SALDO FINAL: $" << saldoCobrado
+                 << " | INGRESO TOTAL: $" << turno.getSena() + saldoCobrado
+                 << endl;
+
+                totalSenas += turno.getSena();
+                totalSaldosCobrados += saldoCobrado;
+                totalFacturadoServicios += totalServiciosTurno;
+                cantidadTurnos++;
+                encontroMovimientos = true;
+            }
+        }
+
+        posTurno++;
+    }
+
+    cout << "-------------------------------------------------" << endl;
+
+    if (!encontroMovimientos) {
+        cout << "No se registraron cobros liquidados para esa fecha.\n";
+    }
+    else {
+      cout << "TURNOS COBRADOS: " << cantidadTurnos << endl;
+        cout << "INGRESOS POR SENIAS: $" << totalSenas << endl;
+        cout << "INGRESOS POR SALDOS FINALES: $" << totalSaldosCobrados << endl;
+        cout << "INGRESOS TOTALES: $" << totalSenas + totalSaldosCobrados << endl;
+        cout << "TOTAL SERVICIOS REALIZADOS: $" << totalFacturadoServicios << endl; }
+        cout << "=================================================" << endl;
+}
+
 
 // SUB-MENU PRINCIPAL: MODULO DE TURNOS
 
@@ -757,7 +923,7 @@ void menuTurnos() {
         cout << "3. Registrar Asistencia (Dar Presente)"            << endl;
         cout << "4. Re-programar Turno (Cambiar Fecha/Hora)"        << endl;
         cout << "5. Cancelar Turno (Baja Logica)"                   << endl;
-        cout << "6. Registrar Cobro en Caja (Liquidar Turno)"       << endl;
+        cout << "6. Caja y Liquidaciones"       << endl;
         cout << "0. Volver al Menu Principal"                       << endl;
         cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion: ";
@@ -1132,9 +1298,7 @@ void menuTurnos() {
         }
         else if (op == 6) {
             system("cls");
-            cobrarLiquidarTurno();
-            cin.ignore(1000, '\n'); cout << "\nPresione ENTER para continuar..."; cin.get();
-            system("cls");
+            submenuCajaLiquidaciones();
         }
         else if (op != 0) {
             cout << "[ERROR] Opcion incorrecta. Reintente.\n\n";

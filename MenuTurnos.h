@@ -8,4 +8,5 @@ bool verificarBloqueOcupado(int d, int m, int a, int horaEvaluar, int idProfesio
 
 void listarTurnosActivosCronologicos();
 
+void reporteCajaGeneral();
 
