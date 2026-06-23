@@ -14,66 +14,8 @@
 
 using namespace std;
 
-//DECLARACION DE FUNCIONES MENU CONFIGURACION
-void crearBackup();
-void restaurarBackup();
-void exportarCSV();
-
-void exportarClientesCSV(bool mostrarMensaje);
-void exportarProfesionalesCSV(bool mostrarMensaje);
-void exportarServiciosCSV(bool mostrarMensaje);
-void exportarServicioXProfesionalCSV(bool mostrarMensaje);
-void exportarTurnosCSV(bool mostrarMensaje);
-void exportarDetalleTurnoCSV(bool mostrarMensaje);
-void exportarTodoCSV();
-
-
-// SUBMENU CONFIGURACION DEL SISTEMA
-void menuConfiguracion() {
-
-    int op;
-
-    do {
-        system("cls");
-
-        cout << "==========================================" << endl;
-        cout << "      CONFIGURACION DEL SISTEMA" << endl;
-        cout << "==========================================" << endl;
-        cout << "1) Crear Backup" << endl;
-        cout << "2) Restaurar Backup" << endl;
-        cout << "3) Exportar Datos a CSV" << endl;
-        cout << "0) Volver" << endl;
-        cout << "==========================================" << endl;
-        cout << "Opcion: ";
-        cin >> op;
-
-        switch(op) {
-
-        case 1:
-            crearBackup();
-            break;
-        case 2:
-            restaurarBackup();
-            break;
-        case 3:
-            exportarCSV();
-            break;
-        case 0:
-            break;
-        default:
-            cout << "\n[ERROR] Opcion invalida." << endl;
-            cin.ignore(1000, '\n');
-            cout << "Presione ENTER para continuar...";
-            cin.get();
-        }
-    } while(op != 0);
-  system("cls");
-}
-
-
 // FUNCIONES GLOBALES
-
-// Crea una copia de seguridad de los archivos del sistema
+/// Crea una copia de seguridad de los archivos del sistema
 void crearBackup() {
 
     system("cls");
@@ -100,7 +42,7 @@ void crearBackup() {
 }
 
 
-// Restaura una copia de seguridad previamente creada
+/// Restaura una copia de seguridad previamente creada
 void restaurarBackup() {
 
     system("cls");
@@ -142,10 +84,9 @@ void restaurarBackup() {
 }
 
 
-// Exporta la informacion del sistema a archivos CSV
+/// Exporta la informacion del sistema a archivos CSV
 // Submenu para exportar informacion a CSV
 void exportarCSV() {
-
     int op;
 
     do {
@@ -200,7 +141,6 @@ void exportarCSV() {
    system("cls");
 }
 
-
 // Exporta clientas a archivo CSV
 void exportarClientesCSV(bool mostrarMensaje) {
 
@@ -234,7 +174,6 @@ void exportarClientesCSV(bool mostrarMensaje) {
         cin.get();
     }
 }
-
 
 // Exporta profesionales a archivo CSV
 void exportarProfesionalesCSV(bool mostrarMensaje) {
@@ -270,7 +209,6 @@ void exportarProfesionalesCSV(bool mostrarMensaje) {
         cin.get();
     }
 }
-
 
 // Exporta servicios a archivo CSV
 void exportarServiciosCSV(bool mostrarMensaje) {
@@ -339,7 +277,6 @@ void exportarServicioXProfesionalCSV(bool mostrarMensaje) {
     }
 }
 
-
 // Exporta turnos a archivo CSV
 void exportarTurnosCSV(bool mostrarMensaje) {
 
@@ -401,7 +338,6 @@ void exportarTurnosCSV(bool mostrarMensaje) {
     }
 }
 
-
 // Exporta Detalle Turno a archivo CSV
 void exportarDetalleTurnoCSV(bool mostrarMensaje) {
 
@@ -439,7 +375,6 @@ void exportarDetalleTurnoCSV(bool mostrarMensaje) {
     }
 }
 
-
 // Exporta toda la informacion principal a CSV
 void exportarTodoCSV() {
 
@@ -457,3 +392,47 @@ void exportarTodoCSV() {
     cout << "Presione ENTER para continuar...";
     cin.get();
 }
+
+
+/// SUBMENU CONFIGURACION DEL SISTEMA
+void menuConfiguracion() {
+
+    int op;
+
+    do {
+        system("cls");
+
+        cout << "==========================================" << endl;
+        cout << "      CONFIGURACION DEL SISTEMA" << endl;
+        cout << "==========================================" << endl;
+        cout << "1) Crear Backup" << endl;
+        cout << "2) Restaurar Backup" << endl;
+        cout << "3) Exportar Datos a CSV" << endl;
+        cout << "0) Volver" << endl;
+        cout << "==========================================" << endl;
+        cout << "Opcion: ";
+        cin >> op;
+
+        switch(op) {
+
+        case 1:
+            crearBackup();
+            break;
+        case 2:
+            restaurarBackup();
+            break;
+        case 3:
+            exportarCSV();
+            break;
+        case 0:
+            break;
+        default:
+            cout << "\n[ERROR] Opcion invalida." << endl;
+            cin.ignore(1000, '\n');
+            cout << "Presione ENTER para continuar...";
+            cin.get();
+        }
+    } while(op != 0);
+  system("cls");
+}
+
