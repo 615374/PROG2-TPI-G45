@@ -41,6 +41,8 @@
 		<Unit filename="Fecha.h" />
 		<Unit filename="MenuClientes.cpp" />
 		<Unit filename="MenuClientes.h" />
+		<Unit filename="MenuConfiguracion.cpp" />
+		<Unit filename="MenuConfiguracion.h" />
 		<Unit filename="MenuProfesionales.cpp" />
 		<Unit filename="MenuProfesionales.h" />
 		<Unit filename="MenuServicios.cpp" />
