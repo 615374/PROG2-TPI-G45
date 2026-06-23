@@ -1,14 +1,179 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
-#include "MenuServicios.h"
 #include "Servicio.h"
+#include "MenuServicios.h"
 #include "DetalleTurno.h"
 #include "Turno.h"
 
 using namespace std;
 
-// Algoritmo: lista los servicios activos agrupados por tipo
+/// FUNCIONES GLOBALES DE MANTENIMIENTO
+void modificarServicio() {
+    int idBuscado;
+    Servicio reg;
+    int pos = 0;
+    bool encontrado = false;
+
+    cout << "================================================="  << endl;
+    cout << "              SELECCIONE SERVICIO A MODIFICAR    "  << endl;
+    cout << "================================================="  << endl;
+    cout << "0. Volver al Menu Principal / Cancelar Modificacion"<< endl;
+    cout << "-------------------------------------------------"  << endl;
+
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado() == true) {
+            cout << "ID: [" << reg.getIdServicio() << "] - "
+                 << reg.getNombre() << " - Tipo: " << reg.getTipo()
+                 << " - Precio: $" << reg.getPrecio() << endl;
+        }
+        pos++;
+    }
+
+    cout << "=================================================" << endl;
+    cout << "Ingrese el ID del servicio a modificar: ";
+    cin >> idBuscado;
+
+    if (idBuscado == 0) {
+        cin.ignore(1000, '\n');
+        cout << "\nOperacion cancelada. Volviendo al menu...\n";
+        cout << "Presione ENTER para continuar...";
+        cin.get();
+        return;
+    }
+
+    pos = 0;
+    FILE* p = fopen("servicios.dat", "rb+");
+    if (p == NULL) {
+        cin.ignore(1000, '\n');
+        cout << "\n[ERROR] No se pudo acceder al archivo.\n";
+        cout << "Presione ENTER para continuar...";
+        cin.get();
+        return;
+    }
+
+    while (fread(&reg, sizeof(Servicio), 1, p) == 1) {
+        if (reg.getIdServicio() == idBuscado && reg.getEstado() == true) {
+            encontrado = true;
+
+            cout << "\nServicio encontrado. Reingrese los datos:\n\n";
+            cout << "ID SERVICIO: " << idBuscado << endl;
+
+            if (!reg.modificar()) {
+                cin.ignore(1000, '\n');
+                cout << "\nModificacion cancelada.\n";
+                cout << "Presione ENTER para continuar...";
+                cin.get();
+                fclose(p);
+                return;
+            }
+            reg.setIdServicio(idBuscado);
+            reg.setEstado(true);
+
+            fseek(p, pos * sizeof(Servicio), SEEK_SET);
+            fwrite(&reg, sizeof(Servicio), 1, p);
+
+            cin.ignore(1000, '\n');
+            cout << "\n[OK] Profesional modificado correctamente.\n";
+            cout << "Presione ENTER para continuar...";
+            cin.get();
+            break;
+        }
+        pos++;
+    }
+    fclose(p);
+    if (!encontrado) {
+        cin.ignore(1000, '\n');
+        cout << "\n[ERROR] No se encontro ningun servicio activo con ese ID.\n";
+        cout << "\nPresione ENTER para continuar...";
+        cin.get();
+    }
+}
+
+/// BAJA LOGICA
+bool darDeBajaServicio() {
+    int idBuscado;
+    Servicio reg;
+    int pos = 0;
+    bool encontrado = false;
+
+    cout << "=================================================" << endl;
+    cout << "          SELECCIONE UN SERVICIO PARA DAR DE BAJA "<< endl;
+    cout << "=================================================" << endl;
+    cout << " 0. Volver al Menu Principal / Cancelar Baja     " << endl;
+    cout << "-------------------------------------------------" << endl;
+
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado() == true) {
+            cout << "ID: [" << reg.getIdServicio() << "] - "
+                 << reg.getNombre()
+                 << " ($" << reg.getPrecio() << ")"
+                 << endl;
+        }
+        pos++;
+    }
+    cout << "=================================================" << endl;
+    cout << "Ingrese el ID del servicio a dar de baja: ";
+    cin >> idBuscado;
+
+    if (idBuscado == 0) {
+        cout << "\nOperacion cancelada. Volviendo al menu...\n";
+        return false;
+    }
+
+    pos = 0;
+    FILE* p = fopen("servicios.dat", "rb+");
+    if (p == NULL) {
+        cout << "\n[ERROR] No se pudo acceder al archivo.\n";
+        return true;
+    }
+    while (fread(&reg, sizeof(Servicio), 1, p) == 1) {
+        if (reg.getIdServicio() == idBuscado && reg.getEstado() == true) {
+            encontrado = true;
+            reg.setEstado(false);
+            fseek(p, pos * sizeof(Servicio), SEEK_SET);
+            fwrite(&reg, sizeof(Servicio), 1, p);
+            cout << "\n[OK] Servicio dado de baja correctamente.\n";
+            break;
+        }
+        pos++;
+    }
+    fclose(p);
+    if (!encontrado) {
+        cout << "\n[ERROR] No se encontro ningun servicio activo con ese ID.\n";
+    }
+    cin.ignore(1000, '\n');
+    cout << "\nPresione ENTER para continuar...";
+    cin.get();
+
+    return true;
+}
+
+/// Algoritmo: lista los servicios inactivos recorriendo el archivo
+void listarServiciosInactivos() {
+    Servicio reg;
+    int pos = 0;
+    bool hayInactivos = false;
+
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado() == false) {
+            cout << "-----------------------------------"  << endl;
+            cout << "ID SERVICIO: " << reg.getIdServicio() << endl;
+            cout << "NOMBRE: " << reg.getNombre()          << endl;
+            cout << "TIPO: " << reg.getTipo()              << endl;
+            cout << "PRECIO: $" << reg.getPrecio()         << endl;
+            cout << "-----------------------------------"  << endl;
+
+            hayInactivos = true;
+        }
+        pos++;
+    }
+    if (!hayInactivos) {
+        cout << "No hay servicios inactivos para mostrar.\n" << endl;
+    }
+}
+
+/// Algoritmo: lista los servicios activos agrupados por tipo
 void listarServiciosPorTipo() {
     Servicio reg;
     int pos = 0, cant = 0;
@@ -97,31 +262,7 @@ void listarServiciosPorTipo() {
     cin.get();
 }
 
-// Algoritmo: lista los servicios inactivos recorriendo el archivo
-void listarServiciosInactivos() {
-    Servicio reg;
-    int pos = 0;
-    bool hayInactivos = false;
-
-    while (reg.leerDisco(pos)) {
-        if (reg.getEstado() == false) {
-            cout << "-----------------------------------"  << endl;
-            cout << "ID SERVICIO: " << reg.getIdServicio() << endl;
-            cout << "NOMBRE: " << reg.getNombre()          << endl;
-            cout << "TIPO: " << reg.getTipo()              << endl;
-            cout << "PRECIO: $" << reg.getPrecio()         << endl;
-            cout << "-----------------------------------"  << endl;
-
-            hayInactivos = true;
-        }
-        pos++;
-    }
-    if (!hayInactivos) {
-        cout << "No hay servicios inactivos para mostrar.\n" << endl;
-    }
-}
-
-// Algoritmo: Genera un ranking de mayor a menor cruzando los servicios brindados y validados por asistencia
+/// Algoritmo: Genera un ranking de mayor a menor cruzando los servicios brindados y validados por asistencia
 void rankingServiciosMasPedidos() {
     Servicio servReg;
     int posS = 0;
@@ -228,139 +369,7 @@ void rankingServiciosMasPedidos() {
     delete[] volumenPedidos;
 }
 
-// FUNCIONES GLOBALES DE MANTENIMIENTO
-
-void modificarServicio() {
-    int idBuscado;
-    Servicio reg;
-    int pos = 0;
-    bool encontrado = false;
-
-    cout << "================================================="  << endl;
-    cout << "              SELECCIONE SERVICIO A MODIFICAR    "  << endl;
-    cout << "================================================="  << endl;
-    cout << "0. Volver al Menu Principal / Cancelar Modificacion"<< endl;
-    cout << "-------------------------------------------------"  << endl;
-
-    while (reg.leerDisco(pos)) {
-        if (reg.getEstado() == true) {
-            cout << "ID: [" << reg.getIdServicio() << "] - "
-                 << reg.getNombre() << " - Tipo: " << reg.getTipo()
-                 << " - Precio: $" << reg.getPrecio() << endl;
-        }
-        pos++;
-    }
-
-    cout << "=================================================" << endl;
-    cout << "Ingrese el ID del servicio a modificar: ";
-    cin >> idBuscado;
-
-    if (idBuscado == 0) {
-        cout << "\nOperacion cancelada. Volviendo al menu...\n";
-        return;
-    }
-
-    pos = 0;
-    FILE* p = fopen("servicios.dat", "rb+");
-    if (p == NULL) {
-        cout << "\n[ERROR] No se pudo acceder al archivo.\n";
-        return;
-    }
-
-    while (fread(&reg, sizeof(Servicio), 1, p) == 1) {
-        if (reg.getIdServicio() == idBuscado && reg.getEstado() == true) {
-            encontrado = true;
-
-            cout << "\nServicio encontrado. Reingrese los datos:\n\n";
-            cout << "ID SERVICIO: " << idBuscado << endl;
-
-            if (!reg.modificar()) {
-                cout << "\nModificacion cancelada.\n";
-                fclose(p);
-                return;
-            }
-            reg.setIdServicio(idBuscado);
-            reg.setEstado(true);
-
-            fseek(p, pos * sizeof(Servicio), SEEK_SET);
-            fwrite(&reg, sizeof(Servicio), 1, p);
-            cout << "\n[OK] Servicio modificado correctamente.\n";
-            cin.ignore(1000, '\n');
-            break;
-        }
-        pos++;
-    }
-    fclose(p);
-
-    if (!encontrado) {
-        cout << "\n[ERROR] No se encontro ningun servicio activo con ese ID.\n";
-    }
-
-    cout << "\nPresione ENTER para continuar...";
-    cin.ignore(1000, '\n');
-    cin.get();
-}
-
-bool darDeBajaServicio() {
-    int idBuscado;
-    Servicio reg;
-    int pos = 0;
-    bool encontrado = false;
-
-    cout << "=================================================" << endl;
-    cout << "          SELECCIONE UN SERVICIO PARA DAR DE BAJA "<< endl;
-    cout << "=================================================" << endl;
-    cout << " 0. Volver al Menu Principal / Cancelar Baja     " << endl;
-    cout << "-------------------------------------------------" << endl;
-
-    while (reg.leerDisco(pos)) {
-        if (reg.getEstado() == true) {
-            cout << "ID: [" << reg.getIdServicio() << "] - "
-                 << reg.getNombre()
-                 << " ($" << reg.getPrecio() << ")"
-                 << endl;
-        }
-        pos++;
-    }
-    cout << "=================================================" << endl;
-    cout << "Ingrese el ID del servicio a dar de baja: ";
-    cin >> idBuscado;
-
-    if (idBuscado == 0) {
-        cout << "\nOperacion cancelada. Volviendo al menu...\n";
-        return false;
-    }
-
-    pos = 0;
-    FILE* p = fopen("servicios.dat", "rb+");
-    if (p == NULL) {
-        cout << "\n[ERROR] No se pudo acceder al archivo.\n";
-        return true;
-    }
-    while (fread(&reg, sizeof(Servicio), 1, p) == 1) {
-        if (reg.getIdServicio() == idBuscado && reg.getEstado() == true) {
-            encontrado = true;
-            reg.setEstado(false);
-            fseek(p, pos * sizeof(Servicio), SEEK_SET);
-            fwrite(&reg, sizeof(Servicio), 1, p);
-            cout << "\n[OK] Servicio dado de baja correctamente.\n";
-            break;
-        }
-        pos++;
-    }
-    fclose(p);
-    if (!encontrado) {
-        cout << "\n[ERROR] No se encontro ningun servicio activo con ese ID.\n";
-    }
-
-    cin.ignore(1000, '\n');
-    cout << "\nPresione ENTER para continuar...";
-    cin.get();
-
-    return true;
-}
-
-// SUB-MENU INTERNO: PANEL DE CONSULTAS SERVICIOS
+/// SUB-MENU INTERNO: PANEL DE CONSULTAS SERVICIOS
 void menuConsultasServicios() {
     int op;
     Servicio aux;
@@ -372,7 +381,7 @@ void menuConsultasServicios() {
         cout << "=================================================" << endl;
         cout << "1. Listar Todos los Servicios Activos            " << endl;
         cout << "2. Listar Servicios Agrupados por Tipo           " << endl;
-        cout << "3. Ver Fichas de Servicios Inactivos (Bajas)     " << endl;
+        cout << "3. Listar Todos los Servicios Inactivos          " << endl;
         cout << "4. Ver Ranking de Servicios Mas Pedidos          " << endl;
         cout << "0. Volver al Menu anterior" << endl;
         cout << "-------------------------------------------------" << endl;
@@ -383,13 +392,24 @@ void menuConsultasServicios() {
         if (op == 1) {
             system("cls");
             pos = 0;
-            cout << "=================================================\n";
-            cout << "           LISTADO DE SERVICIOS ACTIVOS          \n";
-            cout << "=================================================\n";
-            while (aux.leerDisco(pos++)) if (aux.getEstado()) aux.mostrar();
+            bool encontrado = false;
 
+            cout << "==================================================\n";
+            cout << "          LISTADO DE SERVICIOS ACTIVOS            \n";
+            cout << "==================================================\n";
+
+            while (aux.leerDisco(pos++)) {
+                if (aux.getEstado()) {
+                    aux.mostrar();
+                    encontrado = true;
+                }
+            }
+            if (!encontrado) {
+                cout << "\nNo hay servicios activos registrados.\n";
+            }
             cout << "\nPresione ENTER para continuar...";
-            cin.ignore(1000, '\n'); cin.get();
+            cin.ignore(1000, '\n');
+            cin.get();
             system("cls");
         }
         else if (op == 2) {
@@ -423,7 +443,7 @@ void menuConsultasServicios() {
     } while (op != 0);
 }
 
-// MENU PRINCIPAL: MODULO SERVICIOS
+/// MENU PRINCIPAL: MODULO SERVICIOS
 void menuServicios() {
     int op;
     Servicio aux;
@@ -435,7 +455,7 @@ void menuServicios() {
         cout << "1. Registrar Servicio (Alta)"                      << endl;
         cout << "2. Listado de Servicios y Consultas"               << endl;
         cout << "3. Modificar Datos de Servicio"                    << endl;
-        cout << "4. Dar de baja Servicio"                           << endl;
+        cout << "4. Dar de baja Servicio (Bajas)"                           << endl;
         cout << "0. Volver al Menu Principal"                       << endl;
         cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion: ";
@@ -479,5 +499,5 @@ void menuServicios() {
             system("cls");
         }
     } while (op != 0);
-    system("cls");
+  system("cls");
 }

@@ -48,15 +48,3 @@ class Profesional {
         bool escribirDisco();
 };
 
-//DECLARACIONES DE FUNCIONES GLOBALES
-
-// Mantenimiento
-void modificarProfesional();
-bool darDeBajaProfesional();
-
-// Listados Masivos
-void listarProfesionalesPorEspecialidad();
-void listarProfesionalesPorVolumenServicios();
-void listarProfesionalesInactivos();
-void liquidacionComisiones();
-
