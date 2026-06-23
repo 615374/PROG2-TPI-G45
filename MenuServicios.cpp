@@ -3,10 +3,10 @@
 #include <cstring>
 #include "MenuServicios.h"
 #include "Servicio.h"
+#include "DetalleTurno.h"
+#include "Turno.h"
 
 using namespace std;
-
-// FUNCIONES GLOBALES
 
 // Algoritmo: lista los servicios activos agrupados por tipo
 void listarServiciosPorTipo() {
@@ -63,7 +63,7 @@ void listarServiciosPorTipo() {
         }
     } while (opcionTipo < 0 || opcionTipo > cantidadTipos);
 
-    // CORRECCION: Limpiamos el buffer ANTES de evaluar la opcion 0
+    // Limpiamos el buffer antes de evaluar la opcion 0
     cin.ignore(1000, '\n');
 
     if (opcionTipo == 0) {
@@ -121,6 +121,113 @@ void listarServiciosInactivos() {
     }
 }
 
+// Algoritmo: Genera un ranking de mayor a menor cruzando los servicios brindados y validados por asistencia
+void rankingServiciosMasPedidos() {
+    Servicio servReg;
+    int posS = 0;
+    int totalServicios = 0;
+
+    // Contamos cuantos servicios activos hay en disco para dimensionar la memoria
+    while (servReg.leerDisco(posS++)) {
+        if (servReg.getEstado()) totalServicios++;
+    }
+
+    if (totalServicios == 0) {
+        cout << "No hay servicios activos registrados en el sistema.\n\n";
+        return;
+    }
+
+    // Asignacion dinamica de memoria
+    Servicio* listaServicios = new Servicio[totalServicios];
+    int* volumenPedidos = new int[totalServicios];
+
+    if (listaServicios == nullptr || volumenPedidos == nullptr) {
+        cout << "\n[ERROR] Fallo critico de asignacion de memoria dinamica.\n";
+        return;
+    }
+
+    // Volcamos registros y contamos ocurrencias en los detalles de turnos cruzados
+    posS = 0;
+    int idx = 0;
+    while (servReg.leerDisco(posS++)) {
+        if (servReg.getEstado()) {
+            listaServicios[idx] = servReg;
+            int contador = 0;
+
+            DetalleTurno dtReg;
+            int posDT = 0;
+            while (dtReg.leerDisco(posDT++)) {
+                if (dtReg.getEstado() && dtReg.getIdServicio() == servReg.getIdServicio()) {
+                    Turno tReg;
+                    int posT = 0;
+                    while (tReg.leerDisco(posT++)) {
+                        if (tReg.getEstado() && tReg.getAsistio() && tReg.getIdTurno() == dtReg.getIdTurno()) {
+                            contador++;
+                            break;
+                        }
+                    }
+                }
+            }
+            volumenPedidos[idx] = contador;
+            idx++;
+        }
+    }
+
+    // Algoritmo de ordenamiento Burbuja (mayor a menor)
+    for (int i = 0; i < totalServicios - 1; i++) {
+        for (int j = 0; j < totalServicios - i - 1; j++) {
+            if (volumenPedidos[j] < volumenPedidos[j + 1]) {
+                int vAux = volumenPedidos[j];
+                volumenPedidos[j] = volumenPedidos[j + 1];
+                volumenPedidos[j + 1] = vAux;
+
+                Servicio sAux = listaServicios[j];
+                listaServicios[j] = listaServicios[j + 1];
+                listaServicios[j + 1] = sAux;
+            }
+        }
+    }
+
+    // Renderizado del ranking de los servicios
+    cout << "=========================================================================" << endl;
+    cout << "                   RANKING DE SERVICIOS MAS DEMANDADOS                   " << endl;
+    cout << "=========================================================================" << endl;
+    cout << " PUESTO | ID  | SERVICIO                       | TOTAL SOLICITADO        " << endl;
+    cout << "-------------------------------------------------------------------------" << endl;
+
+    for (int i = 0; i < totalServicios; i++) {
+        char nombreFormateado[50];
+        strcpy(nombreFormateado, listaServicios[i].getNombre());
+
+        if (strlen(nombreFormateado) > 30) {
+            nombreFormateado[27] = '.';
+            nombreFormateado[28] = '.';
+            nombreFormateado[29] = '.';
+            nombreFormateado[30] = '\0';
+        }
+
+        cout << "   #";
+        if ((i + 1) < 10) {
+            cout << "0";
+        }
+        cout << (i + 1) << "   | "
+             << (listaServicios[i].getIdServicio() < 10 ? "0" : "") << listaServicios[i].getIdServicio() << "  | "
+             << nombreFormateado;
+
+        int largoActual = strlen(nombreFormateado);
+        for (int espacios = largoActual; espacios < 30; espacios++) {
+            cout << " ";
+        }
+
+        cout << " | " << volumenPedidos[i] << " veces solicitado" << endl;
+    }
+    cout << "=========================================================================\n" << endl;
+
+    // Liberacion de memoria dinamica
+    delete[] listaServicios;
+    delete[] volumenPedidos;
+}
+
 // FUNCIONES GLOBALES DE MANTENIMIENTO
 
 void modificarServicio() {
@@ -129,11 +236,11 @@ void modificarServicio() {
     int pos = 0;
     bool encontrado = false;
 
-    cout << "=================================================" << endl;
-    cout << "              SELECCIONE SERVICIO A MODIFICAR    " << endl;
-    cout << "=================================================" << endl;
-    cout << "0. Volver al Menu Principal / Cancelar Modificacion" << endl;
-    cout << "-------------------------------------------------" << endl;
+    cout << "================================================="  << endl;
+    cout << "              SELECCIONE SERVICIO A MODIFICAR    "  << endl;
+    cout << "================================================="  << endl;
+    cout << "0. Volver al Menu Principal / Cancelar Modificacion"<< endl;
+    cout << "-------------------------------------------------"  << endl;
 
     while (reg.leerDisco(pos)) {
         if (reg.getEstado() == true) {
@@ -201,7 +308,7 @@ bool darDeBajaServicio() {
     bool encontrado = false;
 
     cout << "=================================================" << endl;
-    cout << "         SELECCIONE UN SERVICIO PARA DAR DE BAJA " << endl;
+    cout << "          SELECCIONE UN SERVICIO PARA DAR DE BAJA "<< endl;
     cout << "=================================================" << endl;
     cout << " 0. Volver al Menu Principal / Cancelar Baja     " << endl;
     cout << "-------------------------------------------------" << endl;
@@ -253,6 +360,7 @@ bool darDeBajaServicio() {
     return true;
 }
 
+// SUB-MENU INTERNO: PANEL DE CONSULTAS SERVICIOS
 void menuConsultasServicios() {
     int op;
     Servicio aux;
@@ -265,6 +373,7 @@ void menuConsultasServicios() {
         cout << "1. Listar Todos los Servicios Activos            " << endl;
         cout << "2. Listar Servicios Agrupados por Tipo           " << endl;
         cout << "3. Ver Fichas de Servicios Inactivos (Bajas)     " << endl;
+        cout << "4. Ver Ranking de Servicios Mas Pedidos          " << endl;
         cout << "0. Volver al Menu anterior" << endl;
         cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion: ";
@@ -303,11 +412,17 @@ void menuConsultasServicios() {
             cin.ignore(1000, '\n');
             cout << "Presione ENTER para continuar...";
             cin.get();
+        else if (op == 4) {
+            system("cls");
+            rankingServiciosMasPedidos();
+            cout << "\nPresione ENTER para continuar...";
+            cin.ignore(1000, '\n'); cin.get();
             system("cls");
         }
     } while (op != 0);
 }
 
+// MENU PRINCIPAL: MODULO SERVICIOS
 void menuServicios() {
     int op;
     Servicio aux;
@@ -316,11 +431,11 @@ void menuServicios() {
         cout << "=================================================" << endl;
         cout << "       MODULO: GESTION SERVICIOS                 " << endl;
         cout << "=================================================" << endl;
-        cout << "1. Registrar Servicio (Alta)" << endl;
-        cout << "2. Listado de Servicios y Consultas" << endl;
-        cout << "3. Modificar Datos de Servicio" << endl;
-        cout << "4. Dar de baja Servicio" << endl;
-        cout << "0. Volver al Menu Principal" << endl;
+        cout << "1. Registrar Servicio (Alta)"                      << endl;
+        cout << "2. Listado de Servicios y Consultas"               << endl;
+        cout << "3. Modificar Datos de Servicio"                    << endl;
+        cout << "4. Dar de baja Servicio"                           << endl;
+        cout << "0. Volver al Menu Principal"                       << endl;
         cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion: ";
         cin >> op;
