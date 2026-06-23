@@ -56,15 +56,6 @@ El programa procesa la información en disco para generar los siguientes reporte
 
 ---
 
-## Estructura del Proyecto
-
-Para facilitar la compilación directa y mantener la compatibilidad con el entorno Code::Blocks del equipo, todos los componentes del sistema se encuentran organizados de forma plana en la raíz del directorio principal:
-
-* **Archivos de Código Fuente (`*.cpp`):** Contienen la lógica de negocio, flujos de menús y desarrollos de métodos de cada clase.
-* **Archivos de Cabecera (`*.h`):** Definen las estructuras de las clases, prototipos de funciones globales y atributos.
-* **Archivos de Base de Datos (`*.dat`):** Archivos binarios de persistencia donde se almacenan y modifican los registros del centro de estética (generados automáticamente al ejecutar el sistema).
-
----
 
 ## Compilación y Ejecución
 
@@ -74,6 +65,16 @@ Para compilar y ejecutar el sistema en un entorno local, siga estos pasos:
 3. Asegúrese de realizar una compilación limpia seleccionando **Build -> Clean** y luego **Build -> Rebuild**.
 4. Presione el botón de **Run** (o `F9`) para iniciar la consola ejecutable.
 *Nota: Los archivos de base de datos `.dat` se generarán automáticamente en la raíz del proyecto tras la primera ejecución.*
+
+---
+
+## Estructura del Proyecto
+
+Para facilitar la compilación directa y mantener la compatibilidad con el entorno Code::Blocks del equipo, todos los componentes del sistema se encuentran organizados de forma plana en la raíz del directorio principal:
+
+* **Archivos de Código Fuente (`*.cpp`):** Contienen la lógica de negocio, flujos de menús y desarrollos de métodos de cada clase.
+* **Archivos de Cabecera (`*.h`):** Definen las estructuras de las clases, prototipos de funciones globales y atributos.
+* **Archivos de Base de Datos (`*.dat`):** Archivos binarios de persistencia donde se almacenan y modifican los registros del centro de estética (generados automáticamente al ejecutar el sistema).
 
 ---
 
