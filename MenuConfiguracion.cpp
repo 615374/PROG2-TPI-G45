@@ -67,6 +67,7 @@ void menuConfiguracion() {
             cin.get();
         }
     } while(op != 0);
+  system("cls");
 }
 
 
@@ -195,8 +196,8 @@ void exportarCSV() {
             cout << "Presione ENTER para continuar...";
             cin.get();
         }
-
     } while(op != 0);
+   system("cls");
 }
 
 
