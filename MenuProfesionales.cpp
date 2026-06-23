@@ -8,7 +8,6 @@
 
 using namespace std;
 
-
 /// FUNCIONES GLOBALES DE MANTENIMIENTO
 void modificarProfesional() {
     int idBuscado;
@@ -274,7 +273,7 @@ void listarProfesionalesPorEspecialidad() {
 }
 
 
-/// Algoritmo: Filtrara el listado ordenando por volumen de servicios brindados
+/// Algoritmo: Filtra el listado ordenando por volumen de servicios brindados
 void listarProfesionalesPorVolumenServicios() {
     Profesional profReg;
     int posP = 0;
@@ -379,7 +378,7 @@ void listarProfesionalesPorVolumenServicios() {
 }
 
 
-/// Algoritmo: Filtra la liquidacion de comisiones (menusal / semanal)
+/// Algoritmo: Filtra la liquidacion de comisiones (mensual / semanal)
 void liquidacionComisiones() {
     int mesBuscado, anioBuscado, opcionPeriodo;
     int diaInicio = 1, diaFin = 31; // Rangos por defecto para mes completo

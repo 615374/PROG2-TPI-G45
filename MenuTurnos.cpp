@@ -93,9 +93,9 @@ bool darDeBajaTurno() {
 
 
 //------------------------------------------------------------
-// FILTRADO DE CLIENTAS ACTIVAS POR COINCIDENCIA DE APELLIDO
+/// FILTRADO DE CLIENTAS ACTIVAS POR COINCIDENCIA DE APELLIDO
 //------------------------------------------------------------
-/// Busca clientas por coincidencia parcial en el apellido y retorna el ID seleccionado
+// Busca clientas por coincidencia parcial en el apellido y retorna el ID seleccionado
 int buscarClienteParaTurno(const char* apellidoBuscado) {
     Cliente reg;
     int pos = 0;
@@ -154,10 +154,10 @@ int buscarClienteParaTurno(const char* apellidoBuscado) {
 }
 
 //-------------------------------------
-// VERIFICAR BLOQUE HORARIO OCUPADO
+/// VERIFICAR BLOQUE HORARIO OCUPADO
 //-------------------------------------
 
-/// Revisa si la profesional elegida ya tiene un turno activo en esa fecha y hora especifica
+// Revisa si la profesional elegida ya tiene un turno activo en esa fecha y hora especifica
 bool verificarBloqueOcupado(int d, int m, int a, int horaEvaluar, int idProfesionalEvaluar) {
     Turno t;
     DetalleTurno dt;
@@ -193,8 +193,8 @@ bool verificarBloqueOcupado(int d, int m, int a, int horaEvaluar, int idProfesio
 //-----------------------------------------------
 /// BUSCAR TURNO ACTIVO DE UNA CLIENTA EN UNA FECHA
 //-----------------------------------------------
-/// Retorna el ID del turno si la clienta ya tiene una cabecera activa ese dia.
-/// Si no tiene, retorna -1.
+// Retorna el ID del turno si la clienta ya tiene una cabecera activa ese dia.
+// Si no tiene, retorna -1.
 int buscarTurnoClienteEnFecha(int idCliente, int d, int m, int a) {
     Turno t;
     int pos = 0;
@@ -217,7 +217,7 @@ int buscarTurnoClienteEnFecha(int idCliente, int d, int m, int a) {
 //-----------------------------------------------
 /// VERIFICAR SI LA CLIENTA YA ESTA OCUPADA
 //-----------------------------------------------
-/// Revisa si la clienta ya tiene un detalle activo en esa fecha y hora.
+// Revisa si la clienta ya tiene un detalle activo en esa fecha y hora.
 bool verificarClienteOcupada(int idCliente, int d, int m, int a, int horaEvaluar, int minutoEvaluar) {
     Turno t;
     DetalleTurno dt;
@@ -253,7 +253,7 @@ bool verificarClienteOcupada(int idCliente, int d, int m, int a, int horaEvaluar
 //-----------------------------------------------
 /// GRILLA DE DISPONIBILIDAD SEMANAL INTERACTIVA
 //-----------------------------------------------
-/// Renderiza los proximos 5 dias habiles disponibles a partir de hoy
+// Renderiza los proximos 5 dias habiles disponibles a partir de hoy
 void mostrarGrillaSemanalAuto(int idProfesionalGrilla) {
     time_t tActual = time(0);
 
@@ -321,9 +321,9 @@ void mostrarGrillaSemanalAuto(int idProfesionalGrilla) {
 }
 
 //-----------------------------------------------------
-// GENERACION CRONOLOGICA DE AGENDA (MEMORIA DINAMICA)
+/// GENERACION CRONOLOGICA DE AGENDA (MEMORIA DINAMICA)
 //-----------------------------------------------------
-/// Extrae, ordena cronologicamente y lista la agenda diaria con horario de llegada
+// Extrae, ordena cronologicamente y lista la agenda diaria con horario de llegada
 void listarAgendaCronologica() {
     Turno tReg;
     int pos = 0;
@@ -802,9 +802,9 @@ void cobrarLiquidarTurno() {
 
 
 //-----------------------------------------------------
-// SUB-MENU: CAJA Y LIQUIDACIONES
+/// SUB-MENU: CAJA Y LIQUIDACIONES
 //-----------------------------------------------------
-/// Algoritmo: Agrupa las operaciones economicas relacionadas con turnos
+// Algoritmo: Agrupa las operaciones economicas relacionadas con turnos
 void submenuCajaLiquidaciones() {
     int op;
 
@@ -852,9 +852,9 @@ void submenuCajaLiquidaciones() {
 
 
 //-----------------------------------------------------
-// REPORTE GENERAL DE CAJA
+/// REPORTE GENERAL DE CAJA
 //-----------------------------------------------------
-/// Algoritmo: Filtra turnos liquidados por fecha de cobro y calcula la caja del dia
+// Algoritmo: Filtra turnos liquidados por fecha de cobro y calcula la caja del dia
 void reporteCajaGeneral() {
     int diaBuscado;
     int mesBuscado;
