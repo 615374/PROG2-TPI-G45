@@ -25,12 +25,12 @@ void menuConfiguracion() {
         system("cls");
 
         cout << "==========================================" << endl;
-        cout << "      CONFIGURACION DEL SISTEMA" << endl;
+        cout << "      CONFIGURACION DEL SISTEMA"            << endl;
         cout << "==========================================" << endl;
-        cout << "1) Crear Backup" << endl;
-        cout << "2) Restaurar Backup" << endl;
-        cout << "3) Exportar Datos a CSV" << endl;
-        cout << "0) Volver" << endl;
+        cout << "1) Crear Backup"                            << endl;
+        cout << "2) Restaurar Backup"                        << endl;
+        cout << "3) Exportar Datos a CSV"                    << endl;
+        cout << "0) Volver"                                  << endl;
         cout << "==========================================" << endl;
         cout << "Opcion: ";
         cin >> op;
@@ -66,7 +66,7 @@ void crearBackup() {
     system("cls");
 
     cout << "==========================================" << endl;
-    cout << "              CREAR BACKUP" << endl;
+    cout << "              CREAR BACKUP"                 << endl;
     cout << "==========================================" << endl;
 
     system("mkdir backup");
@@ -88,13 +88,12 @@ void crearBackup() {
 
 
 // Restaura una copia de seguridad previamente creada
-// Restaura una copia de seguridad previamente creada
 void restaurarBackup() {
 
     system("cls");
 
     cout << "==========================================" << endl;
-    cout << "            RESTAURAR BACKUP" << endl;
+    cout << "            RESTAURAR BACKUP"               << endl;
     cout << "==========================================" << endl;
 
     char confirmar;
@@ -125,7 +124,6 @@ void restaurarBackup() {
     cin.ignore(1000, '\n');
     cout << "\nPresione ENTER para continuar...";
     cin.get();
-    cout << "\nFuncion Restaurar Backup en desarrollo." << endl;
 
 }
 
@@ -194,7 +192,7 @@ void exportarCSV() {
     archivoServicios.close();
 
     cout << "==========================================" << endl;
-    cout << "             EXPORTACION CSV" << endl;
+    cout << "             EXPORTACION CSV"               << endl;
     cout << "==========================================" << endl;
     cout << "Exportacion finalizada correctamente." << endl;
     cout << "\nArchivos generados:" << endl;

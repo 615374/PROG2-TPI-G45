@@ -1,0 +1,24 @@
+ID;NOMBRE;TIPO;PRECIO;ESTADO
+1;Limpieza de cutis profunda;Facial;36000;ACTIVO
+2;Limpieza de cutis profunda + Radiofrecuencia;Facial;50000;ACTIVO
+3;Limpieza de cutis profunda + Electroporacion;Facial;52000;ACTIVO
+4;Limpieza de cutis profunda + Dermapen;Facial;54000;ACTIVO
+5;Hydra Lips;Facial;36000;ACTIVO
+6;Peeling;Facial;41000;ACTIVO
+7;Exfoliacion corporal;Corporal;41000;ACTIVO
+8;Masaje Descontracturante;Corporal;41000;ACTIVO
+9;Masaje Descontracturante c/piedras calientes;Corporal;45000;ACTIVO
+10;Maderoterapia;Corporal;48000;ACTIVO
+11;Electrodos;Corporal;35000;ACTIVO
+12;Drenaje Linfatico corporal;Corporal;46000;ACTIVO
+13;Lifitng de pestanias;Pestanias;25000;ACTIVO
+14;Laminado de cejas;Cejas;25000;ACTIVO
+15;Esmaltado semipermanente;Unias;30000;ACTIVO
+16;Tinte de cejas;Cejas;25000;ACTIVO
+17;Tinte de pestanias;Pestanias;25000;ACTIVO
+18;Volumen Bajo;Pestanias;25000;ACTIVO
+19;Volumen Medio;Pestanias;28000;ACTIVO
+20;Volumen Ruso;Pestanias;30000;ACTIVO
+21;Disenio y Perfilado;Cejas;30000;ACTIVO
+22;Kapping Gel;Unias;28000;ACTIVO
+23;Esculpidas ;Unias;32000;ACTIVO

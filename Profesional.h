@@ -7,13 +7,15 @@ class Profesional {
         char apellido[50];
         char especialidad[50];
         float porcentajeComision;
-        bool estado; // Baja lógica
+        bool estado; // Baja logica
 
         // Metodo privado auxiliar para calcular el ID autoincremental
         int generarNuevoId();
 
     public:
         // Constructor
+
+
         Profesional();
 
         // Metodos principales del objeto
