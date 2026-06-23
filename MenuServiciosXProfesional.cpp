@@ -110,6 +110,13 @@ void menuServicioXProfesional() {
             cin.get();
             system("cls");
         }
+        else if (op != 0) {
+            cout << "[ERROR] Opcion incorrecta. Reintente.\n\n";
+            cin.ignore(1000, '\n');
+            cout << "Presione ENTER para continuar...";
+            cin.get();
+            system("cls");
+        }
     } while (op != 0);
     system("cls");
 }

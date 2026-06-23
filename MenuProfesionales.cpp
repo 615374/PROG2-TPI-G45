@@ -1,17 +1,182 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
-#include "MenuProfesionales.h"
 #include "Profesional.h"
+#include "MenuProfesionales.h"
 #include "DetalleTurno.h"
 #include "Turno.h"
 
 using namespace std;
 
+/// FUNCIONES GLOBALES DE MANTENIMIENTO
+void modificarProfesional() {
+    int idBuscado;
+    Profesional reg;
+    int pos = 0;
+    bool encontrado = false;
 
-// FUNCIONES GLOBALES
+    cout << "=================================================" << endl;
+    cout << "          SELECCIONE PROFESIONAL A MODIFICAR     " << endl;
+    cout << "=================================================" << endl;
+    cout << "0. Volver al Menu Principal / Cancelar Modificacion" << endl;
+    cout << "-------------------------------------------------" << endl;
 
-// Algoritmo: Filtra y muestra los profesionales activos agrupados por especialidad usando memoria dinamica
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado() == true) {
+            cout << "ID: [" << reg.getIdProfesional() << "] - "
+                 << reg.getApellido() << ", "
+                 << reg.getNombre()
+                 << " - Especialidad: " << reg.getEspecialidad()
+                 << " - Comision: " << reg.getComision() << "%"
+                 << endl;
+        }
+        pos++;
+    }
+    cout << "=================================================" << endl;
+    cout << "Ingrese el ID del profesional a modificar: ";
+    cin >> idBuscado;
+
+    if (idBuscado == 0) {
+        cin.ignore(1000, '\n');
+        cout << "\nOperacion cancelada. Volviendo al menu...\n";
+        cout << "Presione ENTER para continuar...";
+        cin.get();
+        return;
+    }
+    pos = 0;
+    FILE* p = fopen("profesionales.dat", "rb+");
+
+    if (p == NULL) {
+        cin.ignore(1000, '\n');
+        cout << "\n[ERROR] No se pudo acceder al archivo.\n";
+        cout << "Presione ENTER para continuar...";
+        cin.get();
+        return;
+    }
+    while (fread(&reg, sizeof(Profesional), 1, p) == 1) {
+        if (reg.getIdProfesional() == idBuscado && reg.getEstado() == true) {
+            encontrado = true;
+
+            cout << "\nProfesional encontrado. Reingrese los datos:\n\n";
+            cout << "ID PROFESIONAL: " << idBuscado << endl;
+
+            if (!reg.modificar()) {
+                cin.ignore(1000, '\n');
+                cout << "\nModificacion cancelada.\n";
+                cout << "Presione ENTER para continuar...";
+                cin.get();
+                fclose(p);
+                return;
+            }
+
+            reg.setIdProfesional(idBuscado);
+            reg.setEstado(true);
+
+            fseek(p, pos * sizeof(Profesional), SEEK_SET);
+            fwrite(&reg, sizeof(Profesional), 1, p);
+
+            cin.ignore(1000, '\n');
+            cout << "\n[OK] Profesional modificado correctamente.\n";
+            cout << "Presione ENTER para continuar...";
+            cin.get();
+            break;
+        }
+        pos++;
+    }
+    fclose(p);
+    if (!encontrado) {
+        cin.ignore(1000, '\n');
+        cout << "\n[ERROR] No se encontro ningun profesional activo con ese ID.\n";
+        cout << "Presione ENTER para continuar...";
+        cin.get();
+    }
+}
+
+/// BAJA LOGICA
+bool darDeBajaProfesional() {
+    int idBuscado;
+    Profesional reg;
+    int pos = 0;
+    bool encontrado = false;
+
+    cout << "=================================================" << endl;
+    cout << "      SELECCIONE UN PROFESIONAL PARA DAR DE BAJA " << endl;
+    cout << "=================================================" << endl;
+    cout << " 0. Volver al Menu Principal / Cancelar Baja     " << endl;
+    cout << "-------------------------------------------------" << endl;
+
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado() == true) {
+            cout << "ID: [" << reg.getIdProfesional() << "] - "
+                 << reg.getApellido() << ", "
+                 << reg.getNombre() << endl;
+        }
+        pos++;
+    }
+    cout << "=================================================" << endl;
+    cout << "Ingrese el ID del profesional a dar de baja: ";
+    cin >> idBuscado;
+
+    if (idBuscado == 0) {
+        return false;
+    }
+
+    pos = 0;
+    FILE* p = fopen("profesionales.dat", "rb+");
+    if (p == NULL) {
+        cout << "\n[ERROR] No se pudo acceder al archivo.\n";
+        return true;
+    }
+    while (fread(&reg, sizeof(Profesional), 1, p) == 1) {
+        if (reg.getIdProfesional() == idBuscado && reg.getEstado() == true) {
+            encontrado = true;
+            reg.setEstado(false);
+            fseek(p, pos * sizeof(Profesional), SEEK_SET);
+            fwrite(&reg, sizeof(Profesional), 1, p);
+            cout << "\n[OK] Profesional dado de baja correctamente.\n";
+            break;
+        }
+        pos++;
+    }
+    fclose(p);
+    if (!encontrado) {
+        cout << "\n[ERROR] No se encontro ningun profesional activo con ese ID.\n";
+    }
+    cin.ignore(1000, '\n');
+    cout << "\nPresione ENTER para continuar...";
+    cin.get();
+
+    return true;
+}
+
+/// Algoritmo: Recorre el archivo mostrando unicamente el staff dado de baja
+void listarProfesionalesInactivos() {
+    Profesional reg;
+    int pos = 0;
+    bool hayInactivos = false;
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado() == false) { // Si el estado es false (inactiva)
+            // Tiramos los cout directos para que no se silencie por el if de mostrar()
+            cout << "-----------------------------------" << endl;
+            cout << "ID PROFESIONAL: " << reg.getIdProfesional() << endl;
+            cout << "NOMBRE: " << reg.getNombre() << endl;
+            cout << "APELLIDO: " << reg.getApellido() << endl;
+            cout << "ESPECIALIDAD: " << reg.getEspecialidad() << endl;
+            cout << "COMISION: " << reg.getComision() << "%" << endl;
+            cout << "-----------------------------------" << endl;
+
+            hayInactivos = true;
+        }
+        pos++;
+    }
+
+    if (!hayInactivos) {
+        cout << "No hay profesionales inactivos para mostrar.\n";
+    }
+    cout << "=================================================" << endl << endl;
+}
+
+/// Algoritmo: Filtra y muestra los profesionales activos agrupados por especialidad usando memoria dinamica
 void listarProfesionalesPorEspecialidad() {
     Profesional reg;
     int pos = 0;
@@ -23,7 +188,6 @@ void listarProfesionalesPorEspecialidad() {
             totalActivos++;
         }
     }
-
     if (totalActivos == 0) {
         cout << "\n[AVISO] No hay profesionales activos cargados en el sistema.\n";
         return;
@@ -63,7 +227,7 @@ void listarProfesionalesPorEspecialidad() {
             cantidadEspecialidades++;
         }
     }
-
+    system("cls");
     cout << "=================================================" << endl;
     cout << "          ESPECIALIDADES EN EL SISTEMA           " << endl;
     cout << "=================================================" << endl;
@@ -108,34 +272,8 @@ void listarProfesionalesPorEspecialidad() {
     delete[] especialidades;
 }
 
-// Algoritmo: Recorre el archivo mostrando unicamente el staff dado de baja
-void listarProfesionalesInactivos() {
-    Profesional reg;
-    int pos = 0;
-    bool hayInactivos = false;
-    while (reg.leerDisco(pos)) {
-        if (reg.getEstado() == false) { // Si el estado es false (inactiva)
-            // Tiramos los cout directos para que no se silencie por el if de mostrar()
-            cout << "-----------------------------------" << endl;
-            cout << "ID PROFESIONAL: " << reg.getIdProfesional() << endl;
-            cout << "NOMBRE: " << reg.getNombre() << endl;
-            cout << "APELLIDO: " << reg.getApellido() << endl;
-            cout << "ESPECIALIDAD: " << reg.getEspecialidad() << endl;
-            cout << "COMISION: " << reg.getComision() << "%" << endl;
-            cout << "-----------------------------------" << endl;
 
-            hayInactivos = true;
-        }
-        pos++;
-    }
-
-    if (!hayInactivos) {
-        cout << "No hay profesionales inactivos para mostrar.\n";
-    }
-    cout << "=================================================" << endl << endl;
-}
-
-// Algoritmo: Filtrara el listado ordenando por volumen de servicios brindados
+/// Algoritmo: Filtra el listado ordenando por volumen de servicios brindados
 void listarProfesionalesPorVolumenServicios() {
     Profesional profReg;
     int posP = 0;
@@ -240,8 +378,7 @@ void listarProfesionalesPorVolumenServicios() {
 }
 
 
-// Algoritmo: Filtra la liquidacion de comisiones (menusal / semanal)
-
+/// Algoritmo: Filtra la liquidacion de comisiones (mensual / semanal)
 void liquidacionComisiones() {
     int mesBuscado, anioBuscado, opcionPeriodo;
     int diaInicio = 1, diaFin = 31; // Rangos por defecto para mes completo
@@ -359,135 +496,9 @@ void liquidacionComisiones() {
     cout << "========================================================================\n" << endl;
 }
 
-// FUNCIONES GLOBALES DE MANTENIMIENTO
-void modificarProfesional() {
-    int idBuscado;
-    Profesional reg;
-    int pos = 0;
-    bool encontrado = false;
 
-    cout << "=================================================" << endl;
-    cout << "          SELECCIONE PROFESIONAL A MODIFICAR     " << endl;
-    cout << "=================================================" << endl;
-    cout << "0. Volver al Menu Principal / Cancelar Modificacion" << endl;
-    cout << "-------------------------------------------------" << endl;
 
-    while (reg.leerDisco(pos)) {
-        if (reg.getEstado() == true) {
-            cout << "ID: [" << reg.getIdProfesional() << "] - "
-                 << reg.getApellido() << ", "
-                 << reg.getNombre()
-                 << " - Especialidad: " << reg.getEspecialidad()
-                 << " - Comision: " << reg.getComision() << "%"
-                 << endl;
-        }
-        pos++;
-    }
-    cout << "=================================================" << endl;
-    cout << "Ingrese el ID del profesional a modificar: ";
-    cin >> idBuscado;
-
-    if (idBuscado == 0) {
-        cout << "\nOperacion cancelada. Volviendo al menu...\n";
-        return;
-    }
-    pos = 0;
-    FILE* p = fopen("profesionales.dat", "rb+");
-
-    if (p == NULL) {
-        cout << "\n[ERROR] No se pudo acceder al archivo.\n";
-        return;
-    }
-    while (fread(&reg, sizeof(Profesional), 1, p) == 1) {
-        if (reg.getIdProfesional() == idBuscado && reg.getEstado() == true) {
-            encontrado = true;
-
-            cout << "\nProfesional encontrado. Reingrese los datos:\n\n";
-            cout << "ID PROFESIONAL: " << idBuscado << endl;
-
-            if (!reg.modificar()) {
-                cout << "\nModificacion cancelada.\n";
-                fclose(p);
-                return;
-            }
-
-            reg.setIdProfesional(idBuscado);
-            reg.setEstado(true);
-
-            fseek(p, pos * sizeof(Profesional), SEEK_SET);
-            fwrite(&reg, sizeof(Profesional), 1, p);
-
-            cout << "\n[OK] Profesional modificado correctamente.\n";
-            cin.ignore(1000, '\n');
-            break;
-        }
-        pos++;
-    }
-    fclose(p);
-    if (!encontrado) {
-        cout << "\n[ERROR] No se encontro ningun profesional activo con ese ID.\n";
-    }
-}
-
-//BAJA LOGICA
-bool darDeBajaProfesional() {
-    int idBuscado;
-    Profesional reg;
-    int pos = 0;
-    bool encontrado = false;
-
-    cout << "=================================================" << endl;
-    cout << "      SELECCIONE UN PROFESIONAL PARA DAR DE BAJA " << endl;
-    cout << "=================================================" << endl;
-    cout << " 0. Volver al Menu Principal / Cancelar Baja     " << endl;
-    cout << "-------------------------------------------------" << endl;
-
-    while (reg.leerDisco(pos)) {
-        if (reg.getEstado() == true) {
-            cout << "ID: [" << reg.getIdProfesional() << "] - "
-                 << reg.getApellido() << ", "
-                 << reg.getNombre() << endl;
-        }
-        pos++;
-    }
-    cout << "=================================================" << endl;
-    cout << "Ingrese el ID del profesional a dar de baja: ";
-    cin >> idBuscado;
-
-    if (idBuscado == 0) {
-        return false;
-    }
-
-    pos = 0;
-    FILE* p = fopen("profesionales.dat", "rb+");
-    if (p == NULL) {
-        cout << "\n[ERROR] No se pudo acceder al archivo.\n";
-        return true;
-    }
-    while (fread(&reg, sizeof(Profesional), 1, p) == 1) {
-        if (reg.getIdProfesional() == idBuscado && reg.getEstado() == true) {
-            encontrado = true;
-            reg.setEstado(false);
-            fseek(p, pos * sizeof(Profesional), SEEK_SET);
-            fwrite(&reg, sizeof(Profesional), 1, p);
-            cout << "\n[OK] Profesional dado de baja correctamente.\n";
-            break;
-        }
-        pos++;
-    }
-    fclose(p);
-    if (!encontrado) {
-        cout << "\n[ERROR] No se encontro ningun profesional activo con ese ID.\n";
-    }
-
-    cin.ignore(1000, '\n');
-    cout << "\nPresione ENTER para continuar...";
-    cin.get();
-
-    return true;
-}
-
-// SUB-MENU INTERNO: PANEL DE CONSULTAS Y FILTROS DE STAFF
+/// SUB-MENU INTERNO: PANEL DE CONSULTAS Y FILTROS DE STAFF
 void menuConsultasProfesionales() {
     int op = 1;
     Profesional aux;
@@ -523,6 +534,7 @@ void menuConsultasProfesionales() {
         cout << "Opcion seleccionada: " << op << endl << endl;
 
         if (op == 1) {
+            system("cls");
             cout << "=================================================" << endl;
             cout << "            STAFF DE PROFESIONALES ACTIVAS       " << endl;
             cout << "=================================================" << endl;
@@ -546,6 +558,7 @@ void menuConsultasProfesionales() {
             listarProfesionalesPorEspecialidad();
         }
         else if (op == 3) {
+            system("cls");
             cout << "=================================================" << endl;
             cout << "      PROFESIONALES POR VOLUMEN DE SERVICIOS     " << endl;
             cout << "=================================================" << endl << endl;
@@ -553,6 +566,7 @@ void menuConsultasProfesionales() {
             cout << "=================================================" << endl << endl;
         }
         else if (op == 4) {
+            system("cls");
             cout << "=================================================" << endl;
             cout << "         LISTADO DE PROFESIONALES INACTIVOS      " << endl;
             cout << "=================================================" << endl;
@@ -560,6 +574,7 @@ void menuConsultasProfesionales() {
             cout << "=================================================" << endl << endl;
         }
         else if (op == 5) {
+            system("cls");
             cout << "=================================================" << endl;
             cout << "               LIQUIDACION DE COMISIONES         " << endl;
             cout << "=================================================" << endl << endl;
@@ -569,18 +584,17 @@ void menuConsultasProfesionales() {
         else if (op != 0) {
             cout << "[ERROR] Opcion incorrecta. Reintente.\n\n";
         }
-
         if (op != 0) {
-            cout << "Presione ENTER para refrescar o cambiar de filtro...";
+            cout << "Presione ENTER para continuar...";
             cin.ignore(1000, '\n');
             cin.get();
             system("cls");
         }
-
     } while (op != 0);
+  system("cls");
 }
 
-// MENU PRINCIPAL: MODULO DE PROFESIONALES
+/// MENU PRINCIPAL: MODULO DE PROFESIONALES
 void menuProfesionales() {
     int op;
     Profesional aux;
@@ -629,6 +643,5 @@ void menuProfesionales() {
             system("cls");
         }
     } while (op != 0);
-
-    system("cls");
+  system("cls");
 }

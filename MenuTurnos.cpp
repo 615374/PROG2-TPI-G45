@@ -3,8 +3,8 @@
 #include <cstring>
 #include <cstdio>
 #include <ctime>
-#include "MenuTurnos.h"
 #include "Turno.h"
+#include "MenuTurnos.h"
 #include "Cliente.h"
 #include "Profesional.h"
 #include "Servicio.h"
@@ -16,8 +16,145 @@ using namespace std;
 
 // FUNCIONES GLOBALES DE SOPORTE Y LOGICA DE NEGOCIO
 
+/// BAJA LOGICA TURNO (conectado con detalle turno en cascada)
+bool darDeBajaTurno() {
+    int idBuscado;
+    Turno reg;
+    int pos = 0;
+    bool encontrado = false;
+
+    cout << "=================================================" << endl;
+    cout << "          SELECCIONE TURNO PARA DAR DE BAJA      " << endl;
+    cout << "=================================================" << endl;
+    cout << "0. Volver al Menu Principal / Cancelar Baja      " << endl;
+    cout << "-------------------------------------------------" << endl;
+
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado() == true) {
+            reg.mostrar();
+        }
+        pos++;
+    }
+
+    cout << "Ingrese el ID del turno a dar de baja: ";
+    cin >> idBuscado;
+
+    if (idBuscado == 0) {
+        cout << "\nOperacion cancelada. Volviendo al menu...\n";
+        return false;
+    }
+
+    pos = 0;
+    FILE* p = fopen("turnos.dat", "rb+");
+    if (p == NULL) {
+        cout << "\n[ERROR] No se pudo acceder al archivo.\n";
+        return true;
+    }
+
+    while (fread(&reg, sizeof(Turno), 1, p) == 1) {
+        if (reg.getIdTurno() == idBuscado && reg.getEstado() == true) {
+            encontrado = true;
+            reg.setEstado(false); // Baja logica de cabecera
+
+            fseek(p, pos * sizeof(Turno), SEEK_SET);
+            fwrite(&reg, sizeof(Turno), 1, p);
+
+            // BAJA EN CASCADA EN DETALLES_TURNOS.DAT
+            DetalleTurno dtReg;
+            FILE* pDT = fopen("detalles_turnos.dat", "rb+");
+            if (pDT != NULL) {
+                int posDT = 0;
+                while (fread(&dtReg, sizeof(DetalleTurno), 1, pDT) == 1) {
+                    if (dtReg.getIdTurno() == idBuscado && dtReg.getEstado() == true) {
+                        dtReg.setEstado(false); // Desactivamos los desgloses para liberar la grilla
+                        fseek(pDT, posDT * sizeof(DetalleTurno), SEEK_SET);
+                        fwrite(&dtReg, sizeof(DetalleTurno), 1, pDT);
+                        fseek(pDT, (posDT + 1) * sizeof(DetalleTurno), SEEK_SET); // Sincroniza puntero
+                    }
+                    posDT++;
+                }
+                fclose(pDT);
+            }
+
+            cout << "\n[OK] Turno y desgloses dados de baja. Horarios liberados en la grilla.\n";
+            break;
+        }
+        pos++;
+    }
+    fclose(p);
+
+    if (!encontrado) cout << "\n[ERROR] No se encontro ningun turno activo con ese ID.\n";
+
+    cin.ignore(1000, '\n');
+    cout << "\nPresione ENTER para continuar...";
+    cin.get();
+    return true;
+}
+
+
+//------------------------------------------------------------
+/// FILTRADO DE CLIENTAS ACTIVAS POR COINCIDENCIA DE APELLIDO
+//------------------------------------------------------------
+// Busca clientas por coincidencia parcial en el apellido y retorna el ID seleccionado
+int buscarClienteParaTurno(const char* apellidoBuscado) {
+    Cliente reg;
+    int pos = 0;
+    bool encontrado = false;
+
+    int tam = strlen(apellidoBuscado);
+
+    if (tam == 0) {
+        cout << "\n[ERROR] No se ingreso ningun criterio de busqueda.\n";
+        return -1;
+    }
+
+    system("cls");
+
+    cout << "=================================================" << endl;
+    cout << "  CLIENTAS ACTIVAS QUE EMPIEZAN CON: "             << apellidoBuscado << endl;
+    cout << "=================================================" << endl;
+
+    while (reg.leerDisco(pos)) {
+        if (reg.getEstado() == true && strncmp(reg.getApellido(), apellidoBuscado, tam) == 0) {
+            cout << " ID: [" << reg.getIdCliente() << "] - "
+                 << reg.getApellido() << ", " << reg.getNombre()
+                 << " - Tel: " << reg.getTelefono() << endl;
+            encontrado = true;
+        }
+        pos++;
+    }
+
+    if (!encontrado) {
+        cout << "\n[AVISO] No se encontraron clientas activas con ese criterio.\n";
+        return -1;
+    }
+
+    int idSeleccionado;
+    cout << "-------------------------------------------------" << endl;
+    cout << "Ingrese el ID de la clienta elegida (0 para cancelar): ";
+    cin >> idSeleccionado;
+
+    // Opcion de 0 para cancelar / retornar al menu
+    if (idSeleccionado == 0) {
+        cout << "\nOperacion cancelada por el usuario.\n";
+        return -1;
+    }
+
+    pos = 0;
+    Cliente verificador;
+    while (verificador.leerDisco(pos)) {
+        if (verificador.getIdCliente() == idSeleccionado && verificador.getEstado() == true) {
+            return idSeleccionado;
+        }
+        pos++;
+    }
+
+    cout << "\n[ERROR] El ID ingresado es incorrecto o pertenece a una clienta inactiva.\n";
+    return -1;
+}
+
 //-------------------------------------
-// VERIFICAR BLOQUE HORARIO OCUPADO
+/// VERIFICAR BLOQUE HORARIO OCUPADO
 //-------------------------------------
 
 // Revisa si la profesional elegida ya tiene un turno activo en esa fecha y hora especifica
@@ -54,9 +191,68 @@ bool verificarBloqueOcupado(int d, int m, int a, int horaEvaluar, int idProfesio
 }
 
 //-----------------------------------------------
-// GRILLA DE DISPONIBILIDAD SEMANAL INTERACTIVA
+/// BUSCAR TURNO ACTIVO DE UNA CLIENTA EN UNA FECHA
 //-----------------------------------------------
+// Retorna el ID del turno si la clienta ya tiene una cabecera activa ese dia.
+// Si no tiene, retorna -1.
+int buscarTurnoClienteEnFecha(int idCliente, int d, int m, int a) {
+    Turno t;
+    int pos = 0;
 
+    while (t.leerDisco(pos)) {
+        Fecha f = t.getFecha();
+
+        if (t.getEstado() == true &&
+            t.getIdCliente() == idCliente &&
+            f.getDia() == d &&
+            f.getMes() == m &&
+            f.getAnio() == a) {
+            return t.getIdTurno();
+        }
+        pos++;
+    }
+    return -1;
+}
+
+//-----------------------------------------------
+/// VERIFICAR SI LA CLIENTA YA ESTA OCUPADA
+//-----------------------------------------------
+// Revisa si la clienta ya tiene un detalle activo en esa fecha y hora.
+bool verificarClienteOcupada(int idCliente, int d, int m, int a, int horaEvaluar, int minutoEvaluar) {
+    Turno t;
+    DetalleTurno dt;
+    int posT = 0;
+
+    while (t.leerDisco(posT)) {
+        Fecha f = t.getFecha();
+
+        if (t.getEstado() == true &&
+            t.getIdCliente() == idCliente &&
+            f.getDia() == d &&
+            f.getMes() == m &&
+            f.getAnio() == a) {
+
+            int posDT = 0;
+
+            while (dt.leerDisco(posDT)) {
+                if (dt.getEstado() == true &&
+                    dt.getIdTurno() == t.getIdTurno() &&
+                    dt.getHora() == horaEvaluar &&
+                    dt.getMinuto() == minutoEvaluar) {
+                    return true;
+                }
+
+                posDT++;
+            }
+        }
+        posT++;
+    }
+    return false;
+}
+
+//-----------------------------------------------
+/// GRILLA DE DISPONIBILIDAD SEMANAL INTERACTIVA
+//-----------------------------------------------
 // Renderiza los proximos 5 dias habiles disponibles a partir de hoy
 void mostrarGrillaSemanalAuto(int idProfesionalGrilla) {
     time_t tActual = time(0);
@@ -124,72 +320,9 @@ void mostrarGrillaSemanalAuto(int idProfesionalGrilla) {
     cout << "=================================================\n" << endl;
 }
 
-//------------------------------------------------------------
-// FILTRADO DE CLIENTAS ACTIVAS POR COINCIDENCIA DE APELLIDO
-//------------------------------------------------------------
-
-// Busca clientas por coincidencia parcial en el apellido y retorna el ID seleccionado
-int buscarClienteParaTurno(const char* apellidoBuscado) {
-    Cliente reg;
-    int pos = 0;
-    bool encontrado = false;
-
-    int tam = strlen(apellidoBuscado);
-
-    if (tam == 0) {
-        cout << "\n[ERROR] No se ingreso ningun criterio de busqueda.\n";
-        return -1;
-    }
-
-    system("cls");
-
-    cout << "=================================================" << endl;
-    cout << "  CLIENTAS ACTIVAS QUE EMPIEZAN CON: "             << apellidoBuscado << endl;
-    cout << "=================================================" << endl;
-
-    while (reg.leerDisco(pos)) {
-        if (reg.getEstado() == true && strncmp(reg.getApellido(), apellidoBuscado, tam) == 0) {
-            cout << " ID: [" << reg.getIdCliente() << "] - "
-                 << reg.getApellido() << ", " << reg.getNombre()
-                 << " - Tel: " << reg.getTelefono() << endl;
-            encontrado = true;
-        }
-        pos++;
-    }
-
-    if (!encontrado) {
-        cout << "\n[AVISO] No se encontraron clientas activas con ese criterio.\n";
-        return -1;
-    }
-
-    int idSeleccionado;
-    cout << "-------------------------------------------------" << endl;
-    cout << "Ingrese el ID de la clienta elegida (0 para cancelar): ";
-    cin >> idSeleccionado;
-
-    // Opcion de 0 para cancelar / retornar al menu
-    if (idSeleccionado == 0) {
-        cout << "\nOperacion cancelada por el usuario.\n";
-        return -1;
-    }
-
-    pos = 0;
-    Cliente verificador;
-    while (verificador.leerDisco(pos)) {
-        if (verificador.getIdCliente() == idSeleccionado && verificador.getEstado() == true) {
-            return idSeleccionado;
-        }
-        pos++;
-    }
-
-    cout << "\n[ERROR] El ID ingresado es incorrecto o pertenece a una clienta inactiva.\n";
-    return -1;
-}
-
 //-----------------------------------------------------
-// GENERACION CRONOLOGICA DE AGENDA (MEMORIA DINAMICA)
+/// GENERACION CRONOLOGICA DE AGENDA (MEMORIA DINAMICA)
 //-----------------------------------------------------
-
 // Extrae, ordena cronologicamente y lista la agenda diaria con horario de llegada
 void listarAgendaCronologica() {
     Turno tReg;
@@ -402,7 +535,7 @@ void listarAgendaCronologica() {
 }
 
 //------------------------------------
-// REGISTRAR ASISTENCIA (DAR PRESENTE)
+/// REGISTRAR ASISTENCIA (DAR PRESENTE)
 //------------------------------------
 void registrarAsistencia() {
     int idBuscado;
@@ -447,9 +580,8 @@ void registrarAsistencia() {
 }
 
 //--------------------------------------------------------
-// RE-PROGRAMAR HORARIO DE ATENCION (CON CAMBIO EN CASCADA)
+/// RE-PROGRAMAR HORARIO DE ATENCION (CON CAMBIO EN CASCADA)
 //--------------------------------------------------------
-
 void reprogramarTurno() {
     int idBuscado;
     Turno reg;
@@ -572,83 +704,9 @@ void reprogramarTurno() {
     cout << "\n[OK] Turno re-programado con exito. Grilla actualizada de inmediato.\n";
 }
 
-// BAJA LOGICA TURNO (conectado con detalle turno en cascada)
-bool darDeBajaTurno() {
-    int idBuscado;
-    Turno reg;
-    int pos = 0;
-    bool encontrado = false;
-
-    cout << "=================================================" << endl;
-    cout << "          SELECCIONE TURNO PARA DAR DE BAJA      " << endl;
-    cout << "=================================================" << endl;
-    cout << "0. Volver al Menu Principal / Cancelar Baja      " << endl;
-    cout << "-------------------------------------------------" << endl;
-
-    while (reg.leerDisco(pos)) {
-        if (reg.getEstado() == true) {
-            reg.mostrar();
-        }
-        pos++;
-    }
-
-    cout << "Ingrese el ID del turno a dar de baja: ";
-    cin >> idBuscado;
-
-    if (idBuscado == 0) {
-        cout << "\nOperacion cancelada. Volviendo al menu...\n";
-        return false;
-    }
-
-    pos = 0;
-    FILE* p = fopen("turnos.dat", "rb+");
-    if (p == NULL) {
-        cout << "\n[ERROR] No se pudo acceder al archivo.\n";
-        return true;
-    }
-
-    while (fread(&reg, sizeof(Turno), 1, p) == 1) {
-        if (reg.getIdTurno() == idBuscado && reg.getEstado() == true) {
-            encontrado = true;
-            reg.setEstado(false); // Baja logica de cabecera
-
-            fseek(p, pos * sizeof(Turno), SEEK_SET);
-            fwrite(&reg, sizeof(Turno), 1, p);
-
-            // BAJA EN CASCADA EN DETALLES_TURNOS.DAT
-            DetalleTurno dtReg;
-            FILE* pDT = fopen("detalles_turnos.dat", "rb+");
-            if (pDT != NULL) {
-                int posDT = 0;
-                while (fread(&dtReg, sizeof(DetalleTurno), 1, pDT) == 1) {
-                    if (dtReg.getIdTurno() == idBuscado && dtReg.getEstado() == true) {
-                        dtReg.setEstado(false); // Desactivamos los desgloses para liberar la grilla
-                        fseek(pDT, posDT * sizeof(DetalleTurno), SEEK_SET);
-                        fwrite(&dtReg, sizeof(DetalleTurno), 1, pDT);
-                        fseek(pDT, (posDT + 1) * sizeof(DetalleTurno), SEEK_SET); // Sincroniza puntero
-                    }
-                    posDT++;
-                }
-                fclose(pDT);
-            }
-
-            cout << "\n[OK] Turno y desgloses dados de baja. Horarios liberados en la grilla.\n";
-            break;
-        }
-        pos++;
-    }
-    fclose(p);
-
-    if (!encontrado) cout << "\n[ERROR] No se encontro ningun turno activo con ese ID.\n";
-
-    cin.ignore(1000, '\n');
-    cout << "\nPresione ENTER para continuar...";
-    cin.get();
-    return true;
-}
 
 //-----------------------------------------------------
-// REGISTRAR COBRO EN CAJA (LIQUIDAR TURNOS ASISTIDOS)
+/// REGISTRAR COBRO EN CAJA (LIQUIDAR TURNOS ASISTIDOS)
 //-----------------------------------------------------
 void cobrarLiquidarTurno() {
     int idBuscado;
@@ -721,15 +779,16 @@ void cobrarLiquidarTurno() {
 
             if (confirma == 'S' || confirma == 's') {
                 reg.setLiquidado(true);
-                Fecha hoy; // Usa el constructor
-                hoy.setDia(22);
-                hoy.setMes(6);
-                hoy.setAnio(2026);
-                reg.setFechaLiquidacion(hoy);
+                // Asigna automáticamente la fecha del turno para que impacte bien
+                // en la recaudación diaria de los reportes.
+                reg.setFechaLiquidacion(reg.getFecha());
 
                 fseek(p, pos * sizeof(Turno), SEEK_SET);
                 fwrite(&reg, sizeof(Turno), 1, p);
-                cout << "\n[OK] ¡Cobro exitoso! El turno paso a estado LIQUIDADO.\n";
+
+                cout << "\n[OK] ¡Cobro exitoso! El dinero se imputo para el dia: ";
+                reg.getFecha().mostrarFormateada();
+                cout << "\nEl turno paso a estado LIQUIDADO.\n";
             } else {
                 cout << "\n|Operacion cancelada. No se registro el ingreso de dinero.\n";
             }
@@ -738,12 +797,167 @@ void cobrarLiquidarTurno() {
         pos++;
     }
     fclose(p);
-
     if (!encontrado) cout << "\n[ERROR] No se encontro ningun turno activo con ese ID.\n";
 }
 
-// SUB-MENU PRINCIPAL: MODULO DE TURNOS
 
+//-----------------------------------------------------
+/// SUB-MENU: CAJA Y LIQUIDACIONES
+//-----------------------------------------------------
+// Algoritmo: Agrupa las operaciones economicas relacionadas con turnos
+void submenuCajaLiquidaciones() {
+    int op;
+
+    do {
+        cout << "=================================================" << endl;
+        cout << "              CAJA Y LIQUIDACIONES              " << endl;
+        cout << "=================================================" << endl;
+        cout << "1. Registrar Cobro en Caja" << endl;
+        cout << "2. Reporte General de Caja" << endl;
+        cout << "0. Volver al Modulo de Turnos" << endl;
+        cout << "-------------------------------------------------" << endl;
+        cout << "Seleccione una opcion: ";
+        cin >> op;
+        cout << endl;
+
+        if (op == 1) {
+            system("cls");
+            cobrarLiquidarTurno();
+            cin.ignore(1000, '\n');
+            cout << "\nPresione ENTER para continuar...";
+            cin.get();
+            system("cls");
+        }
+        else if (op == 2) {
+            system("cls");
+            reporteCajaGeneral();
+            cin.ignore(1000, '\n');
+            cout << "\nPresione ENTER para continuar...";
+            cin.get();
+            system("cls");
+        }
+        else if (op != 0) {
+            cout << "[ERROR] Opcion incorrecta. Reintente.\n\n";
+            cin.ignore(1000, '\n');
+            cout << "Presione ENTER para continuar...";
+            cin.get();
+            system("cls");
+        }
+
+    } while (op != 0);
+
+    system("cls");
+}
+
+
+
+//-----------------------------------------------------
+/// REPORTE GENERAL DE CAJA
+//-----------------------------------------------------
+// Algoritmo: Filtra turnos liquidados por fecha de cobro y calcula la caja del dia
+void reporteCajaGeneral() {
+    int diaBuscado;
+    int mesBuscado;
+    int anioBuscado;
+
+    cout << "Ingrese dia de caja (1-31): ";
+    cin >> diaBuscado;
+
+    cout << "Ingrese mes de caja (1-12): ";
+    cin >> mesBuscado;
+
+    cout << "Ingrese anio de caja: ";
+    cin >> anioBuscado;
+
+    if (diaBuscado < 1 || diaBuscado > 31) {
+        cout << "[ERROR] Dia invalido.\n\n";
+        return;
+    }
+
+    if (mesBuscado < 1 || mesBuscado > 12) {
+        cout << "[ERROR] Mes invalido.\n\n";
+        return;
+    }
+
+    if (anioBuscado < 2025) {
+        cout << "[ERROR] Anio invalido.\n\n";
+        return;
+    }
+
+    Turno turno;
+    int posTurno = 0;
+    bool encontroMovimientos = false;
+    int cantidadTurnos = 0;
+
+    float totalSenas = 0;
+    float totalSaldosCobrados = 0;
+    float totalFacturadoServicios = 0;
+
+    cout << "=================================================" << endl;
+    cout << "              REPORTE GENERAL DE CAJA            " << endl;
+    cout << "=================================================" << endl;
+    cout << "FECHA DE CAJA: " << diaBuscado << "/" << mesBuscado << "/" << anioBuscado << endl;
+    cout << "-------------------------------------------------" << endl;
+
+    while (turno.leerDisco(posTurno)) {
+        if (turno.getEstado() && turno.getLiquidado()) {
+            Fecha fechaCaja = turno.getFechaLiquidacion();
+
+            if (fechaCaja.getDia() == diaBuscado &&
+                fechaCaja.getMes() == mesBuscado &&
+                fechaCaja.getAnio() == anioBuscado) {
+
+                DetalleTurno detalle;
+                int posDetalle = 0;
+                float totalServiciosTurno = 0;
+
+                while (detalle.leerDisco(posDetalle)) {
+                    if (detalle.getEstado() &&
+                        detalle.getIdTurno() == turno.getIdTurno()) {
+                        totalServiciosTurno += detalle.getPrecioAlMomento();
+                    }
+                    posDetalle++;
+                }
+
+                float saldoCobrado = totalServiciosTurno - turno.getSena();
+
+                if (saldoCobrado < 0) {
+                    saldoCobrado = 0;
+                }
+
+                cout << "TURNO ID: " << turno.getIdTurno()
+                     << " | CLIENTE ID: " << turno.getIdCliente()
+                     << " | SENIA: $" << turno.getSena()
+                     << " | SALDO FINAL: $" << saldoCobrado
+                     << " | INGRESO TOTAL: $" << (turno.getSena() + saldoCobrado)
+                     << endl;
+
+                totalSenas += turno.getSena();
+                totalSaldosCobrados += saldoCobrado;
+                totalFacturadoServicios += totalServiciosTurno;
+                cantidadTurnos++;
+                encontroMovimientos = true;
+            }
+        }
+        posTurno++;
+    }
+    cout << "-------------------------------------------------" << endl;
+
+    if (!encontroMovimientos) {
+        cout << "No se registraron cobros liquidados para esa fecha.\n";
+    }
+    else {
+        cout << "TURNOS COBRADOS: " << cantidadTurnos << endl;
+        cout << "INGRESOS POR SENIAS: $" << totalSenas << endl;
+        cout << "INGRESOS POR SALDOS FINALES: $" << totalSaldosCobrados << endl;
+        cout << "INGRESOS TOTALES: $" << (totalSenas + totalSaldosCobrados) << endl;
+        cout << "TOTAL SERVICIOS REALIZADOS: $" << totalFacturadoServicios << endl;
+    }
+    cout << "=================================================" << endl;
+}
+
+
+/// SUB-MENU PRINCIPAL: MODULO DE TURNOS
 void menuTurnos() {
     int op;
     Turno aux;
@@ -757,7 +971,7 @@ void menuTurnos() {
         cout << "3. Registrar Asistencia (Dar Presente)"            << endl;
         cout << "4. Re-programar Turno (Cambiar Fecha/Hora)"        << endl;
         cout << "5. Cancelar Turno (Baja Logica)"                   << endl;
-        cout << "6. Registrar Cobro en Caja (Liquidar Turno)"       << endl;
+        cout << "6. Caja y Liquidaciones"       << endl;
         cout << "0. Volver al Menu Principal"                       << endl;
         cout << "-------------------------------------------------" << endl;
         cout << "Seleccione una opcion: ";
@@ -1046,55 +1260,118 @@ void menuTurnos() {
                             cout << "\n[ERROR] La profesional ya tiene agenda ocupada en ese horario. Presione ENTER...";
                             cin.ignore(1000, '\n'); cin.get();
                         }
+                        else if (verificarClienteOcupada(idResuelto, diaElegido, mesElegido, anioElegido, horaElegida, minElegido)) {
+                            cout << "\n[ERROR] La clienta ya tiene un servicio asignado en ese mismo horario." << endl;
+                            cout << "Puede agregar otro servicio antes o despues, pero no en la misma hora." << endl;
+                            cout << "Presione ENTER para reintentar...";
+                            cin.ignore(1000, '\n');
+                            cin.get();
+                        }
                         else {
-                            aux.setIdCliente(idResuelto);
-                            Fecha fAux;
-                            fAux.setDia(diaElegido); fAux.setMes(mesElegido); fAux.setAnio(anioElegido);
-                            aux.setFecha(fAux);
+                            int idTurnoAsignado;
+                            bool turnoNuevo = false;
 
-                            float montoSena;
-                            do {
-                                cout << "Ingrese el monto de la senia: $";
-                                cin >> montoSena;
-                                if (montoSena < 0) cout << "[ERROR] La senia no puede ser negativa.\n";
-                            } while (montoSena < 0);
-                            aux.setSena(montoSena);
-                            aux.setAsistio(false);
-                            aux.setEstado(true);
+                            int idTurnoExistente = buscarTurnoClienteEnFecha(idResuelto, diaElegido, mesElegido, anioElegido);
 
-                            FILE* fTurnosCount = fopen("turnos.dat", "rb");
-                            int cantT = 0;
-                            if (fTurnosCount != NULL) {
-                                fseek(fTurnosCount, 0, SEEK_END);
-                                cantT = ftell(fTurnosCount) / sizeof(Turno);
-                                fclose(fTurnosCount);
+                            if (idTurnoExistente != -1) {
+                                idTurnoAsignado = idTurnoExistente;
+
+                                cout << "\n[AVISO] La clienta ya posee un turno activo en esa fecha." << endl;
+                                cout << "Se agregara este servicio al Turno Nro: " << idTurnoAsignado << endl;
+                                cout << "No se solicitara una nueva senia." << endl;
+                                cout << "\nPresione ENTER para continuar...";
+                                cin.ignore(1000, '\n');
+                                cin.get();
                             }
-                            int idTurnoAsignado = cantT + 1;
-                            aux.setIdTurno(idTurnoAsignado);
+                            else {
+                                aux.setIdCliente(idResuelto);
 
-                            if (aux.escribirDisco()) {
-                                DetalleTurno detAux;
-                                detAux.setIdTurno(idTurnoAsignado);
-                                detAux.setIdServicio(idServicioElegido);
-                                detAux.setIdProfesional(idProfesionalElegido);
-                                detAux.setHora(horaElegida);
-                                detAux.setMinuto(minElegido);
-                                detAux.setPrecioAlMomento(precioBase);
-                                detAux.setEstado(true);
-                                detAux.setObservaciones("Alta inicial desde el panel central");
+                                Fecha fAux;
+                                fAux.setDia(diaElegido);
+                                fAux.setMes(mesElegido);
+                                fAux.setAnio(anioElegido);
+                                aux.setFecha(fAux);
 
-                                if (detAux.escribirDisco()) {
-                                    system("cls");
-                                    cout << "=================================================" << endl;
-                                    cout << "            TURNO REGISTRADO CON EXITO!          " << endl;
-                                    cout << "=================================================" << endl;
-                                    cout << "[OK] Cabecera agendada en Turno Nro: " << idTurnoAsignado << endl;
-                                    cout << "[OK] Desglose de servicios guardado correctamente."<< endl;
-                                    cout << "-------------------------------------------------" << endl;
-                                    fechaAsignadaCorrectamente = true;
-                                    flujoTurnoActivo = false;
+                                float montoSena;
+                                do {
+                                    cout << "Ingrese el monto de la senia: $";
+                                    cin >> montoSena;
+
+                                    if (montoSena < 0) {
+                                        cout << "[ERROR] La senia no puede ser negativa.\n";
+                                    }
+
+                                } while (montoSena < 0);
+
+                                aux.setSena(montoSena);
+                                aux.setAsistio(false);
+                                aux.setEstado(true);
+
+                                FILE* fTurnosCount = fopen("turnos.dat", "rb");
+                                int cantT = 0;
+
+                                if (fTurnosCount != NULL) {
+                                    fseek(fTurnosCount, 0, SEEK_END);
+                                    cantT = ftell(fTurnosCount) / sizeof(Turno);
+                                    fclose(fTurnosCount);
                                 }
-                            }
+
+                                idTurnoAsignado = cantT + 1;
+                                aux.setIdTurno(idTurnoAsignado);
+
+                                if (aux.escribirDisco()) {
+                                    turnoNuevo = true;
+                                }
+                                        else {
+                                            cout << "\n[ERROR] No se pudo guardar la cabecera del turno." << endl;
+                                            cout << "Presione ENTER para continuar...";
+                                            cin.ignore(1000, '\n');
+                                            cin.get();
+                                            continue;
+                                        }
+                                    }
+
+                                    DetalleTurno detAux;
+                                    detAux.setIdTurno(idTurnoAsignado);
+                                    detAux.setIdServicio(idServicioElegido);
+                                    detAux.setIdProfesional(idProfesionalElegido);
+                                    detAux.setHora(horaElegida);
+                                    detAux.setMinuto(minElegido);
+                                    detAux.setPrecioAlMomento(precioBase);
+                                    detAux.setEstado(true);
+
+                                    if (turnoNuevo) {
+                                        detAux.setObservaciones("Alta inicial desde el panel central");
+                                    }
+                                    else {
+                                        detAux.setObservaciones("Servicio agregado a turno existente");
+                                    }
+
+                                    if (detAux.escribirDisco()) {
+                                        system("cls");
+                                        cout << "=================================================" << endl;
+                                        cout << "            TURNO REGISTRADO CON EXITO!          " << endl;
+                                        cout << "=================================================" << endl;
+
+                                        if (turnoNuevo) {
+                                            cout << "[OK] Cabecera agendada en Turno Nro: " << idTurnoAsignado << endl;
+                                        }
+                                        else {
+                                            cout << "[OK] Servicio agregado al Turno Nro: " << idTurnoAsignado << endl;
+                                        }
+
+                                        cout << "[OK] Desglose de servicios guardado correctamente." << endl;
+                                        cout << "-------------------------------------------------" << endl;
+
+                                        fechaAsignadaCorrectamente = true;
+                                        flujoTurnoActivo = false;
+                                    }
+                                    else {
+                                        cout << "\n[ERROR] No se pudo guardar el detalle del turno." << endl;
+                                        cout << "Presione ENTER para continuar...";
+                                        cin.ignore(1000, '\n');
+                                        cin.get();
+                                    }
                         }
                     }
                 }
@@ -1132,8 +1409,13 @@ void menuTurnos() {
         }
         else if (op == 6) {
             system("cls");
-            cobrarLiquidarTurno();
-            cin.ignore(1000, '\n'); cout << "\nPresione ENTER para continuar..."; cin.get();
+            submenuCajaLiquidaciones();
+        }
+        else if (op != 0) {
+            cout << "[ERROR] Opcion incorrecta. Reintente.\n\n";
+            cin.ignore(1000, '\n');
+            cout << "Presione ENTER para continuar...";
+            cin.get();
             system("cls");
         }
     } while (op != 0);

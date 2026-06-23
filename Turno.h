@@ -51,6 +51,3 @@ class Turno {
         bool escribirDisco();
 };
 
-// DECLARACIONES DE FUNCIONES GLOBALES
-bool darDeBajaTurno();
-int buscarClienteParaTurno(const char* apellidoBuscado);

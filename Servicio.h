@@ -6,13 +6,16 @@ class Servicio {
         char nombre[50];
         char tipo[30];
         float precioActual;
-        bool estado;
+        bool estado; // Para el borrado lógico
 
+        // Método privado auxiliar para calcular el ID autoincremental
         int generarNuevoId();
 
-    public:
+        public:
+        // Constructor
         Servicio();
 
+        // Metodos principales del objeto
         bool cargar();
         void mostrar();
         bool modificar();
@@ -42,12 +45,3 @@ class Servicio {
         bool escribirDisco();
 };
 
-//DECLARACIONES DE FUNCIONES GLOBALES
-
-// Mantenimiento
-void modificarServicio();
-bool darDeBajaServicio();
-
-// Listados
-void listarServiciosPorTipo();
-void listarServiciosInactivos();

@@ -82,7 +82,7 @@ bool ServicioXProfesional::cargar() {
         return false; // Regresa directo al main sin mostrar servicios
     }
 
-    cout << endl;
+    system("cls");
 
     // DESPLIEGUE DE SERVICIOS
     cout << "=================================================" << endl;
