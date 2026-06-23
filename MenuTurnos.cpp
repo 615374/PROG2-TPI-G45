@@ -777,25 +777,19 @@ void cobrarLiquidarTurno() {
             cout << "¿Confirma el pago en efectivo/tarjeta? (S/N): ";
             cin >> confirma;
 
-           if (confirma == 'S' || confirma == 's') {
+            if (confirma == 'S' || confirma == 's') {
                 reg.setLiquidado(true);
-
-                Fecha fechaCobro;
-
-                cout << "\nIngrese fecha del cobro/liquidacion:" << endl;
-
-                if (!fechaCobro.cargar()) {
-                    cout << "\n[AVISO] Cobro cancelado. No se registro el ingreso de dinero.\n";
-                    fclose(p);
-                    return;
-                }
-
-                reg.setFechaLiquidacion(fechaCobro);
+                // Asigna automáticamente la fecha del turno para que impacte bien
+                // en la recaudación diaria de los reportes.
+                reg.setFechaLiquidacion(reg.getFecha());
 
                 fseek(p, pos * sizeof(Turno), SEEK_SET);
                 fwrite(&reg, sizeof(Turno), 1, p);
-                cout << "\n[OK] ¡Cobro exitoso! El turno paso a estado LIQUIDADO.\n";
-              } else {
+
+                cout << "\n[OK] ¡Cobro exitoso! El dinero se imputo para el dia: ";
+                reg.getFecha().mostrarFormateada();
+                cout << "\nEl turno paso a estado LIQUIDADO.\n";
+            } else {
                 cout << "\n|Operacion cancelada. No se registro el ingreso de dinero.\n";
             }
             break;
@@ -803,7 +797,6 @@ void cobrarLiquidarTurno() {
         pos++;
     }
     fclose(p);
-
     if (!encontrado) cout << "\n[ERROR] No se encontro ningun turno activo con ese ID.\n";
 }
 
@@ -923,7 +916,6 @@ void reporteCajaGeneral() {
                         detalle.getIdTurno() == turno.getIdTurno()) {
                         totalServiciosTurno += detalle.getPrecioAlMomento();
                     }
-
                     posDetalle++;
                 }
 
@@ -933,12 +925,12 @@ void reporteCajaGeneral() {
                     saldoCobrado = 0;
                 }
 
-            cout << "TURNO ID: " << turno.getIdTurno()
-                 << " | CLIENTE ID: " << turno.getIdCliente()
-                 << " | SENIA: $" << turno.getSena()
-                 << " | SALDO FINAL: $" << saldoCobrado
-                 << " | INGRESO TOTAL: $" << turno.getSena() + saldoCobrado
-                 << endl;
+                cout << "TURNO ID: " << turno.getIdTurno()
+                     << " | CLIENTE ID: " << turno.getIdCliente()
+                     << " | SENIA: $" << turno.getSena()
+                     << " | SALDO FINAL: $" << saldoCobrado
+                     << " | INGRESO TOTAL: $" << (turno.getSena() + saldoCobrado)
+                     << endl;
 
                 totalSenas += turno.getSena();
                 totalSaldosCobrados += saldoCobrado;
@@ -947,7 +939,6 @@ void reporteCajaGeneral() {
                 encontroMovimientos = true;
             }
         }
-
         posTurno++;
     }
     cout << "-------------------------------------------------" << endl;
@@ -956,12 +947,13 @@ void reporteCajaGeneral() {
         cout << "No se registraron cobros liquidados para esa fecha.\n";
     }
     else {
-      cout << "TURNOS COBRADOS: " << cantidadTurnos << endl;
+        cout << "TURNOS COBRADOS: " << cantidadTurnos << endl;
         cout << "INGRESOS POR SENIAS: $" << totalSenas << endl;
         cout << "INGRESOS POR SALDOS FINALES: $" << totalSaldosCobrados << endl;
-        cout << "INGRESOS TOTALES: $" << totalSenas + totalSaldosCobrados << endl;
-        cout << "TOTAL SERVICIOS REALIZADOS: $" << totalFacturadoServicios << endl; }
-        cout << "=================================================" << endl;
+        cout << "INGRESOS TOTALES: $" << (totalSenas + totalSaldosCobrados) << endl;
+        cout << "TOTAL SERVICIOS REALIZADOS: $" << totalFacturadoServicios << endl;
+    }
+    cout << "=================================================" << endl;
 }
 
 
