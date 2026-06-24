@@ -18,7 +18,7 @@ using namespace std;
 
 /// BAJA LOGICA TURNO (conectado con detalle turno en cascada)
 bool darDeBajaTurno() {
-    int idBuscado;
+    int idBuscado, horaBuscada;
     Turno reg;
     int pos = 0;
     bool encontrado = false;
@@ -29,14 +29,37 @@ bool darDeBajaTurno() {
     cout << "0. Volver al Menu Principal / Cancelar Baja      " << endl;
     cout << "-------------------------------------------------" << endl;
 
+    // Muestra cabecera y abre sus desgloses horarios en pantalla
     while (reg.leerDisco(pos)) {
         if (reg.getEstado() == true) {
-            reg.mostrar();
+            reg.mostrar(); // Imprime los datos fijos (ID, cliente, fecha, se≈àa)
+
+            // Buscamos e imprimimos los tratamientos que pertenecen a esta cabecera
+            DetalleTurno dtVisual;
+            int posDTV = 0;
+            while (dtVisual.leerDisco(posDTV++)) {
+                if (dtVisual.getIdTurno() == reg.getIdTurno() && dtVisual.getEstado() == true) {
+                    // Recuperamos el nombre del servicio para que se entienda que es
+                    Servicio servV;
+                    int posSV = 0;
+                    char nombreServV[40] = "Desconocido";
+                    while (servV.leerDisco(posSV++)) {
+                        if (servV.getIdServicio() == dtVisual.getIdServicio()) {
+                            strcpy(nombreServV, servV.getNombre());
+                            break;
+                        }
+                    }
+                    // Imprime el desglose con sangria para que se note la jerarquia
+                    cout << "    [>] Hora: " << (dtVisual.getHora() < 10 ? "0" : "") << dtVisual.getHora() << ":00hs"
+                         << " | Tratamiento: " << nombreServV << endl;
+                }
+            }
+            cout << "-------------------------------------------------" << endl;
         }
         pos++;
     }
 
-    cout << "Ingrese el ID del turno a dar de baja: ";
+    cout << "Ingrese el ID del turno a modificar/dar de baja: ";
     cin >> idBuscado;
 
     if (idBuscado == 0) {
@@ -44,46 +67,71 @@ bool darDeBajaTurno() {
         return false;
     }
 
-    pos = 0;
-    FILE* p = fopen("turnos.dat", "rb+");
-    if (p == NULL) {
-        cout << "\n[ERROR] No se pudo acceder al archivo.\n";
-        return true;
+    cout << "Ingrese la hora del tratamiento especifico a cancelar (Ej: 11 o 12): ";
+    cin >> horaBuscada;
+
+    // Baja logica en detalles_turnos.dat
+    DetalleTurno dtReg;
+    FILE* pDT = fopen("detalles_turnos.dat", "rb+");
+    bool detalleCancelado = false;
+
+    if (pDT != NULL) {
+        int posDT = 0;
+        while (fread(&dtReg, sizeof(DetalleTurno), 1, pDT) == 1) {
+            if (dtReg.getIdTurno() == idBuscado && dtReg.getHora() == horaBuscada && dtReg.getEstado() == true) {
+                dtReg.setEstado(false); // Desactivamos el bloque horario especifico
+
+                fseek(pDT, posDT * sizeof(DetalleTurno), SEEK_SET);
+                fwrite(&dtReg, sizeof(DetalleTurno), 1, pDT);
+                detalleCancelado = true;
+                break;
+            }
+            posDT++;
+        }
+        fclose(pDT);
     }
 
-    while (fread(&reg, sizeof(Turno), 1, p) == 1) {
-        if (reg.getIdTurno() == idBuscado && reg.getEstado() == true) {
-            encontrado = true;
-            reg.setEstado(false); // Baja logica de cabecera
+    if (!detalleCancelado) {
+        cout << "\n[ERROR] No se encontro ningun tratamiento activo a esa hora para el turno indicado.\n";
+        cin.ignore(1000, '\n');
+        cout << "\nPresione ENTER para continuar...";
+        cin.get();
+        return false;
+    }
 
-            fseek(p, pos * sizeof(Turno), SEEK_SET);
-            fwrite(&reg, sizeof(Turno), 1, p);
-
-            // BAJA EN CASCADA EN DETALLES_TURNOS.DAT
-            DetalleTurno dtReg;
-            FILE* pDT = fopen("detalles_turnos.dat", "rb+");
-            if (pDT != NULL) {
-                int posDT = 0;
-                while (fread(&dtReg, sizeof(DetalleTurno), 1, pDT) == 1) {
-                    if (dtReg.getIdTurno() == idBuscado && dtReg.getEstado() == true) {
-                        dtReg.setEstado(false); // Desactivamos los desgloses para liberar la grilla
-                        fseek(pDT, posDT * sizeof(DetalleTurno), SEEK_SET);
-                        fwrite(&dtReg, sizeof(DetalleTurno), 1, pDT);
-                        fseek(pDT, (posDT + 1) * sizeof(DetalleTurno), SEEK_SET); // Sincroniza puntero
-                    }
-                    posDT++;
-                }
-                fclose(pDT);
-            }
-
-            cout << "\n[OK] Turno y desgloses dados de baja. Horarios liberados en la grilla.\n";
+    // Control de integridad: le quedan otros detalles activos a este ID?
+    bool tieneMasDetalles = false;
+    pos = 0;
+    while (dtReg.leerDisco(pos++)) {
+        if (dtReg.getIdTurno() == idBuscado && dtReg.getEstado() == true) {
+            tieneMasDetalles = true;
             break;
         }
-        pos++;
     }
-    fclose(p);
 
-    if (!encontrado) cout << "\n[ERROR] No se encontro ningun turno activo con ese ID.\n";
+    // Si no le quedan mas detalles activos, cancelamos la cabecera en turnos.dat
+    if (!tieneMasDetalles) {
+        pos = 0;
+        FILE* p = fopen("turnos.dat", "rb+");
+        if (p != NULL) {
+            while (fread(&reg, sizeof(Turno), 1, p) == 1) {
+                if (reg.getIdTurno() == idBuscado && reg.getEstado() == true) {
+                    encontrado = true;
+                    reg.setEstado(false); // Desactivamos la cabecera madre
+
+                    fseek(p, pos * sizeof(Turno), SEEK_SET);
+                    fwrite(&reg, sizeof(Turno), 1, p);
+                    break;
+                }
+                pos++;
+            }
+            fclose(p);
+        }
+        cout << "\n[OK] Ultimo tratamiento cancelado. Se dio de baja la cabecera del turno por completo.\n";
+    } else {
+        cout << "\n[OK] Tratamiento de las " << horaBuscada << "hs cancelado de forma exitosa.\n";
+        cout << "[INFO] El turno general sigue activo con los demas servicios agendados hoy.\n";
+    }
 
     cin.ignore(1000, '\n');
     cout << "\nPresione ENTER para continuar...";
@@ -508,14 +556,35 @@ void listarAgendaCronologica() {
                     cout << endl;
                     primerServicio = false;
                 }
-                // Si es un segundo o tercer servicio del mismo turno, se desglosa abajo en forma de lista
+                // Si es un segundo o tercer servicio del mismo turno (Desglose secundario sin ID, ni fecha)
                 else {
-                    cout << "    |            |       |                    | ";
+                    // ID vacio
+                    cout << "      ";
+
+                    // Fecha vacia
+                    cout << "           | ";
+
+                    // Hora de este desglose especifico
+                    cout << (dtReg.getHora() < 10 ? "0" : "") << dtReg.getHora() << ":"
+                         << (dtReg.getMinuto() < 10 ? "0" : "") << dtReg.getMinuto() << " | ";
+
+                    // Clienta
+                    cout << nombreClienta;
+                    for (int e = strlen(nombreClienta); e < 18; e++) cout << " ";
+                    cout << " | ";
+
+                    // Tratamiento y profesional
                     cout << nombreServicio;
                     for (int e = strlen(nombreServicio); e < 35; e++) cout << " ";
                     cout << " | " << apellidoProf;
                     for (int e = strlen(apellidoProf); e < 12; e++) cout << " ";
-                    cout << " |       |      |    " << endl;
+
+                    // Se√±a, asistencia y liquidacion de la cabecera madre
+                    cout << " | $" << (int)listaTurnos[i].getSena();
+                    cout << (listaTurnos[i].getSena() < 10000 ? "  " : " ");
+                    cout << " | " << (listaTurnos[i].getAsistio() ? "SI  " : "NO  ");
+                    cout << " | " << (listaTurnos[i].getLiquidado() ? "SI " : "NO ");
+                    cout << endl;
                 }
             }
         }
@@ -569,7 +638,7 @@ void registrarAsistencia() {
             fseek(p, pos * sizeof(Turno), SEEK_SET);
             fwrite(&reg, sizeof(Turno), 1, p);
 
-            cout << "\n[OK] Asistencia registrada. °Clienta en el centro de estetica!\n";
+            cout << "\n[OK] Asistencia registrada. ¬°Clienta en el centro de estetica!\n";
             break;
         }
         pos++;
@@ -774,19 +843,19 @@ void cobrarLiquidarTurno() {
             cout << "=================================================" << endl;
 
             char confirma;
-            cout << "øConfirma el pago en efectivo/tarjeta? (S/N): ";
+            cout << "¬øConfirma el pago en efectivo/tarjeta? (S/N): ";
             cin >> confirma;
 
             if (confirma == 'S' || confirma == 's') {
                 reg.setLiquidado(true);
-                // Asigna autom·ticamente la fecha del turno para que impacte bien
-                // en la recaudaciÛn diaria de los reportes.
+                // Asigna autom√°ticamente la fecha del turno para que impacte bien
+                // en la recaudaci√≥n diaria de los reportes.
                 reg.setFechaLiquidacion(reg.getFecha());
 
                 fseek(p, pos * sizeof(Turno), SEEK_SET);
                 fwrite(&reg, sizeof(Turno), 1, p);
 
-                cout << "\n[OK] °Cobro exitoso! El dinero se imputo para el dia: ";
+                cout << "\n[OK] ¬°Cobro exitoso! El dinero se imputo para el dia: ";
                 reg.getFecha().mostrarFormateada();
                 cout << "\nEl turno paso a estado LIQUIDADO.\n";
             } else {
