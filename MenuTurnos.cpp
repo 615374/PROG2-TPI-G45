@@ -1321,7 +1321,25 @@ void menuTurnos() {
                             cout << "Presione ENTER para reintentar...";
                             cin.ignore(1000, '\n'); cin.get();
                         }
-                        else if (horaElegida < 9 || horaElegida > 18 || minElegido < 0 || minElegido > 59) {
+                        else {
+                            // Armamos una estructura de tiempo con los datos ingresados
+                            tm infoSemana = {0};
+                            infoSemana.tm_mday = diaElegido;
+                            infoSemana.tm_mon = mesElegido - 1;     // Meses de 0 a 11
+                            infoSemana.tm_year = anioElegido - 1900; // Años desde 1900
+
+                            mktime(&infoSemana); // El sistema calcula e dia de la semana cae
+                            int diaSemana = infoSemana.tm_wday; // 0 = Domingo, 6 = Sabado
+
+                            if (diaSemana == 0 || diaSemana == 6) {
+                                cout << "\n[ERROR] El centro de estetica permanece cerrado los fines de semana.\n";
+                                cout << "La fecha ingresada cae: " << (diaSemana == 0 ? "DOMINGO" : "SABADO") << ".\n";
+                                cout << "Presione ENTER para reintentar...";
+                                cin.ignore(1000, '\n'); cin.get();
+                                continue; // Reinicia el bucle de la fecha sin perder los datos de la clienta
+                            }
+                        }
+                        if (horaElegida < 9 || horaElegida > 18 || minElegido < 0 || minElegido > 59) {
                             cout << "\n[ERROR] Horario fuera del rango comercial. Presione ENTER...";
                             cin.ignore(1000, '\n'); cin.get();
                         }

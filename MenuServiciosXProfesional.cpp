@@ -52,6 +52,7 @@ void menuServicioXProfesional() {
             cout << "        SERVICIOS ASIGNADOS POR PROFESIONAL      " << endl;
             cout << "=================================================" << endl << endl;
 
+            //Se recorren las filas de profesional
             while (prof.leerDisco(posProf)) {
                 if (prof.getEstado()) {
                     tieneServicios = false;
@@ -61,7 +62,9 @@ void menuServicioXProfesional() {
                     int IDsServiciosMostrados[100] = {0};
                     int cantServiciosMostrados = 0;
 
+
                     while (rel.leerDisco(posRel)) {
+                        // Cruza la informacion: busca las coincidencias de esta columna
                         if (rel.getEstado() && rel.getIdProfesional() == prof.getIdProfesional()) {
 
                             // Validamos si ya listamos este tratamiento para esta misma profesional

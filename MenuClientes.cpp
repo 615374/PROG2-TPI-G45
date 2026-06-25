@@ -264,7 +264,7 @@ void listarClientasPorFrecuencia() {
         }
     }
 
-    //Algo ritmo de Ordenamiento: Metodo de la burbuja (de Mayor a Menor)
+    //Algoritmo de Ordenamiento: Metodo de la burbuja (de Mayor a Menor)
     for (int i = 0; i < totalClientas - 1; i++) {
         for (int j = 0; j < totalClientas - i - 1; j++) {
             if (listaFrecuencia[j].cantidadTurnos < listaFrecuencia[j+1].cantidadTurnos) {
