@@ -74,7 +74,7 @@ void modificarServicio() {
             fwrite(&reg, sizeof(Servicio), 1, p);
 
             cin.ignore(1000, '\n');
-            cout << "\n[OK] Profesional modificado correctamente.\n";
+            cout << "\n[OK] Servicio modificado correctamente.\n";
             cout << "Presione ENTER para continuar...";
             cin.get();
             break;
