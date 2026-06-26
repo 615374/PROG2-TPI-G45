@@ -49,7 +49,7 @@ bool darDeBajaTurno() {
                             break;
                         }
                     }
-                    // Imprime el desglose con sangria para que se note la jerarquia
+                    // Imprime el desgloce
                     cout << "    [>] Hora: " << (dtVisual.getHora() < 10 ? "0" : "") << dtVisual.getHora() << ":00hs"
                          << " | Tratamiento: " << nombreServV << endl;
                 }
@@ -239,7 +239,7 @@ bool verificarBloqueOcupado(int d, int m, int a, int horaEvaluar, int idProfesio
 }
 
 //-----------------------------------------------
-/// BUSCAR TURNO ACTIVO DE UNA CLIENTA EN UNA FECHA
+/// BUSCAR TURNO ACTIVO DE UNA CLIENTA EN UNA FECHA (BUSCA SOLO EN LA CABECERA TURNO)
 //-----------------------------------------------
 // Retorna el ID del turno si la clienta ya tiene una cabecera activa ese dia.
 // Si no tiene, retorna -1.
@@ -263,7 +263,7 @@ int buscarTurnoClienteEnFecha(int idCliente, int d, int m, int a) {
 }
 
 //-----------------------------------------------
-/// VERIFICAR SI LA CLIENTA YA ESTA OCUPADA
+/// VERIFICAR SI LA CLIENTA YA ESTA OCUPADA (BUSCA EN CABECERA TURNO Y DETALLE TURNO)
 //-----------------------------------------------
 // Revisa si la clienta ya tiene un detalle activo en esa fecha y hora.
 bool verificarClienteOcupada(int idCliente, int d, int m, int a, int horaEvaluar, int minutoEvaluar) {
@@ -322,7 +322,7 @@ void mostrarGrillaSemanalAuto(int idProfesionalGrilla) {
     int diasMostrados = 0;
     int saltoTemporal = 0;
 
-    // Buscamos e imprimimos los proximos 5 dias de atencion (Lunes a Viernes) a partir de hoy
+    // Buscamos e imprimimos los proximos 5 dias de atencion (Lunes a Viernes) a partir de hoy (filas)
     while (diasMostrados < 5) {
         time_t tDia = tActual + (saltoTemporal * 24 * 60 * 60);
         tm* infoDia = localtime(&tDia);
@@ -340,6 +340,7 @@ void mostrarGrillaSemanalAuto(int idProfesionalGrilla) {
                  << "/" << (mesCalculado < 10 ? "0" : "") << mesCalculado << "/" << anioCalculado << endl;
             cout << "-------------------------------------------------" << endl;
 
+            // for anidado para el listado de los horarios de atencion
             for (int h = 9; h <= 18; h++) {
                 bool esPasadoHoy = false;
 
@@ -633,6 +634,19 @@ void registrarAsistencia() {
     while (fread(&reg, sizeof(Turno), 1, p) == 1) {
         if (reg.getIdTurno() == idBuscado && reg.getEstado() == true) {
             encontrado = true;
+
+            time_t t = time(NULL);
+            struct tm* hoy = localtime(&t);
+            int fechaHoyEntera = (hoy->tm_year + 1900) * 10000 + (hoy->tm_mon + 1) * 100 + hoy->tm_mday;
+            int fechaTurnoEntera = reg.getFecha().getAnio() * 10000 + reg.getFecha().getMes() * 100 + reg.getFecha().getDia();
+
+            if (fechaTurnoEntera > fechaHoyEntera) {
+                cout << "\n[ERROR] No se puede registrar la asistencia de un turno futuro.\n";
+                fclose(p); // Cerramos el archivo y salimos sin guardar nada
+                return;
+            }
+
+            // Si pasa la validacion, recien ahi modificamos y guardamos
             reg.setAsistio(true); // Marcamos el presente
 
             fseek(p, pos * sizeof(Turno), SEEK_SET);
@@ -645,7 +659,9 @@ void registrarAsistencia() {
     }
     fclose(p);
 
-    if (!encontrado) cout << "\n[ERROR] No se encontro ningun turno activo con ese ID.\n";
+    if (!encontrado) {
+        cout << "\n[ERROR] No se encontro ningun turno activo con ese ID.\n";
+    }
 }
 
 //--------------------------------------------------------
@@ -1387,8 +1403,12 @@ void menuTurnos() {
                                     if (montoSena < 0) {
                                         cout << "[ERROR] La senia no puede ser negativa.\n";
                                     }
+                                    // Agregamos la validación con tu variable precioBase
+                                    else if (montoSena > precioBase) {
+                                        cout << "[ERROR] La senia no puede superar el precio total del tratamiento ($" << precioBase << ").\n";
+                                    }
 
-                                } while (montoSena < 0);
+                                } while (montoSena < 0 || montoSena > precioBase);
 
                                 aux.setSena(montoSena);
                                 aux.setAsistio(false);

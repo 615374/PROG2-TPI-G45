@@ -23,7 +23,7 @@ void crearBackup() {
     cout << "==========================================" << endl;
     cout << "              CREAR BACKUP" << endl;
     cout << "==========================================" << endl;
-
+    // Make directory: crea la carpeta y copia los datos de los archivos
     system("mkdir backup");
 
     system("copy clientes.dat backup\\clientes.dat");
@@ -93,16 +93,16 @@ void exportarCSV() {
         system("cls");
 
         cout << "==========================================" << endl;
-        cout << "             EXPORTAR A CSV" << endl;
+        cout << "             EXPORTAR A CSV"                << endl;
         cout << "==========================================" << endl;
-        cout << "1) Exportar Clientas" << endl;
-        cout << "2) Exportar Profesionales" << endl;
-        cout << "3) Exportar Servicios" << endl;
-        cout << "4) Exportar Servicio por Profesional" << endl;
-        cout << "5) Exportar Turnos" << endl;
-        cout << "6) Exportar Detalle de Turnos" << endl;
-        cout << "7) Exportar Todo" << endl;
-        cout << "0) Volver" << endl;
+        cout << "1) Exportar Clientas"                       << endl;
+        cout << "2) Exportar Profesionales"                  << endl;
+        cout << "3) Exportar Servicios"                      << endl;
+        cout << "4) Exportar Servicio por Profesional"       << endl;
+        cout << "5) Exportar Turnos"                         << endl;
+        cout << "6) Exportar Detalle de Turnos"              << endl;
+        cout << "7) Exportar Todo"                           << endl;
+        cout << "0) Volver"                                  << endl;
         cout << "==========================================" << endl;
         cout << "Opcion: ";
         cin >> op;
